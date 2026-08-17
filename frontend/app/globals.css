@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme inline {
+
+    /* Primary */
+    --color-primary-50: #f1f2ee;
+    --color-primary-100: #d4d6cb;
+    --color-primary-200: #bfc2b1;
+    --color-primary-300: #a2a68e;
+    --color-primary-400: #909578;
+    --color-primary-500: #747a56;
+    --color-primary-600: #6a6f4e;
+    --color-primary-700: #52573d;
+    --color-primary-800: #40432f;
+    --color-primary-900: #313324;
+
+    /* Secondary */
+    --color-secondary-50: #f1f2f0;
+    --color-secondary-100: #d4d5cf;
+    --color-secondary-200: #bfc1b8;
+    --color-secondary-300: #a2a598;
+    --color-secondary-400: #909484;
+    --color-secondary-500: #747965;
+    --color-secondary-600: #6a6e5c;
+    --color-secondary-700: #525648;
+    --color-secondary-800: #404338;
+    --color-secondary-900: #31332a;
+
+    /* Tertiary */
+    --color-tertiary-50: #f2f2f0;
+    --color-tertiary-100: #d5d5d0;
+    --color-tertiary-200: #c1c1b9;
+    --color-tertiary-300: #a5a599;
+    --color-tertiary-400: #939385;
+    --color-tertiary-500: #787867;
+    --color-tertiary-600: #6d6d5e;
+    --color-tertiary-700: #555549;
+    --color-tertiary-800: #424239;
+    --color-tertiary-900: #32322b;
+
+    /* Error */
+    --color-error-50: #fcebea;
+    --color-error-100: #f4c1bf;
+    --color-error-200: #efa3a0;
+    --color-error-300: #e87a75;
+    --color-error-400: #e4605a;
+    --color-error-500: #dd3831;
+    --color-error-600: #c9332d;
+    --color-error-700: #9d2823;
+    --color-error-800: #7a1f1b;
+    --color-error-900: #5d1815;
+
+    /* Neutral */
+    --color-neutral-50: #f1f1f1;
+    --color-neutral-100: #d5d5d4;
+    --color-neutral-200: #c0c0bf;
+    --color-neutral-300: #a3a4a2;
+    --color-neutral-400: #919290;
+    --color-neutral-500: #767774;
+    --color-neutral-600: #6b6c6a;
+    --color-neutral-700: #545452;
+    --color-neutral-800: #414140;
+    --color-neutral-900: #323231;
+    --color-neutral-950: #1f1f1e;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Giảm hiệu ứng chuyển động khi người dùng yêu cầu */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-delay: 0ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
