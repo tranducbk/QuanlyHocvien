@@ -8,7 +8,7 @@ Mở rộng hệ thống để quản lý ba hệ đào tạo độc lập:
 2. **Hệ nội bộ quân sự (`MILITARY`)**.
 3. **Hệ nội bộ dân sự (`CIVILIAN`)**.
 
-Bổ sung cổng Giảng viên, Phòng đào tạo, quản lý môn học, phân công giảng dạy, nhập/chốt/mở khóa điểm, Excel, báo cáo, thông báo và audit log. Dữ liệu đào tạo, môn học và điểm của ba hệ phải nằm trong các bảng vật lý riêng để không lẫn dữ liệu.
+Bổ sung quản lý lớp, môn học, quy trình đề xuất/duyệt điểm quân sự, Excel, báo cáo, thông báo và audit log. Dữ liệu đào tạo, môn học và điểm của ba hệ phải nằm trong các bảng vật lý riêng để không lẫn dữ liệu.
 
 ## 2. Quyết định nghiệp vụ đã thống nhất
 
@@ -18,8 +18,11 @@ Bổ sung cổng Giảng viên, Phòng đào tạo, quản lý môn học, phân
 - Mỗi tài khoản chỉ có một role.
 - Mỗi hệ có một Chỉ huy; mỗi học viên có một Chỉ huy.
 - Chỉ huy xem toàn bộ học viên thuộc hệ mình.
-- Giảng viên dạy hệ quân sự và dân sự, không dạy hệ ngoài.
-- Phạm vi Giảng viên được xác định theo phân công, không theo một hệ cố định.
+- Hệ ngoài và hệ dân sự: Chỉ huy đúng hệ trực tiếp nhập điểm.
+- Hệ quân sự có hai luồng: Chỉ huy nhập điểm trực tiếp, hoặc Học viên tự nhập bảng điểm và gửi đề xuất để Chỉ huy duyệt/từ chối.
+- Điểm quân sự được ghi chính thức khi Chỉ huy nhập trực tiếp hoặc khi đề xuất được duyệt.
+- Chỉ huy trực tiếp quản lý lớp, môn học và học kỳ của hệ mình.
+- Điểm chính thức không có chức năng chỉnh sửa, mở khóa hoặc xóa.
 - Mỗi hệ có danh mục môn học riêng.
 - Hệ dân sự giai đoạn đầu chỉ xây dựng model và API CRUD, chưa làm quản lý lớp và giao diện hoàn chỉnh.
 - Khi người dùng ngừng sử dụng: khóa tài khoản, không xóa hồ sơ, điểm hoặc lịch sử.
@@ -33,15 +36,12 @@ Chuẩn hóa `role` thành:
 
 - `ADMIN`
 - `COMMANDER`
-- `ACADEMIC_OFFICER`
-- `TEACHER`
 - `STUDENT`
 
 Bổ sung `system_type`: `EXTERNAL`, `MILITARY`, `CIVILIAN` hoặc `NULL`.
 
 - `system_type` bắt buộc với `STUDENT` và `COMMANDER`.
-- `system_type` để `NULL` với `ADMIN`, `ACADEMIC_OFFICER`, `TEACHER`.
-- Giảng viên được giới hạn bằng bảng phân công.
+- `system_type` để `NULL` với `ADMIN`.
 - `is_active` dùng để khóa/mở tài khoản.
 
 ### 3.2. Hồ sơ
@@ -81,7 +81,7 @@ Mỗi học viên chỉ có một enrollment đang hoạt động và enrollment
 - Chưa làm quản lý lớp dân sự.
 - Tạo `student_class_histories` lưu học viên, hệ, lớp cũ/mới, Chỉ huy thực hiện, lý do và thời gian.
 
-## 4. Môn học, học kỳ và phân công
+## 4. Môn học, học kỳ và quản lý lớp
 
 ### 4.1. Môn học
 
@@ -100,37 +100,43 @@ Thông tin chung gồm mã môn, tên môn, số tín chỉ/học trình và tr�
 - Tổng trọng số bắt buộc bằng 100%.
 - Không được sửa trọng số sau khi đã phát sinh điểm.
 
-Môn chưa được sử dụng có thể xóa. Môn đã có phân công hoặc điểm chỉ được chuyển sang trạng thái ngừng sử dụng.
+Môn chưa được sử dụng có thể xóa. Môn đã được xếp vào lớp/học kỳ hoặc đã có điểm chỉ được chuyển sang trạng thái ngừng sử dụng.
 
-### 4.2. Phân công Giảng viên
+### 4.2. Quyền quản lý
 
-Không tạo thực thể lớp học phần riêng. Phân công được xác định bằng tổ hợp môn, lớp và học kỳ:
-
-- `military_teacher_assignments`
-- `civilian_teacher_assignments`
-
-Trường chính: `teacher_id`, `subject_id`, `semester_id`, `class_id`, trạng thái, người phân công và thời gian. Một môn/lớp/học kỳ có thể có nhiều Giảng viên. Giảng viên chỉ được nhập điểm trong phân công còn hiệu lực.
+- Chỉ huy hệ ngoài quản lý trường ngoài, lớp, môn học và học kỳ của hệ ngoài.
+- Chỉ huy hệ quân sự quản lý lớp quân sự, môn học và học kỳ quân sự.
+- Chỉ huy hệ dân sự quản lý môn học và học kỳ dân sự; quản lý lớp dân sự được triển khai ở giai đoạn sau.
+- Không có role, bảng phân công hoặc cổng làm việc dành cho Giảng viên.
 
 ## 5. Kết quả học tập
 
 ### 5.1. Hệ ngoài
 
-Giữ tương thích với `subject_results`, `semester_results`, `yearly_results` và `grade_requests`. Quy trình giữ nguyên: Học viên gửi đề xuất điểm kèm minh chứng, Chỉ huy hệ ngoài duyệt. Học viên hệ ngoài cũng được gửi yêu cầu chỉnh sửa lịch học.
+Tiếp tục sử dụng `subject_results`, `semester_results` và `yearly_results`. Chỉ huy hệ ngoài trực tiếp nhập điểm cho học viên của hệ. `grade_requests` cũ chỉ được giữ để bảo toàn lịch sử; không tiếp nhận đề xuất điểm mới. Học viên hệ ngoài vẫn được gửi yêu cầu chỉnh sửa lịch học.
 
 ### 5.2. Hệ quân sự
 
 Tạo riêng `military_subject_results`, `military_semester_results`, `military_yearly_results`.
 
-Kết quả môn gồm học viên, môn, lớp, học kỳ, phân công Giảng viên, điểm giữa kỳ, điểm cuối kỳ, điểm tổng kết, lần học/thi, trạng thái, người chốt và thời gian chốt. Trạng thái tối thiểu: `DRAFT`, `LOCKED`, `UNLOCK_REQUESTED`, `UNLOCKED`.
+Tạo thêm `military_grade_requests` và `military_grade_request_items` để lưu đề xuất bảng điểm cùng danh sách môn. Trạng thái đề xuất gồm `PENDING`, `APPROVED`, `REJECTED`.
+
+- Học viên chỉ tạo đề xuất cho chính mình và đúng lớp/học kỳ/môn thuộc hệ quân sự.
+- Sau khi gửi, đề xuất không được chỉnh sửa hoặc xóa.
+- Nếu bị từ chối, Học viên tạo đề xuất mới; không sửa đề xuất cũ.
+- Khi Chỉ huy duyệt, hệ thống kiểm tra lại toàn bộ dữ liệu và tạo kết quả chính thức trong một database transaction.
+- Không được duyệt nếu kết quả cùng học viên/môn/học kỳ/lần thi đã tồn tại.
+
+Kết quả chính thức gồm học viên, môn, lớp, học kỳ, điểm giữa kỳ, điểm cuối kỳ, điểm tổng kết, lần học/thi, nguồn tạo (`DIRECT` hoặc `APPROVED_REQUEST`), đề xuất nguồn nếu có, Chỉ huy tạo/duyệt và thời gian. Điểm được tạo ở trạng thái `FINALIZED`; không có trạng thái nháp, mở khóa hoặc chỉnh sửa.
 
 ### 5.3. Hệ dân sự
 
-Tạo riêng `civilian_subject_results`, `civilian_semester_results`, `civilian_yearly_results`. Hệ dân sự dùng thang điểm 10. Giai đoạn đầu chỉ xây dựng model và API CRUD.
+Tạo riêng `civilian_subject_results`, `civilian_semester_results`, `civilian_yearly_results`. Hệ dân sự dùng thang điểm 10. Chỉ huy hệ dân sự là người nhập điểm. Giai đoạn đầu xây dựng model và API tạo/xem; không cung cấp API sửa hoặc xóa điểm.
 
 ### 5.4. Quy tắc điểm quân sự
 
-- Điểm giữa kỳ và cuối kỳ từ 0 đến 10, chỉ nhận theo bước 0,5.
-- Không được chốt nếu thiếu một điểm thành phần.
+- Điểm giữa kỳ và cuối kỳ từ 0 đến 10.
+- Không được lưu nếu thiếu một điểm thành phần.
 - `Điểm tổng kết = giữa kỳ × trọng số giữa kỳ + cuối kỳ × trọng số cuối kỳ`.
 - Điểm tổng kết làm tròn 2 chữ số.
 - Dưới 5: Không đạt.
@@ -149,73 +155,81 @@ Quản lý tài khoản, role, trạng thái và danh mục kỹ thuật chung. 
 
 - Quản lý trường ngoài và lớp; nhập hồ sơ, xếp học viên và chuyển lớp.
 - Xem toàn bộ học viên hệ ngoài.
-- Duyệt đề xuất điểm và xử lý yêu cầu chỉnh lịch học.
+- Quản lý môn học, học kỳ và trực tiếp nhập/import điểm hệ ngoài.
+- Xuất điểm và báo cáo theo lớp, môn, học kỳ.
+- Xử lý yêu cầu chỉnh lịch học.
+- Không được sửa hoặc xóa điểm đã nhập.
 
 ### 6.3. Chỉ huy hệ quân sự
 
 - Quản lý lớp; nhập hồ sơ, xếp học viên và chuyển lớp.
-- Xem toàn bộ học viên và điểm đã chốt.
-- Không nhập, sửa, chốt hoặc mở khóa điểm.
+- Quản lý môn học, học kỳ và lớp quân sự.
+- Xem toàn bộ học viên trong hệ.
+- Trực tiếp nhập điểm quân sự cho Học viên trong hệ.
+- Xem, kiểm tra, duyệt hoặc từ chối đề xuất bảng điểm của Học viên.
+- Điểm chính thức có thể được tạo từ thao tác nhập trực tiếp hoặc từ đề xuất đã duyệt.
+- Xuất điểm và báo cáo.
+- Không được sửa hoặc xóa đề xuất đã xử lý hay điểm chính thức.
 
 ### 6.4. Chỉ huy hệ dân sự
 
-Có khung quyền tương tự Chỉ huy quân sự nhưng chưa triển khai quản lý lớp ở giai đoạn đầu. Không được sửa điểm.
+Quản lý môn học, học kỳ và trực tiếp nhập điểm hệ dân sự. Giai đoạn đầu chưa triển khai quản lý lớp. Không được sửa hoặc xóa điểm đã nhập.
 
-### 6.5. Phòng đào tạo
-
-Role `ACADEMIC_OFFICER`, dùng chung cho hệ quân sự và dân sự:
-
-- Quản lý học kỳ và danh mục môn học.
-- Phân công Giảng viên.
-- Xem điểm nội bộ.
-- Duyệt hoặc từ chối yêu cầu mở khóa.
-- Xuất báo cáo theo lớp, môn và học kỳ.
-
-### 6.6. Giảng viên
-
-- Xem môn/lớp/học kỳ và học viên thuộc phân công.
-- Nhập/sửa điểm nháp, import/export Excel và chốt điểm.
-- Gửi yêu cầu mở khóa cho một học viên, kèm lý do và minh chứng.
-- Không tự tạo môn, học kỳ hoặc phân công.
-- Không xem ngoài phân công và không nhập điểm hệ ngoài.
-
-### 6.7. Học viên
+### 6.5. Học viên
 
 - Chỉ xem hồ sơ của mình và không tự sửa trực tiếp.
-- Chỉ xem điểm sau khi Giảng viên chốt.
-- Hệ ngoài tiếp tục gửi đề xuất điểm và yêu cầu chỉnh lịch học.
+- Học viên quân sự tự nhập bảng điểm của mình và gửi đề xuất để Chỉ huy kiểm tra.
+- Theo dõi trạng thái `PENDING`, `APPROVED`, `REJECTED` và lý do từ chối.
+- Xem điểm quân sự chính thức sau khi Chỉ huy nhập trực tiếp hoặc sau khi đề xuất được duyệt.
+- Không sửa hoặc xóa đề xuất đã gửi; nếu bị từ chối phải tạo đề xuất mới.
+- Học viên hệ ngoài/dân sự xem điểm sau khi Chỉ huy nhập thành công.
+- Hệ ngoài được gửi yêu cầu chỉnh lịch học, không gửi đề xuất điểm.
 
-## 7. Quy trình điểm nội bộ
+## 7. Quy trình điểm
 
-### 7.1. Nhập và chốt
+### 7.1. Hệ ngoài và hệ dân sự
 
 ```text
-Phòng đào tạo tạo môn, học kỳ và phân công
-→ Giảng viên nhập điểm nháp
+Chỉ huy tạo lớp, môn và học kỳ trong hệ của mình
+→ Chỉ huy chọn đúng hệ, lớp, môn và học viên
+→ Chỉ huy nhập đầy đủ điểm
 → Hệ thống kiểm tra và tính tổng kết
-→ Giảng viên chốt
-→ Điểm bị khóa
-→ Học viên, Chỉ huy và Phòng đào tạo được xem
+→ Hệ thống lưu điểm chính thức, bất biến
+→ Học viên và Chỉ huy được xem
 ```
 
-Điểm nháp không hiển thị cho Học viên hoặc Chỉ huy.
+Không có trạng thái nháp. Backend không cung cấp endpoint `PUT`, `PATCH` hoặc `DELETE` cho kết quả điểm. Nếu nhập sai, hệ thống không có luồng chỉnh sửa điểm; việc xử lý ngoại lệ nằm ngoài phạm vi đặc tả hiện tại.
 
-### 7.2. Mở khóa
+### 7.2. Hệ quân sự
+
+Luồng Chỉ huy nhập trực tiếp:
 
 ```text
-Giảng viên gửi yêu cầu cho một học viên, có lý do và minh chứng
-→ Phòng đào tạo duyệt hoặc từ chối, có ghi lý do
-→ Nếu duyệt, Giảng viên sửa điểm
-→ Giảng viên chốt lại
-→ Hệ thống khóa và tính lại kết quả tổng hợp
+Chỉ huy chọn lớp, học viên, môn và học kỳ
+→ Chỉ huy nhập đầy đủ điểm
+→ Hệ thống kiểm tra trùng và tính tổng kết
+→ Hệ thống lưu điểm FINALIZED với nguồn DIRECT
 ```
 
-Phải lưu toàn bộ phiên bản điểm trước/sau mỗi lần sửa, không cập nhật đè làm mất lịch sử.
+Luồng Học viên đề xuất:
+
+```text
+Học viên chọn học kỳ và nhập danh sách điểm môn học
+→ Hệ thống kiểm tra dữ liệu và tạo đề xuất PENDING
+→ Chỉ huy quân sự xem bảng điểm và thông tin Học viên
+→ Chỉ huy duyệt hoặc từ chối, có ghi chú khi từ chối
+→ Nếu duyệt, hệ thống tạo điểm chính thức trong transaction
+→ Hệ thống tính kết quả tổng hợp và gửi thông báo
+```
+
+Chỉ huy không được thay đổi các giá trị điểm trong đề xuất. Chỉ có hai hành động xử lý: duyệt toàn bộ hoặc từ chối toàn bộ đề xuất.
 
 ### 7.3. Import Excel
 
-- Chỉ import trong đúng phân công.
-- Kiểm tra mã học viên, phạm vi điểm, bước 0,5 và trạng thái khóa.
+- Chỉ huy hệ ngoài/dân sự được import điểm chính thức trong đúng hệ mình quản lý.
+- Không được import trực tiếp điểm quân sự; điểm quân sự phải đi qua đề xuất của Học viên.
+- Kiểm tra mã học viên, hệ, lớp, môn, phạm vi điểm và bước 0,5.
+- Từ chối nếu cùng học viên/môn/học kỳ/lần thi đã tồn tại; không ghi đè. Học hoặc thi lại phải tạo `attempt_number` mới.
 - Chạy toàn bộ lô trong database transaction.
 - Một dòng sai thì không ghi một phần; trả lỗi cụ thể theo dòng.
 
@@ -227,8 +241,11 @@ Tạo `audit_logs`, lưu người thực hiện, role, hệ, hành động, lo�
 
 Bắt buộc audit:
 
-- Chốt, mở khóa và sửa điểm.
-- Duyệt/từ chối yêu cầu mở khóa.
+- Tạo/import điểm trực tiếp ở hệ ngoài/dân sự.
+- Tạo điểm quân sự trực tiếp bởi Chỉ huy.
+- Tạo, duyệt hoặc từ chối đề xuất điểm quân sự.
+- Tạo kết quả quân sự từ đề xuất đã duyệt.
+- Mọi lần truy cập/xuất dữ liệu điểm của Chỉ huy.
 - Chuyển lớp.
 - Khóa/mở tài khoản.
 - Thay đổi role hoặc hệ.
@@ -238,7 +255,7 @@ Audit log không được sửa/xóa qua API thông thường. Vì Admin không 
 
 ### 8.2. Thông báo
 
-Gửi thông báo khi phân công/hủy phân công Giảng viên, chốt điểm, gửi yêu cầu mở khóa, duyệt/từ chối yêu cầu và chốt lại điểm sau chỉnh sửa.
+Gửi thông báo khi Chỉ huy chuyển lớp, Học viên quân sự gửi đề xuất, Chỉ huy duyệt/từ chối đề xuất và khi điểm chính thức được tạo. Không có thông báo sửa hoặc mở khóa điểm.
 
 ## 9. Backend API và bảo mật
 
@@ -248,53 +265,36 @@ Tổ chức API theo phạm vi:
 /api/external/...
 /api/military/...
 /api/civilian/...
-/api/teacher/...
-/api/academic-office/...
+/api/commander/...
 ```
 
 Yêu cầu bắt buộc:
 
-- Backend tự xác định phạm vi từ user đăng nhập và bảng phân công.
-- Không tin `systemType`, `teacherId` hoặc `commanderId` client gửi để quyết định quyền.
+- Backend tự xác định phạm vi từ role và hệ của Chỉ huy/Học viên.
+- Không tin `systemType` hoặc `commanderId` client gửi để quyết định quyền.
 - Mọi truy vấn danh sách/chi tiết phải lọc theo hệ và phạm vi.
 - Kiểm tra quyền ở route và service.
-- Cập nhật validation, Swagger và mã lỗi cho role mới.
-- Giữ tương thích API hệ ngoài trong quá trình chuyển đổi.
-- API dân sự giai đoạn đầu chỉ gồm model và CRUD cơ bản; chưa có quản lý lớp.
+- Cập nhật validation, Swagger và mã lỗi cho `system_type` cùng phạm vi theo hệ.
+- Giữ tương thích API đọc dữ liệu hệ ngoài trong quá trình chuyển đổi; ngừng endpoint đề xuất và sửa/xóa điểm.
+- API dân sự giai đoạn đầu gồm CRUD cho hồ sơ/môn/học kỳ và chỉ `POST`/`GET` cho điểm; chưa có quản lý lớp.
+- API quân sự cho phép Chỉ huy tạo điểm trực tiếp; Học viên tạo/xem đề xuất của mình; Chỉ huy xem/duyệt/từ chối đề xuất. Không có endpoint sửa đề xuất hoặc điểm chính thức.
 
 ## 10. Frontend
 
-### 10.1. Teacher Portal
+### 10.1. Commander Portal
 
-Tạo `frontend/app/teacher`:
+- Hệ ngoài: trường, lớp, hồ sơ, lịch học, nhập/import điểm và báo cáo.
+- Hệ quân sự: lớp, hồ sơ, môn, học kỳ, nhập điểm trực tiếp, danh sách đề xuất, duyệt/từ chối và báo cáo.
+- Hệ dân sự: khung môn học và nhập điểm; chưa quản lý lớp ở giai đoạn đầu.
+- Không có nút hoặc màn hình sửa/xóa điểm.
 
-- Dashboard phân công.
-- Danh sách môn/lớp/học kỳ và học viên.
-- Nhập điểm trực tiếp, import/export Excel.
-- Chốt điểm và gửi/theo dõi yêu cầu mở khóa.
-
-### 10.2. Academic Office Portal
-
-Tạo `frontend/app/academic-office`:
-
-- Quản lý học kỳ, môn học và phân công.
-- Xem điểm nội bộ.
-- Duyệt/từ chối mở khóa.
-- Báo cáo và export.
-
-### 10.3. Commander Portal
-
-- Hệ ngoài: trường, lớp, hồ sơ, lịch học và duyệt đề xuất điểm.
-- Hệ quân sự: lớp, hồ sơ và xem điểm đã chốt.
-- Hệ dân sự: chỉ dựng khung cần thiết ở giai đoạn đầu.
-
-### 10.4. Admin Portal
+### 10.2. Admin Portal
 
 Chỉ quản lý tài khoản, role, trạng thái và danh mục kỹ thuật; không gọi hoặc hiển thị API hồ sơ/điểm.
 
-### 10.5. Student Portal
+### 10.3. Student Portal
 
-Chỉ hiển thị dữ liệu của chính học viên, không hiển thị điểm nháp. Hệ ngoài giữ chức năng đề xuất điểm và yêu cầu chỉnh lịch học.
+Chỉ hiển thị dữ liệu của chính học viên. Học viên quân sự có form nhập bảng điểm, gửi/theo dõi đề xuất và xem điểm chính thức do Chỉ huy nhập trực tiếp hoặc duyệt. Hệ ngoài giữ chức năng yêu cầu chỉnh lịch học nhưng không có đề xuất điểm.
 
 ## 11. Migration dữ liệu
 
@@ -314,9 +314,9 @@ Không sử dụng `sequelize.sync({ force: true })` hoặc reset database có d
 
 1. Role, `system_type`, middleware và phân quyền theo phạm vi.
 2. Hồ sơ, enrollment và migration hệ ngoài hiện tại.
-3. Lớp, môn, học kỳ và phân công hệ quân sự.
-4. Điểm quân sự và Teacher Portal.
-5. Academic Office Portal, chốt/mở khóa và lịch sử điểm.
+3. Lớp, môn và học kỳ hệ quân sự.
+4. Điểm trực tiếp cho cả ba hệ và đề xuất/duyệt điểm quân sự.
+5. Commander Portal theo từng hệ.
 6. Excel, báo cáo, thông báo và audit log.
 7. Khung model/API hệ dân sự.
 
@@ -327,12 +327,16 @@ Không sử dụng `sequelize.sync({ force: true })` hoặc reset database có d
 - Ma trận `role × system × endpoint`.
 - Admin không thể xem hồ sơ hoặc điểm.
 - Chỉ huy không thể xem dữ liệu hệ khác.
-- Giảng viên không thể xem/nhập điểm ngoài phân công.
-- Học viên không thể xem điểm nháp.
-- Không thể chốt khi thiếu điểm thành phần.
+- Chỉ huy không thể nhập điểm cho hệ khác.
+- Chỉ huy quân sự được nhập trực tiếp nhưng không thể thay đổi giá trị trong đề xuất của Học viên.
+- Nhập trực tiếp và duyệt đề xuất đều phải chống trùng cùng học viên/môn/học kỳ/lần thi.
+- Học viên quân sự không thể tạo đề xuất cho người khác hoặc ngoài hệ/lớp của mình.
+- Đề xuất đã gửi không thể sửa/xóa; đề xuất đã xử lý không thể xử lý lại.
+- Duyệt đề xuất tạo toàn bộ kết quả trong một transaction và chống trùng lần thi.
+- Không thể lưu khi thiếu điểm thành phần.
 - Điểm đúng phạm vi 0–10 và bước 0,5.
 - Trọng số bằng 100% và không sửa được sau khi có điểm.
-- Mở khóa đúng một học viên và lưu đủ phiên bản.
+- API điểm không có `PUT`, `PATCH`, `DELETE` và từ chối ghi đè kết quả đã tồn tại.
 - Học/thi lại lưu mọi lần và lấy kết quả cao nhất.
 - Import Excel rollback toàn bộ khi có dòng lỗi.
 - Chuyển lớp lưu lịch sử.
@@ -344,7 +348,7 @@ Không sử dụng `sequelize.sync({ force: true })` hoặc reset database có d
 
 1. Không API nào làm lộ hồ sơ hoặc điểm chéo hệ.
 2. Admin không truy cập được dữ liệu nghiệp vụ bị cấm.
-3. Giảng viên chỉ thao tác trên đúng phân công.
-4. Điểm đã chốt không thể sửa nếu chưa được Phòng đào tạo mở khóa.
-5. Mọi thay đổi điểm đều truy vết được.
+3. Chỉ Chỉ huy đúng hệ được tạo điểm trực tiếp; hệ quân sự còn có thể tạo điểm từ đề xuất được duyệt.
+4. Điểm đã nhập là bất biến, không thể sửa, xóa hoặc mở khóa.
+5. Mọi thao tác tạo, import, xem và xuất điểm đều truy vết được.
 6. Dữ liệu hệ ngoài hiện tại được bảo toàn.
