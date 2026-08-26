@@ -65,6 +65,7 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
           properties: {
             id: { type: 'string', format: 'uuid' }, username: { type: 'string' },
             role: { type: 'string', enum: ['STUDENT', 'COMMANDER', 'ADMIN'] },
+            systemType: { type: 'string', enum: ['EXTERNAL', 'MILITARY', 'CIVILIAN'], nullable: true, description: 'Bắt buộc với STUDENT/COMMANDER; ADMIN luôn null' },
             isAdmin: { type: 'boolean' }, profileId: { type: 'string', format: 'uuid' },
             isActive: { type: 'boolean' },
           },
@@ -124,7 +125,7 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
     },
     security: [{ BearerAuth: [] }],
   },
-  apis: [path.join(__dirname, '../routes/*.route.js')],
+  apis: [path.join(__dirname, '../routes/*.route.js').replace(/\\/g, '/')],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

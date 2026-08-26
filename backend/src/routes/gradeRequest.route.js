@@ -268,6 +268,27 @@ const ctrl = require('../controllers/gradeRequest.controller');
  * }
  */
 
+/**
+ * @swagger
+ * /students/grade-requests/evidence:
+ *   post:
+ *     tags: [Grade Requests]
+ *     summary: Tải minh chứng cho đề xuất điểm
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: OK
+ */
+
 // ===================== Student (chỉ STUDENT) =====================
 const { uploadEvidence } = require('../middlewares/upload.middleware');
 router.post('/students/grade-requests', authMiddleware, requireStudent, ctrl.create);

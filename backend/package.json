@@ -9,7 +9,9 @@
     "seed": "node src/utils/seed.js",
     "db:refresh": "node src/utils/fullSeed.js",
     "migrate:school-years": "node src/utils/migrateSchoolYears.js",
+    "migrate:user-system-types": "node src/utils/migrateUserSystemTypes.js",
     "swagger:check": "node src/utils/checkSwaggerCoverage.js",
+    "test:auth-scope": "node src/utils/authScopeTest.js",
     "test:api": "node src/utils/apiTest.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

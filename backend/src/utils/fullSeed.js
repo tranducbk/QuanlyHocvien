@@ -16,7 +16,7 @@ async function fullSeed() {
     // ==========================
     // Admin
     const admin = await db.user.create({
-      username: 'admin', password: await bcrypt.hash('admin123', 10), role: 'ADMIN', isAdmin: true,
+      username: 'admin', password: await bcrypt.hash('admin123', 10), role: 'ADMIN', systemType: null, isAdmin: true,
     });
 
     // Commanders (create user + profile)
@@ -29,7 +29,7 @@ async function fullSeed() {
       startWork: 2008,
     });
     const chiHuy1 = await db.user.create({
-      username: 'chihuy01', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER',
+      username: 'chihuy01', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER', systemType: 'EXTERNAL',
       profileId: cmd1Profile.id,
     });
 
@@ -42,7 +42,7 @@ async function fullSeed() {
       startWork: 2010,
     });
     const chiHuy2 = await db.user.create({
-      username: 'chihuy02', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER',
+      username: 'chihuy02', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER', systemType: 'EXTERNAL',
       profileId: cmd2Profile.id,
     });
 
@@ -134,6 +134,7 @@ async function fullSeed() {
         username: `hv${String(i + 1).padStart(3, '0')}`,
         password: await bcrypt.hash('hocvien123', 10),
         role: 'STUDENT',
+        systemType: 'EXTERNAL',
         profileId: profile.id,
       });
       hocVienUsers.push(user);
@@ -570,6 +571,7 @@ async function fullSeed() {
       gradeRequestCount,
       studentUsersWithoutProfile,
       commanderUsersWithoutProfile,
+      usersWithValidSystemType,
     ] = await Promise.all([
       db.user.count({ where: { role: 'ADMIN' } }),
       db.user.count({ where: { role: 'COMMANDER' } }),
@@ -585,6 +587,17 @@ async function fullSeed() {
       db.gradeRequest.count(),
       db.user.count({ where: { role: 'STUDENT', profileId: null } }),
       db.user.count({ where: { role: 'COMMANDER', profileId: null } }),
+      db.user.count({
+        where: {
+          [db.Sequelize.Op.or]: [
+            { role: 'ADMIN', systemType: null },
+            {
+              role: { [db.Sequelize.Op.in]: ['STUDENT', 'COMMANDER'] },
+              systemType: { [db.Sequelize.Op.in]: ['EXTERNAL', 'MILITARY', 'CIVILIAN'] },
+            },
+          ],
+        },
+      }),
     ]);
 
     assertSeed(adminCount === 1, 'phải có đúng 1 admin');
@@ -593,6 +606,7 @@ async function fullSeed() {
     assertSeed(profileCount === studentList.length + 2, 'số hồ sơ profile không khớp');
     assertSeed(studentUsersWithoutProfile === 0, 'không được có tài khoản học viên thiếu hồ sơ');
     assertSeed(commanderUsersWithoutProfile === 0, 'không được có tài khoản chỉ huy thiếu hồ sơ');
+    assertSeed(usersWithValidSystemType === adminCount + commanderCount + studentCount, 'mọi tài khoản phải có role và hệ đào tạo hợp lệ');
     assertSeed(semesterCount === semData.length, 'số học kỳ không khớp');
     assertSeed(yearlyResultCount === expectedAcademicRows, 'số kết quả năm không khớp năm học theo enrollment');
     assertSeed(semesterResultCount === expectedSemesterRows, 'số kết quả học kỳ không khớp năm học theo enrollment');

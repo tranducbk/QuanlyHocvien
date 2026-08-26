@@ -1,4 +1,5 @@
 const http = require('http');
+const jwt = require('jsonwebtoken');
 
 const BASE_URL = 'http://localhost:6868/api';
 
@@ -123,16 +124,21 @@ async function main() {
   section('1. AUTH: LOGIN (Public)');
   let r = await request('POST', '/auth/login', { username: 'admin', password: 'admin123' });
   ok('POST /auth/login (admin)     ', r.status, 200); adminToken = r.body.data?.accessToken;
+  ok('Login admin systemType=null   ', r.body.data?.user?.systemType, null);
+  ok('Admin token systemType=null   ', adminToken ? jwt.decode(adminToken)?.systemType : undefined, null);
 
   r = await request('POST', '/auth/login', { username: 'chihuy01', password: 'chihuy123' });
   ok('POST /auth/login (commander) ', r.status, 200);
   commanderToken = r.body.data?.accessToken;
   commanderUserId = r.body.data?.user?.id;
+  ok('Login commander systemType    ', r.body.data?.user?.systemType, 'EXTERNAL');
+  ok('Commander token systemType    ', commanderToken ? jwt.decode(commanderToken)?.systemType : undefined, 'EXTERNAL');
 
   r = await request('POST', '/auth/login', { username: 'hv001', password: 'hocvien123' });
   ok('POST /auth/login (student)   ', r.status, 200);
   studentToken = r.body.data?.accessToken;
   studentUserId = r.body.data?.user?.id;
+  ok('Login student systemType      ', r.body.data?.user?.systemType, 'EXTERNAL');
 
   ok('POST /auth/login (wrong pass) ', (await request('POST', '/auth/login', { username: 'admin', password: 'x' })).status, 401);
   if (!adminToken) { console.log('\n❌ Admin login failed!'); process.exit(1); }
@@ -142,7 +148,9 @@ async function main() {
   // =================================================================
   section('2. AUTH: SELF-SERVICE (All Roles)');
   ok('GET  /auth/me           | admin     ', (await request('GET', '/auth/me', null, adminToken)).status, 200);
-  ok('GET  /auth/me           | commander ', (await request('GET', '/auth/me', null, commanderToken)).status, 200);
+  const commanderMe = await request('GET', '/auth/me', null, commanderToken);
+  ok('GET  /auth/me           | commander ', commanderMe.status, 200);
+  ok('GET  /auth/me systemType           ', commanderMe.body.data?.systemType, 'EXTERNAL');
   ok('GET  /auth/me           | student   ', (await request('GET', '/auth/me', null, studentToken)).status, 200);
   ok('GET  /auth/me           | no-token  ', (await request('GET', '/auth/me')).status, 401);
 
@@ -160,17 +168,25 @@ async function main() {
   ok('POST /auth/change-password | student   ', (await request('POST', '/auth/change-password', { oldPassword: 'hocvien123', newPassword: 'hocvien123' }, studentToken)).status, 200);
 
   const rTok = (await request('POST', '/auth/login', { username: 'admin', password: 'admin123' })).body.data?.refreshToken;
-  if (rTok) ok('POST /auth/refresh-token (public)  ', (await request('POST', '/auth/refresh-token', { refreshToken: rTok })).status, 200);
+  if (rTok) {
+    const refreshResponse = await request('POST', '/auth/refresh-token', { refreshToken: rTok });
+    ok('POST /auth/refresh-token (public)  ', refreshResponse.status, 200);
+    ok('Refresh user systemType=null       ', refreshResponse.body.data?.user?.systemType, null);
+    const refreshedAccessToken = refreshResponse.body.data?.accessToken;
+    ok('Refresh token systemType=null      ', refreshedAccessToken ? jwt.decode(refreshedAccessToken)?.systemType : undefined, null);
+  }
 
   // =================================================================
   // 3. AUTH: REGISTER (Admin Only)
   // =================================================================
   section('3. AUTH: REGISTER (Admin Only)');
-  const regBody = { username: `reg${ts}`, password: 'test123456', role: 'STUDENT', fullName: 'Test' };
+  const regBody = { username: `reg${ts}`, password: 'test123456', role: 'STUDENT', systemType: 'EXTERNAL', fullName: 'Test' };
   ok('POST /auth/register | admin (201)     ', (await request('POST', '/auth/register', regBody, adminToken)).status, 201);
   ok('POST /auth/register | commander (403) ', (await request('POST', '/auth/register', regBody, commanderToken)).status, 403);
   ok('POST /auth/register | student (403)   ', (await request('POST', '/auth/register', regBody, studentToken)).status, 403);
   ok('POST /auth/register | no-token (401)  ', (await request('POST', '/auth/register', regBody)).status, 401);
+  ok('POST /auth/register | missing system  ', (await request('POST', '/auth/register', { username: `nosys${ts}`, password: 'test123456', role: 'STUDENT' }, adminToken)).status, 400);
+  ok('POST /auth/register | admin has system', (await request('POST', '/auth/register', { username: `adminsys${ts}`, password: 'test123456', role: 'ADMIN', systemType: 'EXTERNAL' }, adminToken)).status, 400);
 
   // =================================================================
   // 4. AUTH: NOTIFICATIONS SELF (All Roles)
@@ -285,17 +301,17 @@ async function main() {
   // 8. ADMIN-ONLY (User CRUD create/delete/reset/toggle)
   // =================================================================
   section('8. USERS: ADMIN-ONLY');
-  const userBody = { username: `admcrud${ts}`, password: 'test123456', role: 'STUDENT', fullName: 'CRUD' };
+  const userBody = { username: `admcrud${ts}`, password: 'test123456', role: 'STUDENT', systemType: 'EXTERNAL', fullName: 'CRUD' };
   ok('POST /users           | admin (201)     ', (await request('POST', '/users', userBody, adminToken)).status, 201);
   ok('POST /users           | commander (403) ', (await request('POST', '/users', userBody, commanderToken)).status, 403);
   ok('POST /users           | student (403)   ', (await request('POST', '/users', userBody, studentToken)).status, 403);
 
-  const batchBody = { users: [{ username: `batchadm${ts}`, password: 'test123456', role: 'STUDENT' }] };
+  const batchBody = { users: [{ username: `batchadm${ts}`, password: 'test123456', role: 'STUDENT', systemType: 'EXTERNAL' }] };
   ok('POST /users/batch     | admin (201)     ', (await request('POST', '/users/batch', batchBody, adminToken)).status, 201);
   ok('POST /users/batch     | commander (403) ', (await request('POST', '/users/batch', batchBody, commanderToken)).status, 403);
   ok('POST /users/batch     | student (403)   ', (await request('POST', '/users/batch', batchBody, studentToken)).status, 403);
 
-  const batchUsersBody = { users: [{ username: `batch2adm${ts}`, password: 'test123456', role: 'STUDENT', fullName: 'B2' }] };
+  const batchUsersBody = { users: [{ username: `batch2adm${ts}`, password: 'test123456', role: 'STUDENT', systemType: 'EXTERNAL', fullName: 'B2' }] };
   ok('POST /users/batch-users | admin (201)   ', (await request('POST', '/users/batch-users', batchUsersBody, adminToken)).status, 201);
   ok('POST /users/batch-users | commander (403)', (await request('POST', '/users/batch-users', batchUsersBody, commanderToken)).status, 403);
   ok('POST /users/batch-users | student (403) ', (await request('POST', '/users/batch-users', batchUsersBody, studentToken)).status, 403);
@@ -477,7 +493,7 @@ async function main() {
   // 14. COMMANDER RBAC: Cannot touch Admin/Commander
   // =================================================================
   section('14. COMMANDER RBAC: Cannot Touch Admin/Commander');
-  ok('POST /users (cmd create CMD) | commander (403) ', (await request('POST', '/users', { username: `badcmd${ts}`, password: 'test123456', role: 'COMMANDER', fullName: 'X' }, commanderToken)).status, 403);
+  ok('POST /users (cmd create CMD) | commander (403) ', (await request('POST', '/users', { username: `badcmd${ts}`, password: 'test123456', role: 'COMMANDER', systemType: 'EXTERNAL', fullName: 'X' }, commanderToken)).status, 403);
 
   const cmdUserId = firstId(await request('GET', '/users?role=COMMANDER&limit=1', null, adminToken));
   if (cmdUserId) {

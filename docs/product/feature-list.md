@@ -18,7 +18,7 @@ Tất cả vai trò.
 
 ### Trạng thái
 
-**Có trong source** cho `ADMIN`, `COMMANDER`, `STUDENT`; chưa có `system_type`.
+**Có trong source** cho `ADMIN`, `COMMANDER`, `STUDENT`; đã bổ sung `system_type`, JWT claim và validation role–hệ trong TASK-001. Cần chạy migration trên từng môi trường trước khi dùng source mới.
 
 ## F02 - Quản trị tài khoản
 
@@ -172,7 +172,7 @@ Mỗi Học viên/Chỉ huy thuộc đúng một hệ; dữ liệu không rò r�
 
 ### Trạng thái
 
-**Chưa thực hiện**.
+**Đã có nền tảng backend** trong TASK-001: User nhận biết hệ, migration backfill và middleware kiểm tra role kết hợp system scope. Các route nghiệp vụ chưa được áp dụng cách ly toàn bộ và sẽ hoàn thiện ở các task tiếp theo.
 
 ## F13 - Môn học riêng theo hệ
 

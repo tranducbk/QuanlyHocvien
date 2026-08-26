@@ -4,6 +4,11 @@ const db = require('../models');
 const { NotFoundError, BadRequestError, ForbiddenError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const { findStudentUserByCode } = require('../utils/studentLookup');
+const {
+  assertValidUserAccess,
+  normalizeAndValidateUserAccess,
+  normalizeSystemType,
+} = require('../utils/userAccess');
 const fileStorage = require('./fileStorage.service');
 
 const User = db.user;
@@ -166,6 +171,8 @@ const _createProfile = async (data, requester) => {
 };
 
 const create = async (data, requester) => {
+  normalizeAndValidateUserAccess(data);
+  delete data.isAdmin;
   await _createProfile(data, requester);
 
   if (data.password) {
@@ -181,7 +188,7 @@ const getAll = async (query, requester) => {
   const where = {};
   const profileWhere = {};
 
-  for (const field of ['username', 'role', 'isAdmin', 'isActive']) {
+  for (const field of ['username', 'role', 'systemType', 'isAdmin', 'isActive']) {
     if (query[field] !== undefined) where[field] = query[field];
   }
 
@@ -221,6 +228,7 @@ const exportUsers = async (query = {}) => {
 
   if (query.username) where.username = { [db.Sequelize.Op.iLike]: `%${query.username}%` };
   if (query.role) where.role = query.role;
+  if (query.systemType) where.systemType = query.systemType;
   if (query.isActive !== undefined && query.isActive !== '') {
     where.isActive = String(query.isActive) === 'true';
   }
@@ -230,6 +238,7 @@ const exportUsers = async (query = {}) => {
   const orderFieldMap = {
     username: 'username',
     role: 'role',
+    systemType: 'systemType',
     isActive: 'isActive',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -267,6 +276,7 @@ const exportUsers = async (query = {}) => {
   worksheet.columns = [
     { header: 'Tên đăng nhập', key: 'username', width: 22 },
     { header: 'Vai trò', key: 'role', width: 16 },
+    { header: 'Hệ đào tạo', key: 'systemType', width: 18 },
     { header: 'Trạng thái', key: 'isActive', width: 18 },
     { header: 'Mã', key: 'code', width: 16 },
     { header: 'Họ và tên', key: 'fullName', width: 28 },
@@ -288,6 +298,7 @@ const exportUsers = async (query = {}) => {
     worksheet.addRow({
       username: plain.username,
       role: plain.role,
+      systemType: plain.systemType || '',
       isActive: plain.isActive ? 'Đang hoạt động' : 'Đã khóa',
       code: profile.code || '',
       fullName: profile.fullName || '',
@@ -343,12 +354,21 @@ const getDetail = async (id, requester) => {
 const update = async (id, data, requester) => {
   const record = await getDetail(id, requester);
   _checkRoleHierarchy(requester, record.role);
+  const nextRole = data.role ? normalizeRole(data.role) : record.role;
+  const nextSystemType = data.systemType !== undefined
+    ? normalizeSystemType(data.systemType)
+    : record.systemType;
+  assertValidUserAccess(nextRole, nextSystemType);
+  if (data.role !== undefined) data.role = nextRole;
+  if (data.systemType !== undefined) data.systemType = nextSystemType;
+  delete data.isAdmin;
   _checkCommanderAssignmentPermission(requester, data);
   if (data.commanderId !== undefined) {
     data.commanderId = await _resolveCommanderId(data.commanderId);
   }
   if (data.role) {
     _checkRoleHierarchy(requester, data.role);
+    data.isAdmin = data.role === 'ADMIN';
   }
   if (data.password) {
     data.password = await bcrypt.hash(data.password, 10);
@@ -386,6 +406,8 @@ const createBatchUsers = async (users, requester) => {
     }
 
     try {
+      normalizeAndValidateUserAccess(u);
+      delete u.isAdmin;
       await _createProfile(u, requester);
 
       const hashedPassword = await _hashPassword(u.password);
@@ -393,6 +415,7 @@ const createBatchUsers = async (users, requester) => {
         username: u.username,
         password: hashedPassword,
         role: u.role || 'STUDENT',
+        systemType: u.systemType,
         isAdmin: u.role === 'ADMIN',
         profileId: u.profileId || null,
       });
@@ -462,12 +485,15 @@ const createBatchUsersProfiles = async (users, requester) => {
       continue;
     }
     try {
+      normalizeAndValidateUserAccess(u);
+      delete u.isAdmin;
       await _createProfile(u, requester);
       const hashedPassword = await _hashPassword(u.password || '123456');
       const user = await User.create({
         username: u.username,
         password: hashedPassword,
         role: u.role || 'STUDENT',
+        systemType: u.systemType,
         isAdmin: u.role === 'ADMIN',
         profileId: u.profileId || null,
       });
@@ -488,6 +514,7 @@ const createImportTemplate = async () => {
     { header: 'Tên đăng nhập', key: 'username', width: 18 },
     { header: 'Mật khẩu', key: 'password', width: 16 },
     { header: 'Vai trò', key: 'role', width: 16 },
+    { header: 'Hệ đào tạo', key: 'systemType', width: 18 },
     { header: 'Mã', key: 'code', width: 14 },
     { header: 'Họ và tên', key: 'fullName', width: 26 },
     { header: 'Email', key: 'email', width: 28 },
@@ -505,6 +532,7 @@ const createImportTemplate = async () => {
       username: 'hv011',
       password: 'hocvien123',
       role: 'STUDENT',
+      systemType: 'EXTERNAL',
       code: 'HV011',
       fullName: 'Nguyễn Văn A',
       email: 'vana@example.com',
@@ -521,6 +549,7 @@ const createImportTemplate = async () => {
       username: 'chihuy03',
       password: 'chihuy123',
       role: 'COMMANDER',
+      systemType: 'EXTERNAL',
       code: 'CH003',
       fullName: 'Trần Văn B',
       email: 'vanb@example.com',
@@ -639,6 +668,7 @@ const parseExcelImport = async (file) => {
       username,
       password: toText(getCellValue(row, headerMap, ['Mật khẩu', 'password'])),
       role: normalizeRole(getCellValue(row, headerMap, ['Vai trò', 'role'])),
+      systemType: normalizeSystemType(getCellValue(row, headerMap, ['Hệ đào tạo', 'He dao tao', 'systemType'])),
       code: toText(getCellValue(row, headerMap, ['Mã', 'code'])),
       fullName: toText(getCellValue(row, headerMap, ['Họ và tên', 'fullName'])),
       email: toText(getCellValue(row, headerMap, ['Email', 'email'])),

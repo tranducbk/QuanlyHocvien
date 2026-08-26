@@ -4,6 +4,7 @@ const db = require('../models');
 const JwtService = require('./jwt.service');
 const { serialize } = require('../utils/serialize');
 const { NotFoundError, UnauthorizedError, BadRequestError } = require('../utils/apiError');
+const { normalizeAndValidateUserAccess } = require('../utils/userAccess');
 
 const User = db.user;
 const Profile = db.profile;
@@ -12,10 +13,11 @@ const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('he
 
 const _excludePassword = (user) => serialize(user);
 
-const _generateTokens = (userId) => {
+const _generateTokens = (user) => {
   const issuedAt = Math.floor(Date.now() / 1000);
-  const accessToken = JwtService.jwtSign({ userId, issuedAt, token: 1 }, { expiresIn: '180d' });
-  const refreshToken = JwtService.jwtSign({ userId, issuedAt, token: 2 }, { expiresIn: '365d' });
+  const claims = { userId: user.id, role: user.role, systemType: user.systemType, issuedAt };
+  const accessToken = JwtService.jwtSign({ ...claims, token: 1 }, { expiresIn: '180d' });
+  const refreshToken = JwtService.jwtSign({ ...claims, token: 2 }, { expiresIn: '365d' });
   return { accessToken, refreshToken };
 };
 
@@ -30,15 +32,16 @@ const login = async (username, password) => {
     throw new UnauthorizedError('Mật khẩu không chính xác');
   }
 
-  user.refreshToken = _generateTokens(user.id).refreshToken;
+  const { accessToken, refreshToken } = _generateTokens(user);
+  user.refreshToken = refreshToken;
   await user.save();
 
-  const { accessToken, refreshToken } = _generateTokens(user.id);
   return { accessToken, refreshToken, user: _excludePassword(user) };
 };
 
 const register = async (data) => {
-  const { username, password, role, fullName, email, code } = data;
+  normalizeAndValidateUserAccess(data);
+  const { username, password, role, systemType, fullName, email, code } = data;
 
   const exist = await User.findOne({ where: { username } });
   if (exist) {
@@ -65,6 +68,7 @@ const register = async (data) => {
     username,
     password: hashedPassword,
     role: role || 'STUDENT',
+    systemType,
     isAdmin: role === 'ADMIN',
     profileId,
   });
@@ -83,7 +87,9 @@ const refreshToken = async (token) => {
     throw new UnauthorizedError('Tài khoản không tồn tại');
   }
 
-  const { accessToken, refreshToken } = _generateTokens(user.id);
+  const { accessToken, refreshToken } = _generateTokens(user);
+  user.refreshToken = refreshToken;
+  await user.save();
   return { accessToken, refreshToken, user: _excludePassword(user) };
 };
 

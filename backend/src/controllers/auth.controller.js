@@ -3,6 +3,7 @@ const Yup = require('yup');
 const authService = require('../services/auth.service');
 const db = require('../models');
 const { success, paginated, validateOrThrow } = require('../utils/response');
+const { USER_ROLES, SYSTEM_TYPES } = require('../utils/constants');
 
 const login = asyncHandler(async (req, res) => {
   const schema = Yup.object().shape({
@@ -94,10 +95,15 @@ const register = asyncHandler(async (req, res) => {
   const schema = Yup.object().shape({
     username: Yup.string().required().min(3, 'Tên đăng nhập tối thiểu 3 ký tự'),
     password: Yup.string().required().min(6, 'Mật khẩu tối thiểu 6 ký tự'),
-    role: Yup.string().oneOf(['STUDENT', 'COMMANDER', 'ADMIN']),
+    role: Yup.string().oneOf(USER_ROLES),
+    systemType: Yup.string().oneOf(SYSTEM_TYPES).nullable(),
     fullName: Yup.string().max(100),
     email: Yup.string().max(100).email('Email không hợp lệ'),
     code: Yup.string().max(50),
+  }).test('role-system-type', 'Vai trò và hệ đào tạo không hợp lệ', (value) => {
+    const role = value?.role || 'STUDENT';
+    if (role === 'ADMIN') return value?.systemType === null || value?.systemType === undefined;
+    return SYSTEM_TYPES.includes(value?.systemType);
   });
   await validateOrThrow(schema, req.body);
 

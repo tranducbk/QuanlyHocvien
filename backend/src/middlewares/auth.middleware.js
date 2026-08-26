@@ -3,6 +3,7 @@ const db = require('../models');
 const JwtService = require('../services/jwt.service');
 const { serialize } = require('../utils/serialize');
 const { BadTokenError, ForbiddenError } = require('../utils/apiError');
+const { requireRoleAndSystem } = require('./accessScope.middleware');
 
 const User = db.user;
 
@@ -25,7 +26,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
   req.user = {
     ...plainUser,
     profileId: plainUser.profileId || null,
-    organizationId: plainUser.Profile ? plainUser.Profile.organizationId : null,
+    organizationId: plainUser.profile ? plainUser.profile.organizationId : null,
   };
   return next();
 });
@@ -58,4 +59,5 @@ module.exports = {
   requireRole,
   requireStudent,
   requireAdmin,
+  requireRoleAndSystem,
 };

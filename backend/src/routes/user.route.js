@@ -923,6 +923,14 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *           }
  *         },
  *         {
+ *           "name": "systemType",
+ *           "in": "query",
+ *           "schema": {
+ *             "type": "string",
+ *             "enum": ["EXTERNAL", "MILITARY", "CIVILIAN"]
+ *           }
+ *         },
+ *         {
  *           "name": "page",
  *           "in": "query",
  *           "schema": {
@@ -948,7 +956,7 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *         "Users"
  *       ],
  *       "summary": "ADMIN: Tạo tài khoản + tự động tạo Profile",
- *       "description": "**Admin only.** Nếu role=STUDENT/COMMANDER và có fullName → tự tạo Profile. code tự sinh nếu không cung cấp.",
+ *       "description": "**Admin only.** STUDENT/COMMANDER bắt buộc có systemType; ADMIN phải có systemType=null. Nếu có fullName thì tự tạo Profile.",
  *       "requestBody": {
  *         "required": true,
  *         "content": {
@@ -974,6 +982,11 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *                     "COMMANDER",
  *                     "ADMIN"
  *                   ]
+ *                 },
+ *                 "systemType": {
+ *                   "type": "string",
+ *                   "nullable": true,
+ *                   "enum": ["EXTERNAL", "MILITARY", "CIVILIAN"]
  *                 },
  *                 "fullName": {
  *                   "type": "string"
@@ -1059,6 +1072,14 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *           "in": "query",
  *           "schema": {
  *             "type": "string"
+ *           }
+ *         },
+ *         {
+ *           "name": "systemType",
+ *           "in": "query",
+ *           "schema": {
+ *             "type": "string",
+ *             "enum": ["EXTERNAL", "MILITARY", "CIVILIAN"]
  *           }
  *         },
  *         {
@@ -1185,6 +1206,10 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *                       "role": {
  *                         "type": "string"
  *                       },
+ *                       "systemType": {
+ *                         "type": "string",
+ *                         "enum": ["EXTERNAL", "MILITARY", "CIVILIAN"]
+ *                       },
  *                       "fullName": {
  *                         "type": "string"
  *                       },
@@ -1254,6 +1279,10 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *                         ],
  *                         "default": "STUDENT"
  *                       },
+ *                       "systemType": {
+ *                         "type": "string",
+ *                         "enum": ["EXTERNAL", "MILITARY", "CIVILIAN"]
+ *                       },
  *                       "fullName": {
  *                         "type": "string",
  *                         "description": "Họ tên"
@@ -1308,6 +1337,7 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *                   "username": "hv001",
  *                   "password": "123456",
  *                   "role": "STUDENT",
+ *                   "systemType": "EXTERNAL",
  *                   "fullName": "Nguyễn Văn A",
  *                   "email": "a@example.com",
  *                   "code": "HV001",
@@ -1479,6 +1509,22 @@ router.delete('/time-table/:id', requireStudent, controller.denyMyTimeTableMutat
 // ===================== Student: Cắt cơm =====================
 router.get('/cut-rice', requireStudent, controller.getMyCutRice);
 router.put('/cut-rice', requireStudent, controller.updateMyCutRice);
+/**
+ * @swagger
+ * /users/cut-rice/requests:
+ *   get:
+ *     tags: [Cut Rice]
+ *     summary: Danh sách yêu cầu cắt cơm của học viên hiện tại
+ *     responses:
+ *       200:
+ *         description: OK
+ *   post:
+ *     tags: [Cut Rice]
+ *     summary: Gửi yêu cầu cắt cơm
+ *     responses:
+ *       201:
+ *         description: Created
+ */
 router.get('/cut-rice/requests', requireStudent, controller.getMyCutRiceRequests);
 router.post('/cut-rice/requests', requireStudent, controller.createMyCutRiceRequest);
 

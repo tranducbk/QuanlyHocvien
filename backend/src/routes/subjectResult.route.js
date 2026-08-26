@@ -126,6 +126,23 @@ const { uploadExcel } = require('../middlewares/upload.middleware');
 router.use(authMiddleware);
 router.use(requireRole('ADMIN', 'COMMANDER'));
 
+/**
+ * @swagger
+ * /subject-results/template/download:
+ *   get:
+ *     tags: [Academic Results]
+ *     summary: Tải file mẫu kết quả môn học
+ *     responses:
+ *       200:
+ *         description: File Excel mẫu
+ * /subject-results/import:
+ *   post:
+ *     tags: [Academic Results]
+ *     summary: Nhập kết quả môn học từ Excel
+ *     responses:
+ *       201:
+ *         description: Created
+ */
 router.get('/template/download', controller.downloadTemplate);
 router.post('/import', uploadExcel('file'), controller.importExcel);
 

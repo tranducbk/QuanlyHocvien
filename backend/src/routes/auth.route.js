@@ -126,6 +126,16 @@ const { authMiddleware, requireAdmin } = require('../middlewares/auth.middleware
  *                     "ADMIN"
  *                   ]
  *                 },
+ *                 "systemType": {
+ *                   "type": "string",
+ *                   "nullable": true,
+ *                   "description": "Bắt buộc với STUDENT/COMMANDER; ADMIN phải để null.",
+ *                   "enum": [
+ *                     "EXTERNAL",
+ *                     "MILITARY",
+ *                     "CIVILIAN"
+ *                   ]
+ *                 },
  *                 "fullName": {
  *                   "type": "string"
  *                 },

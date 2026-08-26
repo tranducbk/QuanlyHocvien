@@ -1,5 +1,14 @@
 const yup = require('yup');
-const { RANKS } = require('../utils/constants');
+const { RANKS, USER_ROLES, SYSTEM_TYPES } = require('../utils/constants');
+
+const roleSchema = yup.string().max(50).oneOf(USER_ROLES, 'Vai trò không hợp lệ');
+const systemTypeSchema = yup.string().max(20).oneOf(SYSTEM_TYPES, 'Hệ đào tạo không hợp lệ').nullable();
+
+const hasValidRoleSystemType = (value) => {
+  const role = value?.role || 'STUDENT';
+  if (role === 'ADMIN') return value?.systemType === null || value?.systemType === undefined;
+  return SYSTEM_TYPES.includes(value?.systemType);
+};
 
 const profileFields = {
   code: yup.string().max(50).nullable(),
@@ -41,17 +50,19 @@ const create = yup.object({
   username: yup.string().max(50).required('Trường này là bắt buộc'),
   password: yup.string().max(255).required('Trường này là bắt buộc'),
   isAdmin: yup.boolean().nullable(),
-  role: yup.string().max(50).oneOf(['STUDENT', 'COMMANDER', 'ADMIN'], 'Vai trò không hợp lệ').nullable(),
+  role: roleSchema.nullable(),
+  systemType: systemTypeSchema,
   refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   ...profileFields,
-});
+}).test('role-system-type', 'Vai trò và hệ đào tạo không hợp lệ', hasValidRoleSystemType);
 
 const update = yup.object({
   username: yup.string().max(50).nullable(),
   password: yup.string().max(255).nullable(),
   isAdmin: yup.boolean().nullable(),
-  role: yup.string().max(50).nullable(),
+  role: roleSchema.nullable(),
+  systemType: systemTypeSchema,
   refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   code: yup.string().max(50).nullable(),
@@ -93,11 +104,12 @@ const batch = yup.object({
   username: yup.string().max(50).required('Trường này là bắt buộc'),
   password: yup.string().max(255).nullable(),
   isAdmin: yup.boolean().nullable(),
-  role: yup.string().max(50).nullable(),
+  role: roleSchema.nullable(),
+  systemType: systemTypeSchema,
   refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   ...profileFields,
-});
+}).test('role-system-type', 'Vai trò và hệ đào tạo không hợp lệ', hasValidRoleSystemType);
 
 const batchProfileUpdate = yup.array().of(
   yup.object({

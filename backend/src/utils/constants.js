@@ -20,4 +20,7 @@ const RANKS = [
 
 const GENDER = ['MALE', 'FEMALE', 'OTHER'];
 
-module.exports = { RANKS, GENDER };
+const USER_ROLES = ['ADMIN', 'COMMANDER', 'STUDENT'];
+const SYSTEM_TYPES = ['EXTERNAL', 'MILITARY', 'CIVILIAN'];
+
+module.exports = { RANKS, GENDER, USER_ROLES, SYSTEM_TYPES };

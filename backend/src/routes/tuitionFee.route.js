@@ -285,6 +285,22 @@ router.post('/import', uploadExcel('file'), controller.importExcel);
 router.get('/template', controller.downloadTemplate);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);
+/**
+ * @swagger
+ * /tuition-fees/{id}/histories:
+ *   get:
+ *     tags: [Tuition Fees]
+ *     summary: Lịch sử thay đổi học phí
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ */
 router.get('/:id/histories', controller.getHistories);
 router.put('/:id', controller.update);
 router.delete('/:id', controller.delete);

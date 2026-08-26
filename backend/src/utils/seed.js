@@ -14,6 +14,7 @@ async function seed() {
         username: 'admin',
         password: hashedPassword,
         role: 'ADMIN',
+        systemType: null,
         isAdmin: true,
       },
     });
