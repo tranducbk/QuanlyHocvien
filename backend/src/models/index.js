@@ -1,7 +1,7 @@
 const dbConfig = require('../config/dbConfig.js');
 const { Sequelize, DataTypes } = require('sequelize');
 
-const dialectOptions = dbConfig.ssl
+const dialectOptions = dbConfig.ssl || dbConfig.URL
   ? {
       ssl: {
         require: true,
@@ -10,32 +10,25 @@ const dialectOptions = dbConfig.ssl
     }
   : {};
 
-const sequelize = new Sequelize(
-  dbConfig.DB,
-  dbConfig.USER,
-  dbConfig.PASSWORD,
-  {
-    host: dbConfig.HOST,
-    port: dbConfig.port,
-    dialect: dbConfig.dialect,
-    dialectOptions,
-    logging: false,
-    pool: {
-      max: dbConfig.pool.max,
-      min: dbConfig.pool.min,
-      acquire: dbConfig.pool.acquire,
-      idle: dbConfig.pool.idle
-    }
-  }
-);
+const sequelize = dbConfig.URL
+  ? new Sequelize(dbConfig.URL, {
+      dialect: dbConfig.dialect,
+      dialectOptions,
+      logging: false,
+      pool: dbConfig.pool,
+    })
+  : new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
+      host: dbConfig.HOST,
+      port: dbConfig.port,
+      dialect: dbConfig.dialect,
+      dialectOptions,
+      logging: false,
+      pool: dbConfig.pool,
+    });
 
 sequelize.authenticate()
-  .then(() => {
-    console.log('PostgreSQL connection has been established successfully.');
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+  .then(() => console.log('PostgreSQL connection has been established successfully.'))
+  .catch(err => console.error('Unable to connect to the database:', err));
 
 const db = {};
 db.Sequelize = Sequelize;
