@@ -2,3 +2,4 @@
 .next
 *.log
 server.log
+package-lock.json

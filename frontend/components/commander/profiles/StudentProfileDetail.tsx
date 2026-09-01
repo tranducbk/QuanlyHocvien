@@ -21,6 +21,10 @@ import {
   HiOutlinePhone,
   HiOutlineUserGroup,
 } from "react-icons/hi";
+import {
+  FamilyMembersView,
+  ForeignRelationsView,
+} from "@/components/profiles/ProfileRelationsView";
 
 interface StudentProfileDetailProps {
   studentId: string;
@@ -31,7 +35,11 @@ export default function StudentProfileDetail({
   studentId,
   initialData,
 }: StudentProfileDetailProps) {
-  const { data: response, isPending, isError } = useQuery({
+  const {
+    data: response,
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: [QUERY_KEYS.STUDENT_PROFILES, studentId],
     queryFn: () => userService.getStudentProfileById(studentId),
     placeholderData: { data: initialData, statusCode: 200, message: "Initial" },
@@ -75,43 +83,160 @@ export default function StudentProfileDetail({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DetailSection title="Thông tin cơ bản">
-          <DetailItem icon={<HiOutlineCalendar />} label="Ngày sinh" value={formatDate(student.birthday)} />
-          <DetailItem icon={<HiOutlineUserGroup />} label="Giới tính" value={student.gender === "MALE" ? "Nam" : "Nữ"} />
-          <DetailItem icon={<HiOutlineIdentification />} label="Số CCCD" value={student.cccd} />
-          <DetailItem icon={<HiOutlinePhone />} label="Số điện thoại" value={student.phoneNumber} />
-          <DetailItem icon={<HiOutlineMail />} label="Email" value={student.email} />
-          <DetailItem icon={<HiOutlineLocationMarker />} label="Địa chỉ hiện tại" value={student.currentAddress} />
-          <DetailItem icon={<HiOutlineLocationMarker />} label="Quê quán" value={student.hometown} />
-          <DetailItem icon={<HiOutlineLocationMarker />} label="Nơi sinh" value={student.placeOfBirth} />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Ngày sinh"
+            value={formatDate(student.birthday)}
+          />
+          <DetailItem
+            icon={<HiOutlineUserGroup />}
+            label="Giới tính"
+            value={student.gender === "MALE" ? "Nam" : "Nữ"}
+          />
+          <DetailItem
+            icon={<HiOutlineIdentification />}
+            label="Số CCCD"
+            value={student.cccd}
+          />
+          <DetailItem
+            icon={<HiOutlinePhone />}
+            label="Số điện thoại"
+            value={student.phoneNumber}
+          />
+          <DetailItem
+            icon={<HiOutlineMail />}
+            label="Email"
+            value={student.email}
+          />
+          <DetailItem
+            icon={<HiOutlineLocationMarker />}
+            label="Địa chỉ hiện tại"
+            value={student.currentAddress}
+          />
+          <DetailItem
+            icon={<HiOutlineLocationMarker />}
+            label="Quê quán"
+            value={student.hometown}
+          />
+          <DetailItem
+            icon={<HiOutlineLocationMarker />}
+            label="Nơi sinh"
+            value={student.placeOfBirth}
+          />
         </DetailSection>
 
         <DetailSection title="Thông tin học tập">
-          <DetailItem icon={<HiOutlineLibrary />} label="Trường đào tạo" value={student.university?.universityName} />
-          <DetailItem icon={<HiOutlineOfficeBuilding />} label="Đơn vị" value={student.organization?.organizationName} />
-          <DetailItem icon={<HiOutlineAcademicCap />} label="Lớp học" value={student.class?.className} />
-          <DetailItem icon={<HiOutlineAcademicCap />} label="Trình độ" value={student.educationLevel?.levelName} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Khóa nhập học" value={student.enrollment} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Ngày tốt nghiệp" value={formatDate(student.graduationDate)} />
-          <DetailItem icon={<HiOutlineChartBar />} label="CPA hệ 4" value={student.currentCpa4} />
-          <DetailItem icon={<HiOutlineChartBar />} label="CPA hệ 10" value={student.currentCpa10} />
+          <DetailItem
+            icon={<HiOutlineLibrary />}
+            label="Trường đào tạo"
+            value={student.university?.universityName}
+          />
+          <DetailItem
+            icon={<HiOutlineOfficeBuilding />}
+            label="Đơn vị"
+            value={student.organization?.organizationName}
+          />
+          <DetailItem
+            icon={<HiOutlineAcademicCap />}
+            label="Lớp học"
+            value={student.class?.className}
+          />
+          <DetailItem
+            icon={<HiOutlineAcademicCap />}
+            label="Trình độ"
+            value={student.educationLevel?.levelName}
+          />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Khóa nhập học"
+            value={student.enrollment}
+          />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Ngày tốt nghiệp"
+            value={formatDate(student.graduationDate)}
+          />
+          <DetailItem
+            icon={<HiOutlineChartBar />}
+            label="CPA hệ 4"
+            value={student.currentCpa4}
+          />
+          <DetailItem
+            icon={<HiOutlineChartBar />}
+            label="CPA hệ 10"
+            value={student.currentCpa10}
+          />
         </DetailSection>
 
         <DetailSection title="Quân nhân & chính trị">
-          <DetailItem icon={<HiOutlineBadgeCheck />} label="Cấp bậc" value={student.rank} />
-          <DetailItem icon={<HiOutlineOfficeBuilding />} label="Đơn vị quân nhân" value={student.unit} />
-          <DetailItem icon={<HiOutlineAcademicCap />} label="Chức vụ chính quyền" value={student.positionGovernment} />
-          <DetailItem icon={<HiOutlineAcademicCap />} label="Chức vụ Đảng" value={student.positionParty} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Ngày nhập ngũ" value={formatDate(student.dateOfEnlistment)} />
-          <DetailItem icon={<HiOutlineIdentification />} label="Số thẻ Đảng" value={student.partyMemberCardNumber} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Vào Đảng dự bị" value={formatDate(student.probationaryPartyMember)} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Vào Đảng chính thức" value={formatDate(student.fullPartyMember)} />
+          <DetailItem
+            icon={<HiOutlineBadgeCheck />}
+            label="Cấp bậc"
+            value={student.rank}
+          />
+          <DetailItem
+            icon={<HiOutlineOfficeBuilding />}
+            label="Đơn vị quân nhân"
+            value={student.unit}
+          />
+          <DetailItem
+            icon={<HiOutlineAcademicCap />}
+            label="Chức vụ chính quyền"
+            value={student.positionGovernment}
+          />
+          <DetailItem
+            icon={<HiOutlineAcademicCap />}
+            label="Chức vụ Đảng"
+            value={student.positionParty}
+          />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Ngày nhập ngũ"
+            value={formatDate(student.dateOfEnlistment)}
+          />
+          <DetailItem
+            icon={<HiOutlineIdentification />}
+            label="Số thẻ Đảng"
+            value={student.partyMemberCardNumber}
+          />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Vào Đảng dự bị"
+            value={formatDate(student.probationaryPartyMember)}
+          />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Vào Đảng chính thức"
+            value={formatDate(student.fullPartyMember)}
+          />
         </DetailSection>
 
-        <DetailSection title="Quan hệ & hệ thống">
-          <DetailItem icon={<HiOutlineUserGroup />} label="Thành phần gia đình" value={student.familyMember} />
-          <DetailItem icon={<HiOutlineLibrary />} label="Quan hệ nước ngoài" value={student.foreignRelations} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Ngày tạo hồ sơ" value={formatDateTime(student.createdAt)} />
-          <DetailItem icon={<HiOutlineCalendar />} label="Cập nhật cuối" value={formatDateTime(student.updatedAt)} />
+        <DetailSection title="Gia đình & yếu tố nước ngoài">
+          <div>
+            <Typography variant="caption" color="gray" className="mb-2 block">
+              Thông tin gia đình
+            </Typography>
+            <FamilyMembersView members={student.familyMember} />
+          </div>
+          <div>
+            <Typography variant="caption" color="gray" className="mb-2 block">
+              Yếu tố nước ngoài
+            </Typography>
+            <ForeignRelationsView relations={student.foreignRelations} />
+          </div>
+        </DetailSection>
+
+        <DetailSection title="Thông tin hệ thống">
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Ngày tạo hồ sơ"
+            value={formatDateTime(student.createdAt)}
+          />
+          <DetailItem
+            icon={<HiOutlineCalendar />}
+            label="Cập nhật cuối"
+            value={formatDateTime(student.updatedAt)}
+          />
         </DetailSection>
       </div>
     </div>
@@ -126,7 +251,13 @@ const DetailSection = ({
   children: React.ReactNode;
 }) => (
   <section className="space-y-4 bg-neutral-50/30 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800">
-    <Typography variant="label" weight="black" transform="uppercase" color="primary" tracking="widest">
+    <Typography
+      variant="label"
+      weight="black"
+      transform="uppercase"
+      color="primary"
+      tracking="widest"
+    >
       {title}
     </Typography>
     <div className="space-y-4">{children}</div>
@@ -145,11 +276,21 @@ const DetailItem = ({
   <div className="flex items-start gap-3">
     <div className="mt-1 text-neutral-400">{icon}</div>
     <div className="flex-1 min-w-0">
-      <Typography variant="caption" color="gray" className="block leading-none mb-1">
+      <Typography
+        variant="caption"
+        color="gray"
+        className="block leading-none mb-1"
+      >
         {label}
       </Typography>
-      <Typography variant="body" weight="semibold" className="block whitespace-pre-wrap wrap-break-word">
-        {value !== null && value !== undefined && value !== "" ? value : "Chưa cập nhật"}
+      <Typography
+        variant="body"
+        weight="semibold"
+        className="block whitespace-pre-wrap wrap-break-word"
+      >
+        {value !== null && value !== undefined && value !== ""
+          ? value
+          : "Chưa cập nhật"}
       </Typography>
     </div>
   </div>

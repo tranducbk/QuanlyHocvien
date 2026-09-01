@@ -8,6 +8,16 @@ const { NotFoundError, UnauthorizedError, BadRequestError } = require('../utils/
 const User = db.user;
 const Profile = db.profile;
 
+const SELF_PROFILE_FIELDS = [
+  'fullName', 'email', 'gender', 'birthday', 'hometown', 'ethnicity',
+  'religion', 'currentAddress', 'placeOfBirth', 'phoneNumber', 'cccd',
+  'partyMemberCardNumber', 'unit', 'rank', 'positionGovernment', 'positionParty',
+  'fullPartyMember', 'probationaryPartyMember', 'dateOfEnlistment',
+  'enrollment', 'graduationDate', 'currentCpa4', 'currentCpa10', 'familyMember',
+  'foreignRelations', 'startWork', 'organization', 'classId', 'organizationId',
+  'universityId', 'educationLevelId',
+];
+
 const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
 const _excludePassword = (user) => serialize(user);
@@ -102,9 +112,29 @@ const changePassword = async (userId, oldPassword, newPassword) => {
   await user.save();
 };
 
+const updateProfile = async (userId, data) => {
+  const user = await User.findByPk(userId);
+  if (!user?.profileId) {
+    throw new BadRequestError('Không có hồ sơ để cập nhật');
+  }
+
+  const profile = await Profile.findByPk(user.profileId);
+  if (!profile) {
+    throw new NotFoundError('Không tìm thấy hồ sơ');
+  }
+
+  const updateData = {};
+  for (const field of SELF_PROFILE_FIELDS) {
+    if (data[field] !== undefined) updateData[field] = data[field];
+  }
+
+  return profile.update(updateData);
+};
+
 module.exports = {
   login,
   register,
   refreshToken,
   changePassword,
+  updateProfile,
 };

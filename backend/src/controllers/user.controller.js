@@ -121,6 +121,7 @@ const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 const updateMyProfile = asyncHandler(async (req, res) => {
+  await validateOrThrow(ss.profileUpdate, req.body);
   const result = await service.updateMyProfile(req.userId, req.body);
   return success(res, result, 'Cập nhật hồ sơ thành công');
 });

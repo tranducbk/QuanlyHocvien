@@ -1,0 +1,27 @@
+.list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.card {
+  padding: 0.75rem;
+  border: 1px solid rgb(245 245 245);
+  border-radius: 0.75rem;
+  background-color: rgb(255 255 255 / 60%);
+}
+
+.title,
+.description {
+  overflow-wrap: anywhere;
+}
+
+.description {
+  display: block;
+  margin-top: 0.25rem;
+  white-space: pre-wrap;
+}
+
+:global(.dark) .card {
+  border-color: rgb(38 38 38);
+  background-color: rgb(10 10 10 / 60%);
+}

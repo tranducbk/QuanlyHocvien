@@ -32,6 +32,10 @@ import { IconType } from "react-icons";
 import ProfileSkeleton from "@/components/commander/profile/ProfileSkeleton";
 import UpdateProfileForm from "./UpdateProfileForm";
 import useAppMutation from "@/hooks/useAppMutation";
+import {
+  FamilyMembersView,
+  ForeignRelationsView,
+} from "@/components/profiles/ProfileRelationsView";
 
 export default function Main() {
   const { openModal } = useModalStore();
@@ -49,7 +53,8 @@ export default function Main() {
 
   const profile = profileResponse?.data;
   const student = profile?.profile;
-  const shouldShowMissingProfile = !isLoading && !isError && (!profile || !student);
+  const shouldShowMissingProfile =
+    !isLoading && !isError && (!profile || !student);
 
   const avatarMutation = useAppMutation({
     mutationKey: MUTATION_KEYS.UPDATE_AVATAR,
@@ -166,34 +171,122 @@ export default function Main() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2 flex flex-col gap-8">
           <ProfileSection title="Thông tin cơ bản" accent="bg-primary-500">
-            <InfoItem icon={HiOutlineCalendar} label="Ngày sinh" value={formatDate(student?.birthday)} />
-            <InfoItem icon={HiOutlineUser} label="Giới tính" value={student?.gender === "MALE" ? "Nam" : "Nữ"} />
-            <InfoItem icon={HiOutlineIdentification} label="Số CCCD" value={student?.cccd} />
-            <InfoItem icon={HiOutlineMail} label="Email" value={student?.email} />
-            <InfoItem icon={HiOutlinePhone} label="Số điện thoại" value={student?.phoneNumber} />
-            <InfoItem icon={HiOutlineLocationMarker} label="Quê quán" value={student?.hometown} />
-            <InfoItem icon={HiOutlineLocationMarker} label="Nơi sinh" value={student?.placeOfBirth} />
-            <InfoItem icon={HiOutlineGlobeAlt} label="Dân tộc" value={student?.ethnicity} />
-            <InfoItem icon={HiOutlineLibrary} label="Tôn giáo" value={student?.religion} />
-            <InfoItem icon={HiOutlineLocationMarker} label="Địa chỉ hiện tại" value={student?.currentAddress} />
+            <InfoItem
+              icon={HiOutlineCalendar}
+              label="Ngày sinh"
+              value={formatDate(student?.birthday)}
+            />
+            <InfoItem
+              icon={HiOutlineUser}
+              label="Giới tính"
+              value={student?.gender === "MALE" ? "Nam" : "Nữ"}
+            />
+            <InfoItem
+              icon={HiOutlineIdentification}
+              label="Số CCCD"
+              value={student?.cccd}
+            />
+            <InfoItem
+              icon={HiOutlineMail}
+              label="Email"
+              value={student?.email}
+            />
+            <InfoItem
+              icon={HiOutlinePhone}
+              label="Số điện thoại"
+              value={student?.phoneNumber}
+            />
+            <InfoItem
+              icon={HiOutlineLocationMarker}
+              label="Quê quán"
+              value={student?.hometown}
+            />
+            <InfoItem
+              icon={HiOutlineLocationMarker}
+              label="Nơi sinh"
+              value={student?.placeOfBirth}
+            />
+            <InfoItem
+              icon={HiOutlineGlobeAlt}
+              label="Dân tộc"
+              value={student?.ethnicity}
+            />
+            <InfoItem
+              icon={HiOutlineLibrary}
+              label="Tôn giáo"
+              value={student?.religion}
+            />
+            <InfoItem
+              icon={HiOutlineLocationMarker}
+              label="Địa chỉ hiện tại"
+              value={student?.currentAddress}
+            />
           </ProfileSection>
 
           <ProfileSection title="Thông tin học tập" accent="bg-secondary-500">
-            <InfoItem icon={HiOutlineOfficeBuilding} label="Trường đào tạo" value={student?.university?.universityName} />
-            <InfoItem icon={HiOutlineUsers} label="Đơn vị" value={student?.organization?.organizationName} />
-            <InfoItem icon={HiOutlineAcademicCap} label="Lớp học" value={student?.class?.className} />
-            <InfoItem icon={HiOutlineAcademicCap} label="Trình độ" value={student?.educationLevel?.levelName} />
-            <InfoItem icon={HiOutlineCalendar} label="Khóa nhập học" value={student?.enrollment} />
-            <InfoItem icon={HiOutlineCalendar} label="Ngày tốt nghiệp" value={formatDate(student?.graduationDate)} />
-            <InfoItem icon={HiOutlineAcademicCap} label="CPA hệ 4" value={student?.currentCpa4} />
-            <InfoItem icon={HiOutlineAcademicCap} label="CPA hệ 10" value={student?.currentCpa10} />
+            <InfoItem
+              icon={HiOutlineOfficeBuilding}
+              label="Trường đào tạo"
+              value={student?.university?.universityName}
+            />
+            <InfoItem
+              icon={HiOutlineUsers}
+              label="Đơn vị"
+              value={student?.organization?.organizationName}
+            />
+            <InfoItem
+              icon={HiOutlineAcademicCap}
+              label="Lớp học"
+              value={student?.class?.className}
+            />
+            <InfoItem
+              icon={HiOutlineAcademicCap}
+              label="Trình độ"
+              value={student?.educationLevel?.levelName}
+            />
+            <InfoItem
+              icon={HiOutlineCalendar}
+              label="Khóa nhập học"
+              value={student?.enrollment}
+            />
+            <InfoItem
+              icon={HiOutlineCalendar}
+              label="Ngày tốt nghiệp"
+              value={formatDate(student?.graduationDate)}
+            />
+            <InfoItem
+              icon={HiOutlineAcademicCap}
+              label="CPA hệ 4"
+              value={student?.currentCpa4}
+            />
+            <InfoItem
+              icon={HiOutlineAcademicCap}
+              label="CPA hệ 10"
+              value={student?.currentCpa10}
+            />
           </ProfileSection>
 
           <ProfileSection title="Quân nhân & Chính trị" accent="bg-primary-500">
-            <InfoItem icon={HiOutlineShieldCheck} label="Cấp bậc" value={student?.rank} />
-            <InfoItem icon={HiOutlineFlag} label="Chức vụ chính quyền" value={student?.positionGovernment} />
-            <InfoItem icon={HiOutlineFlag} label="Chức vụ Đảng" value={student?.positionParty} />
-            <InfoItem icon={HiOutlineCalendar} label="Ngày nhập ngũ" value={formatDate(student?.dateOfEnlistment)} />
+            <InfoItem
+              icon={HiOutlineShieldCheck}
+              label="Cấp bậc"
+              value={student?.rank}
+            />
+            <InfoItem
+              icon={HiOutlineFlag}
+              label="Chức vụ chính quyền"
+              value={student?.positionGovernment}
+            />
+            <InfoItem
+              icon={HiOutlineFlag}
+              label="Chức vụ Đảng"
+              value={student?.positionParty}
+            />
+            <InfoItem
+              icon={HiOutlineCalendar}
+              label="Ngày nhập ngũ"
+              value={formatDate(student?.dateOfEnlistment)}
+            />
           </ProfileSection>
         </div>
 
@@ -207,9 +300,21 @@ export default function Main() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <InfoItem icon={HiOutlineShieldCheck} label="Số thẻ Đảng" value={student?.partyMemberCardNumber} />
-              <InfoItem icon={HiOutlineCalendar} label="Ngày vào Đảng (Dự bị)" value={formatDate(student?.probationaryPartyMember)} />
-              <InfoItem icon={HiOutlineCalendar} label="Ngày vào Đảng (Chính thức)" value={formatDate(student?.fullPartyMember)} />
+              <InfoItem
+                icon={HiOutlineShieldCheck}
+                label="Số thẻ Đảng"
+                value={student?.partyMemberCardNumber}
+              />
+              <InfoItem
+                icon={HiOutlineCalendar}
+                label="Ngày vào Đảng (Dự bị)"
+                value={formatDate(student?.probationaryPartyMember)}
+              />
+              <InfoItem
+                icon={HiOutlineCalendar}
+                label="Ngày vào Đảng (Chính thức)"
+                value={formatDate(student?.fullPartyMember)}
+              />
             </div>
           </section>
 
@@ -220,11 +325,29 @@ export default function Main() {
                 Quan hệ & hệ thống
               </Typography>
             </div>
-            <div className="flex flex-col gap-4">
-              <InfoItem icon={HiOutlineUsers} label="Quan hệ gia đình" value={student?.familyMember} />
-              <InfoItem icon={HiOutlineGlobeAlt} label="Quan hệ nước ngoài" value={student?.foreignRelations} />
-              <InfoItem icon={HiOutlineCalendar} label="Ngày tham gia" value={formatDateTime(profile?.createdAt)} />
-              <InfoItem icon={HiOutlineCalendar} label="Cập nhật cuối" value={formatDateTime(profile?.updatedAt)} />
+            <div className="flex flex-col gap-5">
+              <div>
+                <Typography variant="label" color="gray" className="mb-2 block">
+                  Thông tin gia đình
+                </Typography>
+                <FamilyMembersView members={student?.familyMember} />
+              </div>
+              <div>
+                <Typography variant="label" color="gray" className="mb-2 block">
+                  Yếu tố nước ngoài
+                </Typography>
+                <ForeignRelationsView relations={student?.foreignRelations} />
+              </div>
+              <InfoItem
+                icon={HiOutlineCalendar}
+                label="Ngày tham gia"
+                value={formatDateTime(profile?.createdAt)}
+              />
+              <InfoItem
+                icon={HiOutlineCalendar}
+                label="Cập nhật cuối"
+                value={formatDateTime(profile?.updatedAt)}
+              />
             </div>
           </section>
         </div>
@@ -270,7 +393,11 @@ const InfoItem = ({
       <Typography variant="label" color="gray" className="mb-0.5">
         {label}
       </Typography>
-      <Typography variant="body" weight="semibold" className="text-neutral-800 dark:text-neutral-100 break-words">
+      <Typography
+        variant="body"
+        weight="semibold"
+        className="text-neutral-800 dark:text-neutral-100 break-words"
+      >
         {textOrDash(value)}
       </Typography>
     </div>

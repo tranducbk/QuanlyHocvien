@@ -88,7 +88,30 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
             enrollment: { type: 'integer', description: 'Khóa học (Student)' },
             graduationDate: { type: 'string', format: 'date' },
             currentCpa4: { type: 'number' }, currentCpa10: { type: 'number' },
-            familyMember: { type: 'object' }, foreignRelations: { type: 'object' },
+            familyMember: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['relationship', 'fullName'],
+                properties: {
+                  relationship: { type: 'string' }, fullName: { type: 'string' },
+                  birthYear: { type: 'integer' }, occupation: { type: 'string' },
+                  workplace: { type: 'string' }, address: { type: 'string' },
+                },
+              },
+            },
+            foreignRelations: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['relationship', 'fullName', 'nationality', 'country'],
+                properties: {
+                  relationship: { type: 'string' }, fullName: { type: 'string' },
+                  nationality: { type: 'string' }, country: { type: 'string' },
+                  occupation: { type: 'string' }, address: { type: 'string' }, notes: { type: 'string' },
+                },
+              },
+            },
             startWork: { type: 'integer', description: 'Năm bắt đầu công tác (Commander)' },
             organization: { type: 'string', description: 'Cơ quan (Commander)' },
             classId: { type: 'string', format: 'uuid' }, organizationId: { type: 'string', format: 'uuid' },
