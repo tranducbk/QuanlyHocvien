@@ -167,8 +167,9 @@ export default function Main({
         id: "studentCount",
         header: "Số học viên",
         accessorKey: "studentCount",
+        meta: { align: "center" },
         cell: (info) => (
-          <Typography variant="body" color="neutral">
+          <Typography variant="body" weight="semibold" color="neutral">
             {info.row.original.studentCount}
           </Typography>
         ),
@@ -177,6 +178,7 @@ export default function Main({
         id: "createdAt",
         header: "Ngày tạo",
         accessorKey: "createdAt",
+        meta: { align: "center", noWrap: true },
         cell: (info) => (
           <Typography
             variant="caption"
@@ -192,6 +194,7 @@ export default function Main({
         id: "updatedAt",
         header: "Ngày cập nhật",
         accessorKey: "updatedAt",
+        meta: { align: "center", noWrap: true },
         cell: (info) => (
           <Typography
             variant="caption"
@@ -206,10 +209,11 @@ export default function Main({
       {
         id: "actions",
         header: "Hành động",
+        meta: { align: "center" },
         cell: (info) => {
           const cls = info.row.original;
           return (
-            <div className="flex items-center justify-start gap-1">
+            <div className="flex items-center justify-center gap-1">
               <ActionButton
                 tooltipText="Thêm học viên"
                 icon={HiOutlineUserAdd}

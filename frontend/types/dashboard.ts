@@ -74,21 +74,14 @@ export interface AdminDashboard {
     totalStudents: number;
     totalCommanders: number;
     totalAdmins: number;
-    totalUniversities: number;
-    totalOrganizations: number;
-    totalClasses: number;
     totalNotifications: number;
-    pendingGradeRequests: number;
     usersWithoutProfile: number;
   };
   charts: {
     usersByRole: DashboardChartItem[];
     userStatus: DashboardChartItem[];
-    masterData: DashboardChartItem[];
-    recordsByModule: DashboardChartItem[];
   };
   alerts: {
-    pendingGradeRequests: number;
     inactiveUsers: number;
     usersWithoutProfile: number;
   };

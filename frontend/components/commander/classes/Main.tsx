@@ -2,23 +2,22 @@
 
 import { useMemo, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineUserGroup } from "react-icons/hi";
-import ActionButton from "@/library/ActionButton";
 import PageContainer from "@/library/PageContainer";
 import Table from "@/library/Table";
-import Typography from "@/library/Typography";
 import { FilterField } from "@/library/table/TableFilter";
 import useTableQuery from "@/hooks/useTableQuery";
 import { classService } from "@/services/classes";
 import { universityService } from "@/services/universities";
 import { DEFAULT_PAGE } from "@/constants/constants";
-import { QUERY_KEYS } from "@/constants/query-keys";
+import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { useModalStore } from "@/store/useModalStore";
 import { Class } from "@/types/classes";
-import { formatDateTime, textOrDash } from "@/utils/fn-common";
+import AddClassStudentsModal from "@/components/classes/AddClassStudentsModal";
 import ClassStudentsListModal from "@/components/classes/ClassStudentsListModal";
+import CreateClassForm from "./CreateClassForm";
+import UpdateClassForm from "./UpdateClassForm";
 import ClassSkeleton from "./ClassSkeleton";
+import { useClassColumns } from "./useClassColumns";
 
 export default function Main() {
   const { openModal } = useModalStore();
@@ -60,107 +59,58 @@ export default function Main() {
     fetchData: classService.getClasses,
   });
 
-  const handleOpenStudentsListModal = useCallback(
+  const handleOpenCreateModal = useCallback(() => {
+    openModal({
+      title: "Tạo lớp học mới",
+      content: <CreateClassForm />,
+      size: "md",
+      config: {
+        mutationKey: MUTATION_KEYS.CREATE_CLASS,
+      },
+    });
+  }, [openModal]);
+
+  const handleOpenUpdateModal = useCallback(
     (cls: Class) => {
       openModal({
-        title: "Danh sách học viên trong lớp",
-        content: <ClassStudentsListModal cls={cls} readOnly />,
+        title: "Chỉnh sửa lớp học",
+        content: <UpdateClassForm cls={cls} />,
+        size: "md",
+        config: {
+          mutationKey: MUTATION_KEYS.UPDATE_CLASS,
+        },
+      });
+    },
+    [openModal]
+  );
+
+  const handleOpenAddStudentsModal = useCallback(
+    (cls: Class) => {
+      openModal({
+        title: "Thêm học viên vào lớp",
+        content: <AddClassStudentsModal cls={cls} />,
         size: "2xl",
       });
     },
     [openModal]
   );
 
-  const columns = useMemo<ColumnDef<Class>[]>(
-    () => [
-      {
-        id: "className",
-        header: "Tên lớp",
-        accessorKey: "className",
-        cell: (info) => (
-          <Typography variant="body" weight="semibold" color="neutral">
-            {info.row.original.className}
-          </Typography>
-        ),
-      },
-      {
-        id: "universityName",
-        header: "Trường đại học",
-        accessorKey: "universityName",
-        cell: (info) => (
-          <Typography variant="body" color="neutral">
-            {textOrDash(info.row.original.universityName)}
-          </Typography>
-        ),
-      },
-      {
-        id: "organizationName",
-        header: "Khoa/Ngành",
-        accessorKey: "organizationName",
-        cell: (info) => (
-          <Typography variant="body" color="neutral">
-            {textOrDash(info.row.original.organizationName)}
-          </Typography>
-        ),
-      },
-      {
-        id: "levelName",
-        header: "Trình độ",
-        accessorKey: "levelName",
-        cell: (info) => (
-          <Typography variant="body" color="neutral">
-            {textOrDash(info.row.original.levelName)}
-          </Typography>
-        ),
-      },
-      {
-        id: "studentCount",
-        header: "Số học viên",
-        accessorKey: "studentCount",
-        cell: (info) => (
-          <Typography variant="body" color="neutral">
-            {info.row.original.studentCount}
-          </Typography>
-        ),
-      },
-      {
-        id: "createdAt",
-        header: "Ngày tạo",
-        accessorKey: "createdAt",
-        cell: (info) => (
-          <Typography variant="caption" weight="semibold" color="gray" className="whitespace-nowrap">
-            {formatDateTime(info.row.original.createdAt)}
-          </Typography>
-        ),
-      },
-      {
-        id: "updatedAt",
-        header: "Ngày cập nhật",
-        accessorKey: "updatedAt",
-        cell: (info) => (
-          <Typography variant="caption" weight="semibold" color="gray" className="whitespace-nowrap">
-            {formatDateTime(info.row.original.updatedAt)}
-          </Typography>
-        ),
-      },
-      {
-        id: "actions",
-        header: "Hành động",
-        cell: (info) => {
-          const cls = info.row.original;
-          return (
-            <ActionButton
-              tooltipText="Danh sách học viên"
-              icon={HiOutlineUserGroup}
-              onClick={() => handleOpenStudentsListModal(cls)}
-              color="secondary"
-            />
-          );
-        },
-      },
-    ],
-    [handleOpenStudentsListModal]
+  const handleOpenStudentsListModal = useCallback(
+    (cls: Class) => {
+      openModal({
+        title: "Danh sách học viên trong lớp",
+        content: <ClassStudentsListModal cls={cls} />,
+        size: "2xl",
+      });
+    },
+    [openModal]
   );
+
+  const columns = useClassColumns({
+    onAddStudents: handleOpenAddStudentsModal,
+    onViewStudents: handleOpenStudentsListModal,
+    onEdit: handleOpenUpdateModal,
+  });
 
   const universityOptions = useMemo(() => {
     const options = [{ value: "", label: "Tất cả trường" }];
@@ -229,6 +179,8 @@ export default function Main() {
             onSortingChange={setSorting}
             filterFields={filterOptions}
             emptyText="Không tìm thấy lớp học nào phù hợp"
+            onAdd={handleOpenCreateModal}
+            addLabel="Tạo lớp học"
           />
         </div>
       </div>

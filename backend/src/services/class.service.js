@@ -26,7 +26,26 @@ const studentCountLiteral = [
   'studentCount'
 ];
 
-const create = async (data) => Class.create(data);
+const ensureUniqueClass = async (educationLevelId, className, excludeId) => {
+  if (!className) return;
+  const trimmed = String(className).trim();
+  const existing = await Class.findOne({
+    where: {
+      educationLevelId,
+      className: { [db.Sequelize.Op.iLike]: trimmed },
+      ...(excludeId ? { id: { [db.Sequelize.Op.ne]: excludeId } } : {}),
+    },
+  });
+  if (existing) {
+    throw new BadRequestError(`Lớp học "${trimmed}" đã tồn tại trong trình độ đào tạo này`);
+  }
+};
+
+const create = async (data) => {
+  const trimmedName = String(data.className || '').trim();
+  await ensureUniqueClass(data.educationLevelId, trimmedName);
+  return Class.create({ ...data, className: trimmedName });
+};
 
 const getAll = async (query) => {
   const where = {};
@@ -104,7 +123,12 @@ const getDetail = async (id) => {
 
 const update = async (id, data) => {
   const record = await getDetail(id);
-  return record.update(data);
+  const { studentCount, ...updateData } = data;
+  if (updateData.className) {
+    await ensureUniqueClass(record.educationLevelId, updateData.className, id);
+    updateData.className = String(updateData.className).trim();
+  }
+  return record.update(updateData);
 };
 
 const getStudents = async (classId, query) => {

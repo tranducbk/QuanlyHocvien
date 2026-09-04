@@ -58,7 +58,7 @@ export interface TableProps<TData> {
   /** Class CSS bổ sung cho container của bảng */
   className?: string;
   /** Class CSS cho các hàng (tr) */
-  rowClassName?: string;
+  rowClassName?: string | ((row: Row<TData>) => string);
   /** Lay cac row con de expand tren client */
   getSubRows?: (row: TData) => TData[] | undefined;
   /** Render hang group full-width; return null/undefined/false de render row theo columns */
@@ -119,11 +119,16 @@ const Table = <TData,>({
       header: "STT",
       size: 70,
       enableSorting: false,
+      meta: {
+        align: "center",
+      },
       cell: (info) => {
         return (
-          <span className="text-xs font-bold text-neutral-400 dark:text-neutral-500">
-            {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
-          </span>
+          <div className="text-center">
+            <span className="text-xs font-bold text-neutral-400 dark:text-neutral-500">
+              {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
+            </span>
+          </div>
         );
       },
     };
