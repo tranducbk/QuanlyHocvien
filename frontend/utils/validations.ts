@@ -280,7 +280,6 @@ export type CreateClassFormValues = z.infer<typeof createClassSchema>;
  */
 export const updateClassSchema = z.object({
   className: z.string().min(1, "Tên lớp là bắt buộc"),
-  studentCount: z.number().min(0, "Số lượng học viên không được âm"),
 });
 
 export type UpdateClassFormValues = z.infer<typeof updateClassSchema>;

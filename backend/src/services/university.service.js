@@ -1,5 +1,5 @@
 const db = require('../models');
-const { NotFoundError } = require('../utils/apiError');
+const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 
 const University = db.university;
@@ -16,13 +16,42 @@ const totalStudentsLiteral = [
   'totalStudents'
 ];
 
+const ensureUniqueUniversity = async ({ code, name, excludeId } = {}) => {
+  if (code) {
+    const trimmedCode = String(code).trim();
+    const existing = await University.findOne({
+      where: {
+        universityCode: { [db.Sequelize.Op.iLike]: trimmedCode },
+        ...(excludeId ? { id: { [db.Sequelize.Op.ne]: excludeId } } : {}),
+      },
+    });
+    if (existing) throw new BadRequestError(`Mã trường "${trimmedCode}" đã tồn tại trong hệ thống`);
+  }
+
+  if (name) {
+    const trimmedName = String(name).trim();
+    const existing = await University.findOne({
+      where: {
+        universityName: { [db.Sequelize.Op.iLike]: trimmedName },
+        ...(excludeId ? { id: { [db.Sequelize.Op.ne]: excludeId } } : {}),
+      },
+    });
+    if (existing) throw new BadRequestError(`Tên trường "${trimmedName}" đã tồn tại trong hệ thống`);
+  }
+};
+
 const create = async (data) => {
+  const trimmedCode = String(data.universityCode || '').trim();
+  const trimmedName = String(data.universityName || '').trim();
+
+  await ensureUniqueUniversity({ code: trimmedCode, name: trimmedName });
+
   const transaction = await db.sequelize.transaction();
   try {
     const university = await University.create(
       {
-        universityCode: data.universityCode,
-        universityName: data.universityName,
+        universityCode: trimmedCode,
+        universityName: trimmedName,
         status: data.status || 'ACTIVE',
       },
       { transaction }
@@ -115,6 +144,16 @@ const getHierarchy = async () => {
 
 const update = async (id, data) => {
   const record = await getDetail(id);
+
+  await ensureUniqueUniversity({
+    code: data.universityCode,
+    name: data.universityName,
+    excludeId: id,
+  });
+
+  if (data.universityCode) data.universityCode = String(data.universityCode).trim();
+  if (data.universityName) data.universityName = String(data.universityName).trim();
+
   return record.update(data);
 };
 

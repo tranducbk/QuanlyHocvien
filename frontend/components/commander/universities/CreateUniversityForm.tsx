@@ -47,7 +47,7 @@ export default function CreateUniversityForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col py-2 gap-4">
       <div className="flex-1 p-4 space-y-8">
         <section>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div className="flex flex-col gap-5">
             <Input
               label="Mã trường"
               placeholder="Ví dụ: T01, T02..."

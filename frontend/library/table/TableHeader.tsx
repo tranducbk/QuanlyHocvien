@@ -15,28 +15,40 @@ const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
   });
 
   const isSorted = header.column.getIsSorted();
+  const align = header.column.columnDef.meta?.align || "left";
+  const alignClasses =
+    align === "center"
+      ? "justify-center text-center"
+      : align === "right"
+      ? "justify-end text-right"
+      : "justify-start text-left";
 
   return (
     <th
       ref={ref}
       colSpan={header.colSpan}
-      className={`p-2 py-4 text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest first:pl-4 transition-colors
+      className={`relative group p-2 py-3.5 text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-wider transition-colors
         ${isDragSource ? "bg-primary-50/80 dark:bg-primary-500/10 opacity-60" : "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/60"}
       `}
     >
       {header.isPlaceholder ? null : (
-        <div className="flex items-center gap-2">
-          {/* Vùng nắm để kéo thả */}
-          <div
-            ref={handleRef}
-            className="cursor-grab active:cursor-grabbing p-1 -ml-1"
-          >
-            <div className="w-1 h-4 border-l-2 border-dotted border-neutral-300 dark:border-neutral-700" />
-          </div>
+        <div className={`flex items-center gap-1.5 w-full ${alignClasses}`}>
+          {/* Vùng nắm để kéo thả - định vị tuyệt đối bên trái để không làm lệch tâm cột */}
+          {header.column.id !== "stt" &&
+            header.column.id !== "select" &&
+            header.column.id !== "actions" && (
+              <div
+                ref={handleRef}
+                className="absolute left-1 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-300 dark:text-neutral-600 hover:text-neutral-500"
+                title="Kéo thả để đổi thứ tự cột"
+              >
+                <div className="w-1 h-3.5 border-l-2 border-dotted border-current" />
+              </div>
+            )}
 
-          {/* Vùng bấm để sắp xếp */}
+          {/* Vùng bấm để sắp xếp & Tiêu đề - luôn ở đúng tâm */}
           <div
-            className={`flex items-center gap-2 flex-1 ${
+            className={`flex items-center gap-1.5 ${
               header.column.getCanSort()
                 ? "cursor-pointer select-none group/sort hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                 : ""

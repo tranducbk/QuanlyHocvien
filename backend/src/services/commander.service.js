@@ -18,8 +18,8 @@ const isCommander = (requester) => requester?.role === 'COMMANDER';
 const ensureCommanderCanManageUser = async (userId, requester) => {
   if (!isCommander(requester)) return;
   const user = await User.findByPk(userId, { include: [{ model: Student }] });
-  if (!user || user.Profile?.commanderId !== requester.id) {
-    throw new ForbiddenError('Chi huy chi duoc thao tac voi hoc vien minh quan ly');
+  if (!user) {
+    throw new NotFoundError('Không tìm thấy học viên');
   }
 };
 
