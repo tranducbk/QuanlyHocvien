@@ -14,6 +14,10 @@ interface TableToolbarProps<TData> {
   filterFields?: FilterField[];
   /** Hiển thị bộ lọc (mặc định: true nếu có filterFields) */
   showFilter?: boolean;
+  /** Mở sẵn khu vực bộ lọc khi tải bảng. */
+  defaultFilterOpen?: boolean;
+  /** Hiển thị menu tùy chỉnh cột. */
+  showVisibilityToggle?: boolean;
   /** Callback khi bấm nút thêm */
   onAdd?: () => void;
   /** Nhãn cho nút thêm */
@@ -30,13 +34,15 @@ const TableToolbar = <TData,>({
   table,
   filterFields,
   showFilter = true,
+  defaultFilterOpen = false,
+  showVisibilityToggle = true,
   onAdd,
   addLabel,
   onBulkUpdate,
   bulkUpdateLabel,
   actions,
 }: TableToolbarProps<TData>) => {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(defaultFilterOpen);
 
   return (
     <div className="flex flex-col px-2">
@@ -83,6 +89,7 @@ const TableToolbar = <TData,>({
           </button>
         )}
 
+        {showVisibilityToggle && (
         <div className="relative group/visibility self-start">
           <button className=" cursor-pointer flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl text-[11px] font-black uppercase tracking-wider text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700 transition-all shadow-sm dark:shadow-none">
             <HiOutlineAdjustments size={16} className="text-neutral-400 dark:text-neutral-500" />
@@ -136,6 +143,7 @@ const TableToolbar = <TData,>({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {showFilter && filterFields && filterFields.length > 0 && (

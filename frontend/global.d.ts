@@ -14,8 +14,9 @@ declare global {
     totalPages: number;
   }
 
-  interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  interface PaginatedResponse<T, TSummary = unknown> extends ApiResponse<T[]> {
     pagination: PaginationInfo;
+    summary?: TSummary;
   }
 
   interface BatchMutationResult {

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { HiOutlinePaperAirplane } from "react-icons/hi";
 import Button from "@/library/Button";
-import Checkbox from "@/library/Checkbox";
 import Divide from "@/library/Divide";
 import Textarea from "@/library/Textarea";
 import Typography from "@/library/Typography";
@@ -12,28 +11,9 @@ import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { cutRiceService } from "@/services/cut-rice";
 import { MealDayKey, MealSlotKey, WeeklyCutRice } from "@/types/cut-rice";
 import { useModalStore } from "@/store/useModalStore";
-
-const mealDays: MealDayKey[] = [
-  "Thứ 2",
-  "Thứ 3",
-  "Thứ 4",
-  "Thứ 5",
-  "Thứ 6",
-  "Thứ 7",
-  "Chủ nhật",
-];
-
-const mealSlots: Array<{ key: MealSlotKey; label: string }> = [
-  { key: "morning", label: "Bữa sáng" },
-  { key: "noon", label: "Bữa trưa" },
-  { key: "evening", label: "Bữa tối" },
-];
-
-const createEmptyWeekly = (): WeeklyCutRice =>
-  mealDays.reduce<WeeklyCutRice>((acc, day) => {
-    acc[day] = { morning: false, noon: false, evening: false };
-    return acc;
-  }, {});
+import MealWeekGrid from "@/components/meal-schedules/MealWeekGrid";
+import { countCutMeals, createEmptyMealWeek } from "@/utils/meal-schedule";
+import styles from "./CreateMealRequestForm.module.css";
 
 interface Props {
   semesterId: string;
@@ -48,7 +28,7 @@ export default function CreateMealRequestForm({
 }: Props) {
   const { closeModal } = useModalStore();
   const [requestWeekly, setRequestWeekly] = useState<WeeklyCutRice>(() =>
-    createEmptyWeekly()
+    createEmptyMealWeek()
   );
   const [requestNotes, setRequestNotes] = useState("");
 
@@ -64,15 +44,21 @@ export default function CreateMealRequestForm({
     },
   });
 
-  const toggleRequestSlot = (day: MealDayKey, meal: MealSlotKey) => {
+  const toggleRequestSlot = (
+    day: MealDayKey,
+    meal: MealSlotKey,
+    checked: boolean
+  ) => {
     setRequestWeekly((current) => ({
       ...current,
       [day]: {
         ...(current[day] || {}),
-        [meal]: !current[day]?.[meal],
+        [meal]: checked,
       },
     }));
   };
+
+  const selectedMealCount = countCutMeals(requestWeekly);
 
   const handleSubmitRequest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,33 +76,25 @@ export default function CreateMealRequestForm({
       className="flex max-h-[85vh] flex-col gap-6 pt-2 pb-4"
     >
       <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-        <Typography variant="caption" color="gray">
-          Chọn các bữa cần cắt cho tuần đang xem.
-        </Typography>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          {mealDays.map((day) => (
-            <div
-              key={day}
-              className="rounded-2xl border border-neutral-100 p-3 dark:border-neutral-700"
-            >
-              <Typography variant="body" weight="bold" className="mb-3">
-                {day}
-              </Typography>
-              <div className="flex flex-wrap gap-3">
-                {mealSlots.map((meal) => (
-                  <Checkbox
-                    key={meal.key}
-                    checked={Boolean(requestWeekly[day]?.[meal.key])}
-                    onChange={() => toggleRequestSlot(day, meal.key)}
-                    label={meal.label}
-                    size="sm"
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className={styles.guide}>
+          <div>
+            <Typography variant="body" weight="bold">
+              Chọn bữa cần cắt
+            </Typography>
+            <Typography variant="caption" color="gray">
+              Lịch được chia theo Sáng – Trưa – Tối để bạn kiểm tra nhanh
+              trước khi gửi.
+            </Typography>
+          </div>
+          <span className={styles.counter}>{selectedMealCount}/21 bữa</span>
         </div>
+
+        <MealWeekGrid
+          weekly={requestWeekly}
+          editable
+          disabled={createRequestMutation.isPending}
+          onToggle={toggleRequestSlot}
+        />
 
         <Textarea
           label="Lý do"

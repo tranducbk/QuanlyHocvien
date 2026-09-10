@@ -1,13 +1,14 @@
 import Skeleton from "@/library/Skeleton";
+import styles from "./MealScheduleSkeleton.module.css";
 
 export default function MealScheduleSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+    <div className={styles.container}>
+      <div className={styles.summary}>
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="rounded-2xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900"
+            className={styles.summaryCard}
           >
             <Skeleton variant="text" width={90} height={14} />
             <Skeleton variant="text" width={140} height={24} />
@@ -15,29 +16,31 @@ export default function MealScheduleSkeleton() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 7 }).map((_, index) => (
-          <div
-            key={index}
-            className="rounded-3xl border border-neutral-100 bg-white p-4 shadow-sm dark:border-neutral-700/80 dark:bg-neutral-900"
-          >
-            <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-3 dark:border-neutral-700/80">
+      <div className={styles.schedule}>
+        <div className={styles.scheduleHeading}>
+          <Skeleton variant="text" width={140} height={22} />
+          <Skeleton variant="text" width={260} height={14} />
+        </div>
+        <div className={styles.table}>
+          <div className={styles.row}>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} variant="text" width={90} height={16} />
+            ))}
+          </div>
+          {Array.from({ length: 7 }).map((_, rowIndex) => (
+            <div key={rowIndex} className={styles.row}>
               <Skeleton variant="text" width={64} height={16} />
-              <Skeleton variant="rounded" width={56} height={22} />
-            </div>
-            <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, mealIndex) => (
-                <div
+                <Skeleton
                   key={mealIndex}
-                  className="flex items-center justify-between rounded-2xl border border-neutral-100 p-3 dark:border-neutral-700/50"
-                >
-                  <Skeleton variant="text" width={80} height={14} />
-                  <Skeleton variant="rounded" width={72} height={22} />
-                </div>
+                  variant="rounded"
+                  width={112}
+                  height={40}
+                />
               ))}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

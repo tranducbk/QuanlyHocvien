@@ -49,10 +49,14 @@ export interface TableProps<TData> {
   showIndex?: boolean;
   /** Hiển thị nút tùy chỉnh ẩn hiện cột (mặc định: true) */
   showVisibilityToggle?: boolean;
+  /** Cho phép kéo thả để đổi vị trí cột. */
+  enableColumnOrdering?: boolean;
   /** Cấu hình các trường lọc */
   filterFields?: FilterField[];
   /** Hiển thị bộ lọc (mặc định: true nếu có filterFields) */
   showFilter?: boolean;
+  /** Mở sẵn khu vực bộ lọc khi tải bảng. */
+  defaultFilterOpen?: boolean;
   /** Văn bản hiển thị khi không có dữ liệu */
   emptyText?: string;
   /** Class CSS bổ sung cho container của bảng */
@@ -77,6 +81,8 @@ export interface TableProps<TData> {
   bulkUpdateLabel?: string;
   /** Các node hành động tùy chỉnh hiển thị trên thanh công cụ (vd: nút xuất báo cáo) */
   actions?: ReactNode;
+  /** Nội dung hiển thị sau thanh công cụ và trước bảng dữ liệu. */
+  contentBeforeTable?: ReactNode;
 }
 
 const Table = <TData,>({
@@ -89,8 +95,11 @@ const Table = <TData,>({
   sorting,
   onSortingChange,
   showIndex = true,
+  showVisibilityToggle = true,
+  enableColumnOrdering = true,
   filterFields,
   showFilter = true,
+  defaultFilterOpen = false,
   emptyText = "Không có dữ liệu hiển thị",
   className = "",
   rowClassName = "",
@@ -103,6 +112,7 @@ const Table = <TData,>({
   onBulkUpdate,
   bulkUpdateLabel,
   actions,
+  contentBeforeTable,
 }: TableProps<TData>) => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnOrder, setColumnOrder] = useState<string[]>([]);
@@ -203,12 +213,16 @@ const Table = <TData,>({
         table={table}
         filterFields={filterFields}
         showFilter={showFilter}
+        defaultFilterOpen={defaultFilterOpen}
+        showVisibilityToggle={showVisibilityToggle}
         onAdd={onAdd}
         addLabel={addLabel}
         onBulkUpdate={onBulkUpdate}
         bulkUpdateLabel={bulkUpdateLabel}
         actions={actions}
       />
+
+      {contentBeforeTable}
 
       <DragDropProvider onDragEnd={handleDragEnd}>
         <div
@@ -224,6 +238,7 @@ const Table = <TData,>({
                         key={header.id}
                         header={header}
                         index={index}
+                        enableDragging={enableColumnOrdering}
                       />
                     ))}
                   </tr>

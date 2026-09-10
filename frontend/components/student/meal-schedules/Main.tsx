@@ -4,52 +4,38 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   HiOutlineCalendar,
-  HiOutlineCheckCircle,
   HiOutlineClock,
+  HiOutlineMoon,
   HiOutlinePaperAirplane,
-  HiOutlineXCircle,
+  HiOutlineSun,
 } from "react-icons/hi";
 import Badge from "@/library/Badge";
 import Button from "@/library/Button";
-import Checkbox from "@/library/Checkbox";
 import DatePicker from "@/library/DatePicker";
 import ErrorState from "@/library/ErrorState";
 import PageContainer from "@/library/PageContainer";
 import Select from "@/library/Select";
-import Textarea from "@/library/Textarea";
 import Typography from "@/library/Typography";
-import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
-import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
+import { QUERY_KEYS } from "@/constants/query-keys";
 import { cutRiceService } from "@/services/cut-rice";
 import { timeTableService } from "@/services/time-tables";
 import {
-  CutRice,
   CutRiceRequest,
-  MealDayKey,
-  MealSlotKey,
-  WeeklyCutRice,
 } from "@/types/cut-rice";
 import { TimeTableSemester } from "@/types/time-tables";
 import { formatDateTime } from "@/utils/fn-common";
 import MealScheduleSkeleton from "./MealScheduleSkeleton";
 import CreateMealRequestForm from "./CreateMealRequestForm";
-
-const mealDays: MealDayKey[] = [
-  "Thứ 2",
-  "Thứ 3",
-  "Thứ 4",
-  "Thứ 5",
-  "Thứ 6",
-  "Thứ 7",
-  "Chủ nhật",
-];
-
-const mealSlots: Array<{ key: MealSlotKey; label: string; time: string }> = [
-  { key: "morning", label: "Bữa sáng", time: "06:00" },
-  { key: "noon", label: "Bữa trưa", time: "11:00" },
-  { key: "evening", label: "Bữa tối", time: "17:30" },
-];
+import MealWeekGrid from "@/components/meal-schedules/MealWeekGrid";
+import {
+  countCutMeals,
+  countCutMealsBySlot,
+  getMealSlots,
+  MEAL_DAYS,
+  MEAL_SLOTS,
+} from "@/utils/meal-schedule";
+import styles from "./MealSchedule.module.css";
 
 const toDateOnly = (date: Date) =>
   [
@@ -79,17 +65,6 @@ const formatWeekRange = (start?: string | null, end?: string | null) =>
     ? `${start.split("-").reverse().join("/")} - ${end.split("-").reverse().join("/")}`
     : "Chưa chọn tuần";
 
-const getSlot = (record: CutRice | undefined, day: MealDayKey) => {
-  const weekly = record?.weekly || {};
-  return weekly[day] || weekly[day.toLowerCase()] || {};
-};
-
-const getRequestSlot = (record: CutRiceRequest, day: MealDayKey) => {
-  const weekly = record.weekly || {};
-  return weekly[day] || weekly[day.toLowerCase()] || {};
-};
-
-
 const getSemesterLabel = (semester: TimeTableSemester) => {
   const schoolYear = semester.schoolYearInfo?.schoolYear;
   return [schoolYear, `Học kỳ ${semester.code}`].filter(Boolean).join(" - ");
@@ -99,6 +74,12 @@ const getRequestStatus = (request: CutRiceRequest) => {
   if (request.status === "APPROVED") return { label: "Đã duyệt", variant: "success" as const };
   if (request.status === "REJECTED") return { label: "Từ chối", variant: "error" as const };
   return { label: "Chờ duyệt", variant: "warning" as const };
+};
+
+const mealIcons = {
+  morning: HiOutlineSun,
+  noon: HiOutlineClock,
+  evening: HiOutlineMoon,
 };
 
 export default function Main() {
@@ -173,24 +154,16 @@ export default function Main() {
   const requests = requestsResponse?.data || [];
 
   const summary = useMemo(() => {
-    const totalSlots = mealDays.length * mealSlots.length;
-    const cutCount = mealDays.reduce((total, day) => {
-      const slot = getSlot(cutRice, day);
-      return (
-        total +
-        mealSlots.reduce(
-          (dayTotal, meal) => dayTotal + Number(Boolean(slot[meal.key])),
-          0
-        )
-      );
-    }, 0);
+    const totalSlots = MEAL_DAYS.length * MEAL_SLOTS.length;
+    const cutCount = countCutMeals(cutRice?.weekly);
 
     return {
       totalSlots,
       cutCount,
-      activeDays: mealDays.filter((day) => {
-        const slot = getSlot(cutRice, day);
-        return mealSlots.some((meal) => slot[meal.key]);
+      mealTotals: countCutMealsBySlot(cutRice?.weekly),
+      activeDays: MEAL_DAYS.filter((day) => {
+        const slot = getMealSlots(cutRice?.weekly, day);
+        return MEAL_SLOTS.some((meal) => slot[meal.key]);
       }).length,
     };
   }, [cutRice]);
@@ -269,51 +242,43 @@ export default function Main() {
             />
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 dark:border-primary-700/60 dark:bg-primary-950/40">
-                  <div className="flex items-center gap-2 text-primary-700 dark:text-primary-100">
-                    <HiOutlineCalendar size={18} />
-                    <Typography variant="caption" weight="bold">
-                      Tổng bữa cắt
-                    </Typography>
-                  </div>
-                  <Typography variant="h2" className="mt-2 text-primary-700 dark:text-primary-100">
-                    {summary.cutCount}/{summary.totalSlots}
-                  </Typography>
-                </div>
-
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-700/60 dark:bg-emerald-950/40">
-                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-100">
-                    <HiOutlineCheckCircle size={18} />
-                    <Typography variant="caption" weight="bold">
-                      Ngày có lịch cắt
-                    </Typography>
-                  </div>
-                  <Typography variant="h2" className="mt-2 text-emerald-700 dark:text-emerald-100">
-                    {summary.activeDays}/7
-                  </Typography>
-                </div>
-
-                <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-700/60 dark:bg-amber-950/40">
-                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-100">
-                    <HiOutlineClock size={18} />
-                    <Typography variant="caption" weight="bold">
-                      Cập nhật
-                    </Typography>
-                  </div>
-                  <Typography variant="body" weight="black" className="mt-3 text-amber-700 dark:text-amber-100">
-                    {cutRice?.lastUpdated
-                      ? formatDateTime(cutRice.lastUpdated)
-                      : cutRice?.updatedAt
-                        ? formatDateTime(cutRice.updatedAt)
-                        : "Chưa có dữ liệu"}
-                  </Typography>
-                </div>
+              <div className={styles.mealSummary}>
+                {MEAL_SLOTS.map((meal) => {
+                  const MealIcon = mealIcons[meal.key];
+                  return (
+                    <div
+                      key={meal.key}
+                      className={`${styles.mealSummaryCard} ${styles[meal.key]}`}
+                    >
+                      <div className={styles.mealSummaryIcon}>
+                        <MealIcon aria-hidden="true" />
+                      </div>
+                      <div>
+                        <Typography variant="body" weight="bold">
+                          {meal.label}
+                        </Typography>
+                        <Typography variant="caption" color="gray">
+                          {meal.time}
+                        </Typography>
+                      </div>
+                      <div className={styles.mealSummaryValue}>
+                        <strong>{summary.mealTotals[meal.key]}</strong>
+                        <span>/7 ngày cắt</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className={styles.metadata}>
                 <Badge variant={cutRice?.isAutoGenerated ? "success" : "warning"}>
                   {cutRice?.isAutoGenerated ? "Tự động" : "Thủ công"}
+                </Badge>
+                <Badge variant="secondary">
+                  Tổng {summary.cutCount}/{summary.totalSlots} bữa
+                </Badge>
+                <Badge variant="secondary">
+                  {summary.activeDays}/7 ngày có lịch cắt
                 </Badge>
                 <Badge variant="secondary">
                   {cutRice?.notes || "Không có ghi chú"}
@@ -321,61 +286,29 @@ export default function Main() {
                 <Badge variant="neutral">
                   Tuần {formatWeekRange(cutRice?.weekStartDate || activeWeekRange.weekStartDate, cutRice?.weekEndDate || activeWeekRange.weekEndDate)}
                 </Badge>
+                <span className={styles.updatedAt}>
+                  Cập nhật: {cutRice?.lastUpdated
+                    ? formatDateTime(cutRice.lastUpdated)
+                    : cutRice?.updatedAt
+                      ? formatDateTime(cutRice.updatedAt)
+                      : "Chưa có dữ liệu"}
+                </span>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {mealDays.map((day) => {
-                  const slot = getSlot(cutRice, day);
-                  const cutMeals = mealSlots.filter((meal) => slot[meal.key]).length;
-
-                  return (
-                    <div
-                      key={day}
-                      className="rounded-3xl border border-neutral-100 bg-white p-4 shadow-sm transition-colors dark:border-neutral-700/80 dark:bg-neutral-900 dark:shadow-black/20"
-                    >
-                      <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-3 dark:border-neutral-700/80">
-                        <Typography variant="body" weight="bold" className="text-neutral-900 dark:text-neutral-100">
-                          {day}
-                        </Typography>
-                        <Badge variant={cutMeals ? "success" : "secondary"}>
-                          {cutMeals}/3 bữa
-                        </Badge>
-                      </div>
-
-                      <div className="space-y-3">
-                        {mealSlots.map((meal) => {
-                          const isCut = Boolean(slot[meal.key]);
-                          const StatusIcon = isCut ? HiOutlineXCircle : HiOutlineCheckCircle;
-
-                          return (
-                            <div
-                              key={meal.key}
-                              className={`flex items-center justify-between gap-3 rounded-2xl border p-3 ${
-                                isCut
-                                  ? "border-amber-100 bg-amber-50/80 dark:border-amber-700/60 dark:bg-amber-950/40"
-                                  : "border-neutral-100 bg-neutral-50/70 dark:border-neutral-700/70 dark:bg-neutral-800/70"
-                              }`}
-                            >
-                              <div className="min-w-0">
-                                <Typography variant="body" weight="semibold" className="text-neutral-900 dark:text-neutral-100">
-                                  {meal.label}
-                                </Typography>
-                                <Typography variant="caption" className="text-neutral-500 dark:text-neutral-400">
-                                  {meal.time}
-                                </Typography>
-                              </div>
-                              <Badge variant={isCut ? "warning" : "neutral"} className="shrink-0 gap-1.5 whitespace-nowrap">
-                                <StatusIcon size={13} />
-                                {isCut ? "Cắt cơm" : "Không cắt"}
-                              </Badge>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <section className={styles.scheduleSection}>
+                <div className={styles.sectionHeading}>
+                  <div>
+                    <Typography variant="h4" weight="bold">
+                      Lịch theo tuần
+                    </Typography>
+                    <Typography variant="caption" color="gray">
+                      Đối chiếu từng ngày theo ba khung giờ ăn cố định.
+                    </Typography>
+                  </div>
+                  <HiOutlineCalendar aria-hidden="true" />
+                </div>
+                <MealWeekGrid weekly={cutRice?.weekly} />
+              </section>
 
               <div className="rounded-3xl border border-neutral-100 bg-white p-5 shadow-sm dark:border-neutral-700/80 dark:bg-neutral-900">
                 <Typography variant="h5" weight="bold">
@@ -389,10 +322,7 @@ export default function Main() {
                     ) : requests.length ? (
                       requests.map((request) => {
                         const status = getRequestStatus(request);
-                        const cutCount = mealDays.reduce((total, day) => {
-                          const slot = getRequestSlot(request, day);
-                          return total + mealSlots.reduce((sum, meal) => sum + Number(Boolean(slot[meal.key])), 0);
-                        }, 0);
+                        const cutCount = countCutMeals(request.weekly);
 
                         return (
                           <div key={request.id} className="rounded-2xl border border-neutral-100 p-3 dark:border-neutral-700">

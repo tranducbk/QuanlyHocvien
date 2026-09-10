@@ -6,9 +6,14 @@ import { useSortable } from "@dnd-kit/react/sortable";
 interface HeaderProps<TData> {
   header: Header<TData, unknown>;
   index: number;
+  enableDragging?: boolean;
 }
 
-const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
+const TableHeader = <TData,>({
+  header,
+  index,
+  enableDragging = true,
+}: HeaderProps<TData>) => {
   const { ref, handleRef, isDragSource } = useSortable({
     id: header.column.id,
     index,
@@ -18,7 +23,7 @@ const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
 
   return (
     <th
-      ref={ref}
+      ref={enableDragging ? ref : undefined}
       colSpan={header.colSpan}
       className={`p-2 py-4 text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest first:pl-4 transition-colors
         ${isDragSource ? "bg-primary-50/80 dark:bg-primary-500/10 opacity-60" : "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/60"}
@@ -27,12 +32,14 @@ const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
       {header.isPlaceholder ? null : (
         <div className="flex items-center gap-2">
           {/* Vùng nắm để kéo thả */}
-          <div
-            ref={handleRef}
-            className="cursor-grab active:cursor-grabbing p-1 -ml-1"
-          >
-            <div className="w-1 h-4 border-l-2 border-dotted border-neutral-300 dark:border-neutral-700" />
-          </div>
+          {enableDragging && (
+            <div
+              ref={handleRef}
+              className="cursor-grab active:cursor-grabbing p-1 -ml-1"
+            >
+              <div className="w-1 h-4 border-l-2 border-dotted border-neutral-300 dark:border-neutral-700" />
+            </div>
+          )}
 
           {/* Vùng bấm để sắp xếp */}
           <div

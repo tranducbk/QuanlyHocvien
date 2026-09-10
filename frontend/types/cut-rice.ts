@@ -14,6 +14,17 @@ export interface MealSlots {
   evening?: boolean;
 }
 
+export interface MealSlotCounts {
+  morning: number;
+  noon: number;
+  evening: number;
+}
+
+export interface CutRiceDailySummary {
+  totalSchedules: number;
+  daily: Record<MealDayKey, MealSlotCounts>;
+}
+
 export type WeeklyCutRice = Partial<Record<MealDayKey | string, MealSlots>>;
 
 export interface CutRiceProfile {
