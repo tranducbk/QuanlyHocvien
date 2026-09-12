@@ -27,6 +27,10 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi";
 import { UserDetailResponse } from "@/types/user";
+import {
+  FamilyMembersView,
+  ForeignRelationsView,
+} from "@/components/profiles/ProfileRelationsView";
 
 interface DetailUserFormProps {
   userId: string;
@@ -364,16 +368,28 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
                   />
                 </div>
                 <div className="space-y-4">
-                  <DetailItem
-                    icon={<HiOutlineUserGroup />}
-                    label="Thành phần gia đình"
-                    value={user.profile.familyMember || "Chưa cập nhật"}
-                  />
-                  <DetailItem
-                    icon={<HiOutlineLibrary />}
-                    label="Quan hệ nước ngoài"
-                    value={user.profile.foreignRelations || "Không có"}
-                  />
+                  <div>
+                    <Typography
+                      variant="caption"
+                      color="gray"
+                      className="mb-2 block"
+                    >
+                      Thông tin gia đình
+                    </Typography>
+                    <FamilyMembersView members={user.profile.familyMember} />
+                  </div>
+                  <div>
+                    <Typography
+                      variant="caption"
+                      color="gray"
+                      className="mb-2 block"
+                    >
+                      Yếu tố nước ngoài
+                    </Typography>
+                    <ForeignRelationsView
+                      relations={user.profile.foreignRelations}
+                    />
+                  </div>
                 </div>
               </div>
             </section>

@@ -1,5 +1,6 @@
 const yup = require('yup');
 const { RANKS } = require('../utils/constants');
+const { familyMembers, foreignRelations } = require('./profileRelations.validation');
 
 const create = yup.object({
   code: yup.string().max(50).required('Trường này là bắt buộc'),
@@ -26,8 +27,8 @@ const create = yup.object({
   dateOfEnlistment: yup.date().nullable(),
   currentCpa4: yup.number().min(0).max(4).nullable(),
   currentCpa10: yup.number().min(0).max(10).nullable(),
-  familyMember: yup.object().nullable(),
-  foreignRelations: yup.object().nullable(),
+  familyMember: familyMembers,
+  foreignRelations,
   classId: yup.string().uuid('Mã lớp không hợp lệ').nullable(),
   organizationId: yup.string().uuid('Mã đơn vị không hợp lệ').nullable(),
   universityId: yup.string().uuid('Mã trường không hợp lệ').nullable(),
@@ -60,8 +61,8 @@ const update = yup.object({
   dateOfEnlistment: yup.date().nullable(),
   currentCpa4: yup.number().min(0).max(4).nullable(),
   currentCpa10: yup.number().min(0).max(10).nullable(),
-  familyMember: yup.object().nullable(),
-  foreignRelations: yup.object().nullable(),
+  familyMember: familyMembers,
+  foreignRelations,
   classId: yup.string().uuid('Mã lớp không hợp lệ').nullable(),
   organizationId: yup.string().uuid('Mã đơn vị không hợp lệ').nullable(),
   universityId: yup.string().uuid('Mã trường không hợp lệ').nullable(),
@@ -91,8 +92,8 @@ const profileUpdate = yup.object({
   dateOfEnlistment: yup.date().nullable(),
   currentCpa4: yup.number().min(0).max(4).nullable(),
   currentCpa10: yup.number().min(0).max(10).nullable(),
-  familyMember: yup.object().nullable(),
-  foreignRelations: yup.object().nullable(),
+  familyMember: familyMembers,
+  foreignRelations,
   classId: yup.string().uuid('Mã lớp không hợp lệ').nullable(),
   organizationId: yup.string().uuid('Mã đơn vị không hợp lệ').nullable(),
   universityId: yup.string().uuid('Mã trường không hợp lệ').nullable(),
@@ -115,4 +116,10 @@ const cutRiceSchema = yup.object({
   notes: yup.string().max(255).nullable(),
 });
 
-module.exports = { create, update, profileUpdate, timetable, cutRice: cutRiceSchema };
+module.exports = {
+  create,
+  update,
+  profileUpdate,
+  timetable,
+  cutRice: cutRiceSchema,
+};

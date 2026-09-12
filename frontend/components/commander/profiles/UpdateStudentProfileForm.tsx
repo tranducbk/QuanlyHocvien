@@ -18,6 +18,8 @@ import {
   studentProfileSchema,
   StudentProfileFormValues,
 } from "@/utils/validations";
+import ProfileRelationsEditor from "@/components/profiles/ProfileRelationsEditor";
+import { getProfileRelationFormDefaults } from "@/utils/profile-relations";
 
 interface UpdateStudentProfileFormProps {
   student: Student;
@@ -70,9 +72,7 @@ export default function UpdateStudentProfileForm({
       partyMemberCardNumber: student.partyMemberCardNumber,
       probationaryPartyMember: student.probationaryPartyMember,
       fullPartyMember: student.fullPartyMember,
-      familyMember: typeof student.familyMember === "string" ? student.familyMember : "",
-      foreignRelations:
-        typeof student.foreignRelations === "string" ? student.foreignRelations : "",
+      ...getProfileRelationFormDefaults(student),
     },
   });
 
@@ -312,7 +312,7 @@ export default function UpdateStudentProfileForm({
         </section>
 
         <section>
-          <SectionHeader title="Đảng & Đoàn - Quan hệ" />
+          <SectionHeader title="Đảng & Đoàn" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             <Input
               label="Chức vụ Đảng"
@@ -354,21 +354,40 @@ export default function UpdateStudentProfileForm({
                 />
               )}
             />
-            <Input
-              label="Thành phần gia đình"
-              placeholder="Nhập thành phần gia đình"
-              error={errors.familyMember?.message}
-              isLoading={mutation.isPending}
-              {...register("familyMember")}
-            />
-            <Input
-              label="Quan hệ nước ngoài"
-              placeholder="Nhập quan hệ nước ngoài"
-              error={errors.foreignRelations?.message}
-              isLoading={mutation.isPending}
-              {...register("foreignRelations")}
-            />
           </div>
+        </section>
+
+        <section>
+          <SectionHeader title="Gia đình & Yếu tố nước ngoài" />
+          <Controller
+            name="familyMember"
+            control={control}
+            render={({ field: familyField }) => (
+              <Controller
+                name="foreignRelations"
+                control={control}
+                render={({ field: foreignField }) => (
+                  <ProfileRelationsEditor
+                    familyMembers={familyField.value ?? []}
+                    foreignRelations={foreignField.value ?? []}
+                    onFamilyMembersChange={familyField.onChange}
+                    onForeignRelationsChange={foreignField.onChange}
+                    familyErrors={
+                      Array.isArray(errors.familyMember)
+                        ? errors.familyMember
+                        : undefined
+                    }
+                    foreignErrors={
+                      Array.isArray(errors.foreignRelations)
+                        ? errors.foreignRelations
+                        : undefined
+                    }
+                    isLoading={mutation.isPending}
+                  />
+                )}
+              />
+            )}
+          />
         </section>
       </div>
 

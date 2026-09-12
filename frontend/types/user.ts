@@ -57,10 +57,29 @@ export interface UpdateProfileRequest {
   partyMemberCardNumber?: string | null;
   probationaryPartyMember?: string | null;
   fullPartyMember?: string | null;
-  familyMember?: string | null;
-  foreignRelations?: string | null;
+  familyMember?: FamilyMember[] | null;
+  foreignRelations?: ForeignRelation[] | null;
   startWork?: number | null;
   commanderId?: string | null;
+}
+
+export interface FamilyMember {
+  relationship: string;
+  fullName: string;
+  birthYear?: number | null;
+  occupation?: string | null;
+  workplace?: string | null;
+  address?: string | null;
+}
+
+export interface ForeignRelation {
+  relationship: string;
+  fullName: string;
+  nationality: string;
+  country: string;
+  occupation?: string | null;
+  address?: string | null;
+  notes?: string | null;
 }
 
 export interface University {
@@ -119,8 +138,8 @@ export interface Student {
   email: string;
   enrollment: number;
   ethnicity: string;
-  familyMember: string | null;
-  foreignRelations: string | null;
+  familyMember: FamilyMember[] | null;
+  foreignRelations: ForeignRelation[] | null;
   fullPartyMember: string | null;
   gender: "MALE" | "FEMALE";
   graduationDate: string | null;

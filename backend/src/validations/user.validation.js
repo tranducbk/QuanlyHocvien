@@ -1,5 +1,6 @@
 const yup = require('yup');
 const { RANKS } = require('../utils/constants');
+const { familyMembers, foreignRelations } = require('./profileRelations.validation');
 
 const profileFields = {
   code: yup.string().max(50).nullable(),
@@ -26,8 +27,8 @@ const profileFields = {
   graduationDate: yup.date().nullable(),
   currentCpa4: yup.number().nullable(),
   currentCpa10: yup.number().nullable(),
-  familyMember: yup.mixed().nullable(),
-  foreignRelations: yup.mixed().nullable(),
+  familyMember: familyMembers,
+  foreignRelations,
   startWork: yup.number().integer().nullable(),
   organization: yup.string().max(255).nullable(),
   classId: yup.string().max(36).nullable(),
@@ -78,8 +79,8 @@ const update = yup.object({
   graduationDate: yup.date().nullable(),
   currentCpa4: yup.number().nullable(),
   currentCpa10: yup.number().nullable(),
-  familyMember: yup.mixed().nullable(),
-  foreignRelations: yup.mixed().nullable(),
+  familyMember: familyMembers,
+  foreignRelations,
   startWork: yup.number().integer().nullable(),
   organization: yup.string().max(255).nullable(),
   classId: yup.string().max(36).nullable(),
@@ -125,8 +126,8 @@ const batchProfileUpdate = yup.array().of(
     graduationDate: yup.date().nullable(),
     currentCpa4: yup.number().nullable(),
     currentCpa10: yup.number().nullable(),
-    familyMember: yup.mixed().nullable(),
-    foreignRelations: yup.mixed().nullable(),
+    familyMember: familyMembers,
+    foreignRelations,
     startWork: yup.number().integer().nullable(),
     organization: yup.string().max(255).nullable(),
     classId: yup.string().max(36).nullable(),

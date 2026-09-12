@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { profileRelationValidationFields } from "./profile-relations";
 
 /**
  * Schema validation cho form đăng nhập
@@ -78,8 +79,7 @@ export const updateUserSchema = z.object({
   partyMemberCardNumber: z.string().nullable().or(z.literal("")).optional(),
   probationaryPartyMember: z.string().nullable().or(z.literal("")).optional(),
   fullPartyMember: z.string().nullable().or(z.literal("")).optional(),
-  familyMember: z.string().nullable().or(z.literal("")).optional(),
-  foreignRelations: z.string().nullable().or(z.literal("")).optional(),
+  ...profileRelationValidationFields,
   enrollment: z.number().nullable().optional(),
   currentCpa4: z.number().nullable().optional(),
   currentCpa10: z.number().nullable().optional(),
@@ -139,7 +139,9 @@ export const universitySchema = z.object({
   organizations: z
     .array(
       z.object({
-        organizationName: z.string().min(1, "Tên khoa/ngành không được để trống"),
+        organizationName: z
+          .string()
+          .min(1, "Tên khoa/ngành không được để trống"),
         educationLevels: z.string().optional(),
       })
     )
@@ -172,6 +174,7 @@ export const profileSchema = z.object({
   probationaryPartyMember: z.string().nullable().or(z.literal("")).optional(),
   fullPartyMember: z.string().nullable().or(z.literal("")).optional(),
   partyMemberCardNumber: z.string().nullable().or(z.literal("")).optional(),
+  ...profileRelationValidationFields,
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -211,8 +214,7 @@ export const studentProfileSchema = z.object({
   partyMemberCardNumber: z.string().nullable().or(z.literal("")).optional(),
   probationaryPartyMember: z.string().nullable().or(z.literal("")).optional(),
   fullPartyMember: z.string().nullable().or(z.literal("")).optional(),
-  familyMember: z.string().nullable().or(z.literal("")).optional(),
-  foreignRelations: z.string().nullable().or(z.literal("")).optional(),
+  ...profileRelationValidationFields,
 });
 
 export type StudentProfileFormValues = z.infer<typeof studentProfileSchema>;

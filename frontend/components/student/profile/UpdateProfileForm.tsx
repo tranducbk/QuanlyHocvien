@@ -16,6 +16,8 @@ import Divide from "@/library/Divide";
 import { profileSchema, ProfileFormValues } from "@/utils/validations";
 import { RANKS, GENDER } from "@/constants/constants";
 import useAppMutation from "@/hooks/useAppMutation";
+import ProfileRelationsEditor from "@/components/profiles/ProfileRelationsEditor";
+import { getProfileRelationFormDefaults } from "@/utils/profile-relations";
 
 interface UpdateProfileFormProps {
   initialData: Student;
@@ -54,6 +56,7 @@ export default function UpdateProfileForm({
       probationaryPartyMember: textValue(initialData.probationaryPartyMember),
       fullPartyMember: textValue(initialData.fullPartyMember),
       partyMemberCardNumber: textValue(initialData.partyMemberCardNumber),
+      ...getProfileRelationFormDefaults(initialData),
     },
   });
 
@@ -280,6 +283,39 @@ export default function UpdateProfileForm({
               )}
             />
           </div>
+        </section>
+
+        <section>
+          <SectionHeader title="Gia đình & Yếu tố nước ngoài" />
+          <Controller
+            name="familyMember"
+            control={control}
+            render={({ field: familyField }) => (
+              <Controller
+                name="foreignRelations"
+                control={control}
+                render={({ field: foreignField }) => (
+                  <ProfileRelationsEditor
+                    familyMembers={familyField.value ?? []}
+                    foreignRelations={foreignField.value ?? []}
+                    onFamilyMembersChange={familyField.onChange}
+                    onForeignRelationsChange={foreignField.onChange}
+                    familyErrors={
+                      Array.isArray(errors.familyMember)
+                        ? errors.familyMember
+                        : undefined
+                    }
+                    foreignErrors={
+                      Array.isArray(errors.foreignRelations)
+                        ? errors.foreignRelations
+                        : undefined
+                    }
+                    isLoading={mutation.isPending}
+                  />
+                )}
+              />
+            )}
+          />
         </section>
       </div>
 

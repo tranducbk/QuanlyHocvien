@@ -3,6 +3,7 @@ const Yup = require('yup');
 const authService = require('../services/auth.service');
 const db = require('../models');
 const { success, paginated, validateOrThrow } = require('../utils/response');
+const studentValidation = require('../validations/student.validation');
 
 const login = asyncHandler(async (req, res) => {
   const schema = Yup.object().shape({
@@ -28,30 +29,9 @@ const me = asyncHandler(async (req, res) => {
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
-  const allowedFields = [
-    'fullName', 'email', 'gender', 'birthday', 'hometown', 'ethnicity',
-    'religion', 'currentAddress', 'placeOfBirth', 'phoneNumber', 'cccd',
-    'partyMemberCardNumber', 'unit', 'rank', 'positionGovernment', 'positionParty',
-    'fullPartyMember', 'probationaryPartyMember', 'dateOfEnlistment',
-    'enrollment', 'graduationDate', 'currentCpa4', 'currentCpa10', 'familyMember',
-    'foreignRelations', 'startWork', 'organization', 'classId', 'organizationId',
-    'universityId', 'educationLevelId',
-  ];
-
-  const data = {};
-  for (const key of allowedFields) {
-    if (req.body[key] !== undefined) data[key] = req.body[key];
-  }
-
-  if (req.user.profileId) {
-    const profile = await db.profile.findByPk(req.user.profileId);
-    if (!profile) throw new (require('../utils/apiError').NotFoundError)('Không tìm thấy hồ sơ');
-    await profile.update(data);
-  } else {
-    throw new (require('../utils/apiError').BadRequestError)('Không có hồ sơ để cập nhật');
-  }
-
-  return success(res, null, 'Cập nhật thông tin thành công');
+  await validateOrThrow(studentValidation.profileUpdate, req.body);
+  const profile = await authService.updateProfile(req.userId, req.body);
+  return success(res, profile, 'Cập nhật thông tin thành công');
 });
 
 // ===================== Notifications (chung cho mọi role) =====================
