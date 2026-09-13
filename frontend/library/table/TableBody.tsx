@@ -13,7 +13,7 @@ interface TableBodyProps<TData> {
   /** Văn bản hiển thị khi không có dữ liệu */
   emptyText: string;
   /** Class CSS tùy chỉnh cho hàng */
-  rowClassName: string;
+  rowClassName: string | ((row: Row<TData>) => string);
   /** Render hàng group row, nếu không có trả về row */
   renderGroupRow?: (row: Row<TData>) => ReactNode;
   /** Render sub component khi expand row */
@@ -59,6 +59,11 @@ const TableBody = <TData,>({
             );
           }
 
+          const dynamicRowClass =
+            typeof rowClassName === "function"
+              ? rowClassName(row)
+              : rowClassName;
+
           return (
             <m.tr
               key={row.id}
@@ -66,10 +71,18 @@ const TableBody = <TData,>({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={`group hover:bg-neutral-50/50 dark:hover:bg-neutral-900/60 border-b border-neutral-100/50 dark:border-neutral-800/70 transition-colors ${rowClassName}`}
+              className={`group hover:bg-neutral-50/50 dark:hover:bg-neutral-900/60 border-b border-neutral-100/50 dark:border-neutral-800/70 transition-colors ${dynamicRowClass}`}
             >
               {row.getVisibleCells().map((cell) => {
                 const noWrap = cell.column.columnDef.meta?.noWrap;
+                const align = cell.column.columnDef.meta?.align || "left";
+                const alignClass =
+                  align === "center"
+                    ? "text-center"
+                    : align === "right"
+                    ? "text-right"
+                    : "text-left";
+
                 return (
                   <m.td
                     key={cell.id}
@@ -79,7 +92,7 @@ const TableBody = <TData,>({
                       stiffness: 300,
                       damping: 30,
                     }}
-                    className={`p-2 ${row.depth > 0 ? "first:pl-6" : "first:pl-4"} ${noWrap ? "whitespace-nowrap" : ""}`}
+                    className={`p-2 ${alignClass} ${row.depth > 0 ? "first:pl-6" : "first:pl-4"} ${noWrap ? "whitespace-nowrap" : ""}`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </m.td>

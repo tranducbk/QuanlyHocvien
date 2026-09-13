@@ -1,5 +1,5 @@
 const db = require('../models');
-const { NotFoundError } = require('../utils/apiError');
+const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 
 const Organization = db.organization;
@@ -14,7 +14,26 @@ const totalStudentsLiteral = [
   'totalStudents'
 ];
 
-const create = async (data) => Organization.create(data);
+const ensureUniqueOrganization = async (universityId, organizationName, excludeId) => {
+  if (!organizationName) return;
+  const trimmed = String(organizationName).trim();
+  const existing = await Organization.findOne({
+    where: {
+      universityId,
+      organizationName: { [db.Sequelize.Op.iLike]: trimmed },
+      ...(excludeId ? { id: { [db.Sequelize.Op.ne]: excludeId } } : {}),
+    },
+  });
+  if (existing) {
+    throw new BadRequestError(`Khoa/ngành "${trimmed}" đã tồn tại trong trường này`);
+  }
+};
+
+const create = async (data) => {
+  const trimmedName = String(data.organizationName || '').trim();
+  await ensureUniqueOrganization(data.universityId, trimmedName);
+  return Organization.create({ ...data, organizationName: trimmedName });
+};
 const getAll = async (query) => paginateQuery(Organization, query, {
   filterFields: ['organizationName', 'status', 'universityId'],
   attributes: { include: [totalStudentsLiteral] },
@@ -32,6 +51,10 @@ const getDetail = async (id) => {
 
 const update = async (id, data) => {
   const record = await getDetail(id);
+  if (data.organizationName) {
+    await ensureUniqueOrganization(record.universityId, data.organizationName, id);
+    data.organizationName = String(data.organizationName).trim();
+  }
   return record.update(data);
 };
 

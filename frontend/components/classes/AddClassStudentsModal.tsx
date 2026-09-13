@@ -172,18 +172,21 @@ export default function AddClassStudentsModal({ cls }: Props) {
         header: "Chọn",
         size: 72,
         enableSorting: false,
+        meta: { align: "center" },
         cell: (info) => {
           const user = info.row.original;
           const profile = getUserProfile(user);
           const isAlreadyInClass = profile?.classId === cls.id;
 
           return (
-            <Checkbox
-              checked={selectedUserIds.has(user.id)}
-              disabled={isAlreadyInClass || assignMutation.isPending}
-              onChange={() => toggleStudent(user.id)}
-              size="sm"
-            />
+            <div className="flex justify-center">
+              <Checkbox
+                checked={selectedUserIds.has(user.id)}
+                disabled={isAlreadyInClass || assignMutation.isPending}
+                onChange={() => toggleStudent(user.id)}
+                size="sm"
+              />
+            </div>
           );
         },
       },
@@ -191,6 +194,7 @@ export default function AddClassStudentsModal({ cls }: Props) {
         id: "code",
         header: "Mã học viên",
         accessorKey: "code",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" weight="semibold" color="neutral">
             {textOrDash(getUserProfile(info.row.original)?.code)}
@@ -214,6 +218,7 @@ export default function AddClassStudentsModal({ cls }: Props) {
         id: "unit",
         header: "Đơn vị",
         accessorKey: "unit",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" color="neutral">
             {textOrDash(getUserProfile(info.row.original)?.unit)}
@@ -223,11 +228,34 @@ export default function AddClassStudentsModal({ cls }: Props) {
       {
         id: "class",
         header: "Lớp hiện tại",
-        cell: (info) => (
-          <Typography variant="body" color="neutral">
-            {textOrDash(getUserProfile(info.row.original)?.class?.className)}
-          </Typography>
-        ),
+        meta: { align: "center" },
+        cell: (info) => {
+          const user = info.row.original;
+          const profile = getUserProfile(user);
+          const isAlreadyInClass =
+            profile?.classId === cls.id || profile?.class?.id === cls.id;
+
+          return (
+            <div className="flex justify-center">
+              {isAlreadyInClass ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Đang ở lớp này ({cls.className})
+                </span>
+              ) : profile?.class?.className ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+                  <span className="size-1.5 rounded-full bg-neutral-400" />
+                  {profile.class.className}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800/70">
+                  <span className="size-1.5 rounded-full bg-amber-400" />
+                  Chưa xếp lớp
+                </span>
+              )}
+            </div>
+          );
+        },
       },
     ],
     [assignMutation.isPending, cls.id, selectedUserIds]
@@ -320,6 +348,15 @@ export default function AddClassStudentsModal({ cls }: Props) {
             emptyText="Không tìm thấy học viên phù hợp"
             className="shadow-none"
             actions={actions}
+            rowClassName={(row) => {
+              const profile = getUserProfile(row.original);
+              const isAlreadyInClass =
+                profile?.classId === cls.id || profile?.class?.id === cls.id;
+              if (isAlreadyInClass) {
+                return "bg-emerald-50/75 dark:bg-emerald-950/30 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/50 transition-colors border-l-4 border-l-emerald-500";
+              }
+              return "";
+            }}
           />
         )}
       </div>

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../controllers/organization.controller');
-const { authMiddleware, requireRole, requireAdmin } = require('../middlewares/auth.middleware');
+const { authMiddleware, requireRole } = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -144,12 +144,12 @@ const { authMiddleware, requireRole, requireAdmin } = require('../middlewares/au
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
 
-router.post('/', requireAdmin, controller.create);
+router.post('/', controller.create);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);
-router.put('/:id', requireAdmin, controller.update);
-router.delete('/:id', requireAdmin, controller.delete);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
 
 module.exports = router;
