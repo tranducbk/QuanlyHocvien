@@ -46,5 +46,6 @@ declare module "@tanstack/react-table" {
   interface ColumnMeta {
     /** Áp dụng white-space: nowrap cho cell */
     noWrap?: boolean;
+    align?: "left" | "center" | "right";
   }
 }

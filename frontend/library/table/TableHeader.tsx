@@ -20,14 +20,11 @@ const TableHeader = <TData,>({
   });
 
   const isSorted = header.column.getIsSorted();
-  const meta = header.column.columnDef.meta as
-    | { align?: "left" | "center" | "right" }
-    | undefined;
-
+  const align = header.column.columnDef.meta?.align || "left";
   const alignClasses =
-    meta?.align === "center"
+    align === "center"
       ? "justify-center text-center"
-      : meta?.align === "right"
+      : align === "right"
       ? "justify-end text-right"
       : "justify-start text-left";
 
@@ -35,7 +32,7 @@ const TableHeader = <TData,>({
     <th
       ref={enableDragging ? ref : undefined}
       colSpan={header.colSpan}
-      className={`group relative p-2 py-4 text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest first:pl-4 transition-colors
+      className={`relative group p-2 py-3.5 text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-wider transition-colors
         ${isDragSource ? "bg-primary-50/80 dark:bg-primary-500/10 opacity-60" : "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/60"}
       `}
     >
@@ -47,7 +44,7 @@ const TableHeader = <TData,>({
             header.column.id !== "actions" && (
               <div
                 ref={handleRef}
-                className="absolute left-1 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute left-1 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-300 dark:text-neutral-600 hover:text-neutral-500"
                 title="Kéo thả để đổi thứ tự cột"
               >
                 <div className="w-1 h-3.5 border-l-2 border-dotted border-current" />
@@ -55,10 +52,10 @@ const TableHeader = <TData,>({
             )}
 
           <div
-            className={`flex items-center gap-2 ${
-              meta?.align === "center"
+            className={`flex items-center gap-1.5 ${
+              align === "center"
                 ? "justify-center"
-                : meta?.align === "right"
+                : align === "right"
                 ? "justify-end"
                 : "justify-start"
             } ${
