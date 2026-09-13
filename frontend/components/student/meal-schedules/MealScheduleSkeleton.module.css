@@ -1,0 +1,73 @@
+.container {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summaryCard {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid rgb(243 244 246);
+  border-radius: 1rem;
+  background: rgb(249 250 251 / 70%);
+}
+
+.schedule {
+  overflow: hidden;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 1rem;
+  background: rgb(255 255 255);
+}
+
+.scheduleHeading {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid rgb(229 231 235);
+}
+
+.table {
+  min-width: 680px;
+  overflow: hidden;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 8rem repeat(3, minmax(10.5rem, 1fr));
+  align-items: center;
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid rgb(243 244 246);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 1023px) {
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule {
+    overflow-x: auto;
+  }
+}
+
+:global(.dark) .summaryCard,
+:global(.dark) .schedule {
+  border-color: rgb(55 65 81);
+  background: rgb(17 24 39);
+}
+
+:global(.dark) .scheduleHeading,
+:global(.dark) .row {
+  border-color: rgb(55 65 81);
+}

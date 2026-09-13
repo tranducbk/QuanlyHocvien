@@ -3,6 +3,7 @@ import { ENDPOINTS } from "@/constants/endpoints";
 import {
   CreateCutRiceRequest,
   CutRice,
+  CutRiceDailySummary,
   CutRiceRequest,
   CutRiceRequestQueryRequest,
   CutRiceQueryRequest,
@@ -14,7 +15,7 @@ import {
 export const cutRiceService = {
   getCutRiceList: async (
     params?: CutRiceQueryRequest
-  ): Promise<PaginatedResponse<CutRice>> => {
+  ): Promise<PaginatedResponse<CutRice, CutRiceDailySummary>> => {
     return apiClient.get(ENDPOINTS.CUT_RICE.BASE, { params });
   },
 
@@ -69,7 +70,7 @@ export const cutRiceService = {
     semesterId?: string,
     weekStartDate?: string
   ) => {
-    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE(userId), null, {
+    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE(userId), {}, {
       params: {
         ...(semesterId ? { semesterId } : {}),
         ...(weekStartDate ? { weekStartDate } : {}),
@@ -78,7 +79,7 @@ export const cutRiceService = {
   },
 
   generateAll: async () => {
-    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE_ALL);
+    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE_ALL, {});
   },
 
   importExcel: async (file: File): Promise<ApiResponse<BatchMutationResult>> => {

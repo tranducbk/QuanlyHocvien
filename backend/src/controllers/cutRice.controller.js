@@ -11,7 +11,7 @@ const create = asyncHandler(async (req, res) => {
 
 const getAll = asyncHandler(async (req, res) => {
   const result = await service.getAll(req.query, req.user);
-  return paginated(res, result.rows, result.pagination);
+  return paginated(res, result.rows, result.pagination, result.summary);
 });
 
 const getDetail = asyncHandler(async (req, res) => {

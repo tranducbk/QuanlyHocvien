@@ -5,11 +5,11 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import { DEFAULT_PAGE } from "@/constants/constants";
 
-export interface UseTableQueryOptions<TData, TParams> {
+export interface UseTableQueryOptions<TData, TParams, TSummary = unknown> {
   /** Khóa truy vấn cho React Query (ví dụ: [QUERY_KEYS.CLASSES]) */
   queryKey: unknown[];
   /** Hàm gọi API để lấy dữ liệu, nhận vào các tham số phân trang, lọc, sắp xếp */
-  fetchData: (params: TParams) => Promise<PaginatedResponse<TData>>;
+  fetchData: (params: TParams) => Promise<PaginatedResponse<TData, TSummary>>;
   /** Trang bắt đầu (mặc định: 0) */
   initialPageIndex?: number;
   /** Số lượng bản ghi trên mỗi trang (mặc định: 10) */
@@ -26,13 +26,14 @@ export interface UseTableQueryOptions<TData, TParams> {
 export default function useTableQuery<
   TData,
   TParams extends object = Record<string, unknown>,
+  TSummary = unknown,
 >({
   queryKey,
   fetchData,
   initialPageIndex = DEFAULT_PAGE.PAGE_INDEX,
   initialPageSize = DEFAULT_PAGE.PAGE_SIZE,
   enabled = true,
-}: UseTableQueryOptions<TData, TParams>) {
+}: UseTableQueryOptions<TData, TParams, TSummary>) {
   const [pagination, setPagination] = useState({
     pageIndex: initialPageIndex,
     pageSize: initialPageSize,

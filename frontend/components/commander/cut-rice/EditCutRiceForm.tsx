@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import Textarea from "@/library/Textarea";
-import Toggle from "@/library/Toggle";
 import Typography from "@/library/Typography";
 import useAppMutation from "@/hooks/useAppMutation";
 import { QUERY_KEYS } from "@/constants/query-keys";
@@ -16,40 +15,13 @@ import {
   WeeklyCutRice,
 } from "@/types/cut-rice";
 import { useModalStore } from "@/store/useModalStore";
-
-const mealDays: MealDayKey[] = [
-  "Thứ 2",
-  "Thứ 3",
-  "Thứ 4",
-  "Thứ 5",
-  "Thứ 6",
-  "Thứ 7",
-  "Chủ nhật",
-];
-
-const mealSlots: Array<{ key: MealSlotKey; label: string }> = [
-  { key: "morning", label: "Sáng" },
-  { key: "noon", label: "Trưa" },
-  { key: "evening", label: "Tối" },
-];
+import MealWeekGrid from "@/components/meal-schedules/MealWeekGrid";
+import { normalizeMealWeek } from "@/utils/meal-schedule";
 
 const getUser = (record: CutRice) => record.User || record.user;
 const getProfile = (record: CutRice) => {
   const user = getUser(record);
   return user?.Profile || user?.profile;
-};
-
-const normalizeWeekly = (weekly?: WeeklyCutRice | null): WeeklyCutRice => {
-  const source = weekly || {};
-  return mealDays.reduce<WeeklyCutRice>((acc, day) => {
-    const slot = source[day] || source[day.toLowerCase()] || {};
-    acc[day] = {
-      morning: Boolean(slot.morning),
-      noon: Boolean(slot.noon),
-      evening: Boolean(slot.evening),
-    };
-    return acc;
-  }, {});
 };
 
 interface Props {
@@ -59,7 +31,7 @@ interface Props {
 export default function EditCutRiceForm({ record }: Props) {
   const { closeModal } = useModalStore();
   const [weekly, setWeekly] = useState<WeeklyCutRice>(() =>
-    normalizeWeekly(record.weekly)
+    normalizeMealWeek(record.weekly)
   );
   const [notes, setNotes] = useState(record.notes || "");
 
@@ -109,49 +81,12 @@ export default function EditCutRiceForm({ record }: Props) {
         </Typography>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
-        <table className="w-full min-w-[560px] text-left">
-          <thead className="bg-neutral-50 dark:bg-neutral-900">
-            <tr>
-              <th className="px-4 py-3 text-xs font-bold uppercase text-neutral-500">
-                Ngày
-              </th>
-              {mealSlots.map((meal) => (
-                <th
-                  key={meal.key}
-                  className="px-4 py-3 text-center text-xs font-bold uppercase text-neutral-500"
-                >
-                  {meal.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {mealDays.map((day) => (
-              <tr
-                key={day}
-                className="border-t border-neutral-100 dark:border-neutral-800"
-              >
-                <td className="px-4 py-3">
-                  <Typography variant="body" weight="semibold" color="neutral">
-                    {day}
-                  </Typography>
-                </td>
-                {mealSlots.map((meal) => (
-                  <td key={meal.key} className="px-4 py-3 text-center">
-                    <Toggle
-                      checked={Boolean(weekly[day]?.[meal.key])}
-                      onChange={(checked) => handleToggle(day, meal.key, checked)}
-                      disabled={updateMutation.isPending}
-                      size="sm"
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <MealWeekGrid
+        weekly={weekly}
+        editable
+        disabled={updateMutation.isPending}
+        onToggle={handleToggle}
+      />
 
       <Textarea
         label="Ghi chú"

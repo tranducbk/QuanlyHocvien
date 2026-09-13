@@ -6,9 +6,14 @@ import { useSortable } from "@dnd-kit/react/sortable";
 interface HeaderProps<TData> {
   header: Header<TData, unknown>;
   index: number;
+  enableDragging?: boolean;
 }
 
-const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
+const TableHeader = <TData,>({
+  header,
+  index,
+  enableDragging = true,
+}: HeaderProps<TData>) => {
   const { ref, handleRef, isDragSource } = useSortable({
     id: header.column.id,
     index,
@@ -25,7 +30,7 @@ const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
 
   return (
     <th
-      ref={ref}
+      ref={enableDragging ? ref : undefined}
       colSpan={header.colSpan}
       className={`relative group p-2 py-3.5 text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-wider transition-colors
         ${isDragSource ? "bg-primary-50/80 dark:bg-primary-500/10 opacity-60" : "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/60"}
@@ -33,8 +38,8 @@ const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
     >
       {header.isPlaceholder ? null : (
         <div className={`flex items-center gap-1.5 w-full ${alignClasses}`}>
-          {/* Vùng nắm để kéo thả - định vị tuyệt đối bên trái để không làm lệch tâm cột */}
-          {header.column.id !== "stt" &&
+          {enableDragging &&
+            header.column.id !== "stt" &&
             header.column.id !== "select" &&
             header.column.id !== "actions" && (
               <div
@@ -46,9 +51,14 @@ const TableHeader = <TData,>({ header, index }: HeaderProps<TData>) => {
               </div>
             )}
 
-          {/* Vùng bấm để sắp xếp & Tiêu đề - luôn ở đúng tâm */}
           <div
             className={`flex items-center gap-1.5 ${
+              align === "center"
+                ? "justify-center"
+                : align === "right"
+                ? "justify-end"
+                : "justify-start"
+            } ${
               header.column.getCanSort()
                 ? "cursor-pointer select-none group/sort hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                 : ""
