@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import Badge from "@/library/Badge";
 import Typography from "@/library/Typography";
 import type { CutRiceDailySummary, MealDayKey } from "@/types/cut-rice";
 import { MEAL_DAYS } from "@/utils/meal-schedule";
@@ -68,13 +69,13 @@ export default function DailyMealSummary({
           <div className="size-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
             <HiOutlineChartBar className="size-5" aria-hidden="true" />
           </div>
-          <div>
+          <div className="flex flex-wrap items-center gap-2">
             <Typography variant="body" weight="bold" color="neutral">
               Tổng hợp cắt cơm theo ngày
             </Typography>
-            <Typography variant="caption" color="gray">
-              Tổng hợp từ {totalSchedulesFormatted} lịch theo bộ lọc hiện tại
-            </Typography>
+            <Badge variant="primary">
+              {totalSchedulesFormatted} học viên
+            </Badge>
           </div>
         </div>
 
