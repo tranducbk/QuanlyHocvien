@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   HiOutlineCalendar,
-  HiOutlineClock,
   HiOutlineMoon,
   HiOutlinePaperAirplane,
   HiOutlineSun,
@@ -78,7 +77,7 @@ const getRequestStatus = (request: CutRiceRequest) => {
 
 const mealIcons = {
   morning: HiOutlineSun,
-  noon: HiOutlineClock,
+  noon: HiOutlineSun,
   evening: HiOutlineMoon,
 };
 
