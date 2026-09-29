@@ -98,6 +98,11 @@ export const ENDPOINTS = {
     BASE: "/api/semester-results",
     DETAIL: (id: string | number) => `/api/semester-results/${id}`,
   },
+  YEARLY_RESULTS: {
+    BASE: "/api/yearly-results",
+    DETAIL: (id: string | number) => `/api/yearly-results/${id}`,
+    EXPORT: "/api/yearly-results/export",
+  },
   ACHIEVEMENTS: {
     BASE: "/api/achievements",
     IMPORT: "/api/achievements/import",

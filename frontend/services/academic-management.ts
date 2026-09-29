@@ -1,6 +1,11 @@
 import apiClient from "./axios-client";
 import { ENDPOINTS } from "@/constants/endpoints";
-import { SemesterResult, SubjectResult } from "@/types/student-academic";
+import {
+  SemesterResult,
+  SubjectResult,
+  YearlyResult,
+  YearlyResultQueryRequest,
+} from "@/types/student-academic";
 
 export interface SemesterResultQueryRequest extends QueryRequest {
   semester?: string;
@@ -17,6 +22,27 @@ export interface SemesterResultQueryRequest extends QueryRequest {
 }
 
 export const academicManagementService = {
+  getYearlyResults: async (
+    params?: YearlyResultQueryRequest
+  ): Promise<PaginatedResponse<YearlyResult>> => {
+    return apiClient.get(ENDPOINTS.YEARLY_RESULTS.BASE, { params });
+  },
+
+  getYearlyResultDetail: async (
+    id: string
+  ): Promise<ApiResponse<YearlyResult>> => {
+    return apiClient.get(ENDPOINTS.YEARLY_RESULTS.DETAIL(id));
+  },
+
+  exportYearlyResults: async (
+    params?: YearlyResultQueryRequest
+  ): Promise<Blob> => {
+    return apiClient.get(ENDPOINTS.YEARLY_RESULTS.EXPORT, {
+      params,
+      responseType: "blob",
+    });
+  },
+
   // Semester Results
   getSemesterResults: async (
     params?: SemesterResultQueryRequest
@@ -53,7 +79,7 @@ export const academicManagementService = {
     return apiClient.delete(ENDPOINTS.SUBJECT_RESULTS.DETAIL(id));
   },
 
-  importSubjectResults: async (semesterResultId: string, file: File): Promise<ApiResponse<any>> => {
+  importSubjectResults: async (semesterResultId: string, file: File): Promise<ApiResponse<SubjectResult[]>> => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("semesterResultId", semesterResultId);

@@ -4,19 +4,13 @@ const { NotFoundError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 
 const YearlyResult = db.yearlyResult;
-const Student = db.profile;
 const University = db.university;
 const Class = db.class;
 const SemesterResult = db.semesterResult;
 
-const create = async (data) => YearlyResult.create(data);
-const getAll = async (query) => {
+const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
   const where = {};
-  const studentWhere = {};
-  const include = [
-    { model: User, include: [{ model: db.profile, include: [{ model: University }, { model: Class }] }] },
-    { model: SemesterResult },
-  ];
+  const profileWhere = {};
 
   if (query.schoolYear) where.schoolYear = query.schoolYear;
   if (query.userId) where.userId = query.userId;
@@ -37,51 +31,74 @@ const getAll = async (query) => {
   }
 
   if (query.fullName) {
-    studentWhere.fullName = { [db.Sequelize.Op.like]: `%${query.fullName}%` };
+    profileWhere.fullName = { [db.Sequelize.Op.iLike]: `%${query.fullName}%` };
   }
 
   if (query.unit) {
-    studentWhere.unit = query.unit;
+    profileWhere.unit = { [db.Sequelize.Op.iLike]: `%${query.unit}%` };
   }
 
   if (query.isPartyMember === 'true') {
-    studentWhere[db.Sequelize.Op.or] = [
+    profileWhere[db.Sequelize.Op.or] = [
       { probationaryPartyMember: { [db.Sequelize.Op.ne]: null } },
       { fullPartyMember: { [db.Sequelize.Op.ne]: null } },
     ];
   } else if (query.isPartyMember === 'false') {
-    studentWhere.probationaryPartyMember = null;
-    studentWhere.fullPartyMember = null;
+    profileWhere.probationaryPartyMember = null;
+    profileWhere.fullPartyMember = null;
   }
 
-  if (Object.keys(studentWhere).length > 0) {
-    include[0].where = studentWhere;
-    include[0].required = true;
+  const profileInclude = {
+    model: db.profile,
+    as: 'Profile',
+    attributes: ['id', 'code', 'fullName', 'unit', 'universityId', 'classId'],
+    include: [
+      { model: University, attributes: ['id', 'universityName'] },
+      { model: Class, attributes: ['id', 'className'] },
+    ],
+    required: true,
+  };
+  if (Object.keys(profileWhere).length > 0) {
+    profileInclude.where = profileWhere;
   }
 
+  const include = [{
+    model: User,
+    attributes: ['id'],
+    where: { role: 'STUDENT' },
+    include: [profileInclude],
+    required: true,
+  }];
+
+  if (includeSemesters) {
+    include.push({
+      model: SemesterResult,
+      attributes: [
+        'id', 'userId', 'yearlyResultId', 'semester', 'schoolYear',
+        'totalCredits', 'averageGrade4', 'averageGrade10',
+        'cumulativeCredits', 'cumulativeGrade4', 'cumulativeGrade10',
+        'debtCredits', 'failedSubjects',
+      ],
+      separate: true,
+      order: [['semester', 'ASC']],
+    });
+  }
+
+  return { where, include };
+};
+
+const getAll = async (query) => {
+  const { where, include } = buildQueryParts(query);
   return paginateQuery(YearlyResult, query, { where, include });
 };
 
 const getDetail = async (id) => {
+  const { include } = buildQueryParts({}, { includeSemesters: true });
   const record = await YearlyResult.findByPk(id, {
-    include: [
-      { model: User },
-      { model: SemesterResult },
-    ],
+    include,
   });
   if (!record) throw new NotFoundError('Không tìm thấy kết quả năm học');
   return record;
-};
-
-const update = async (id, data) => {
-  const record = await getDetail(id);
-  return record.update(data);
-};
-
-const deleteRecord = async (id) => {
-  const record = await getDetail(id);
-  await record.destroy();
-  return { deleted: true };
 };
 
 // ===================== Export Excel =====================
@@ -119,42 +136,7 @@ const resolveField = (obj, path) => {
 };
 
 const exportYearlyResults = async (query) => {
-  const where = {};
-  const studentWhere = {};
-  const include = [{ model: User, include: [{ model: db.profile, include: [{ model: University }] }] }];
-
-  if (query.schoolYear) where.schoolYear = query.schoolYear;
-  if (query.userId) where.userId = query.userId;
-
-  if (query.gpaFrom !== undefined || query.gpaTo !== undefined) {
-    where.averageGrade4 = {};
-    if (query.gpaFrom !== undefined) where.averageGrade4[db.Sequelize.Op.gte] = parseFloat(query.gpaFrom);
-    if (query.gpaTo !== undefined) where.averageGrade4[db.Sequelize.Op.lte] = parseFloat(query.gpaTo);
-  }
-
-  if (query.cpaFrom !== undefined || query.cpaTo !== undefined) {
-    where.cumulativeGrade4 = {};
-    if (query.cpaFrom !== undefined) where.cumulativeGrade4[db.Sequelize.Op.gte] = parseFloat(query.cpaFrom);
-    if (query.cpaTo !== undefined) where.cumulativeGrade4[db.Sequelize.Op.lte] = parseFloat(query.cpaTo);
-  }
-
-  if (query.unit) studentWhere.unit = query.unit;
-  if (query.fullName) studentWhere.fullName = { [db.Sequelize.Op.like]: `%${query.fullName}%` };
-
-  if (query.isPartyMember === 'true') {
-    studentWhere[db.Sequelize.Op.or] = [
-      { probationaryPartyMember: { [db.Sequelize.Op.ne]: null } },
-      { fullPartyMember: { [db.Sequelize.Op.ne]: null } },
-    ];
-  } else if (query.isPartyMember === 'false') {
-    studentWhere.probationaryPartyMember = null;
-    studentWhere.fullPartyMember = null;
-  }
-
-  if (Object.keys(studentWhere).length > 0) {
-    include[0].where = studentWhere;
-    include[0].required = true;
-  }
+  const { where, include } = buildQueryParts(query);
 
   const sortBy = query.sortBy || 'schoolYear';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
@@ -173,7 +155,12 @@ const exportYearlyResults = async (query) => {
   for (const r of results) {
     const plain = r.get({ plain: true });
     if (plain.User) {
-      plain.student = plain.User;
+      const profile = plain.User.Profile || {};
+      plain.student = {
+        ...profile,
+        university: profile.University,
+        class: profile.Class,
+      };
       delete plain.User;
     }
     worksheet.addRow(fields.map(f => resolveField(plain, f)));
@@ -186,4 +173,4 @@ const exportYearlyResults = async (query) => {
   return workbook.xlsx.writeBuffer();
 };
 
-module.exports = { create, getAll, getDetail, update, delete: deleteRecord, exportYearlyResults };
+module.exports = { getAll, getDetail, exportYearlyResults };

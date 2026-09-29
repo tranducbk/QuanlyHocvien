@@ -18,7 +18,7 @@ Tất cả vai trò.
 
 ### Trạng thái
 
-**Có trong source** cho `ADMIN`, `COMMANDER`, `STUDENT`; chưa có `system_type`.
+**Có trong source** cho `ADMIN`, `COMMANDER`, `STUDENT`.
 
 ## F02 - Quản trị tài khoản
 
@@ -46,13 +46,13 @@ Chỉ huy quản lý hồ sơ; Học viên xem hồ sơ của chính mình.
 
 ### Trạng thái
 
-**Cần thay đổi**: source có `Profile` chung; chưa tách `military_profiles`, `civilian_profiles` và enrollment.
+**Có trong source** với `Profile` dùng chung.
 
-## F04 - Cơ sở và lớp hệ ngoài
+## F04 - Cơ sở và lớp
 
 ### Người dùng
 
-Chỉ huy hệ ngoài.
+Chỉ huy.
 
 ### Mục tiêu
 
@@ -60,13 +60,13 @@ Quản lý trường, tổ chức/chuyên ngành, trình độ, lớp và xếp 
 
 ### Trạng thái
 
-**Có trong source**, cần bổ sung scope hệ.
+**Có trong source**.
 
-## F05 - Kết quả học tập hệ ngoài
+## F05 - Kết quả học tập
 
 ### Người dùng
 
-Chỉ huy hệ ngoài, Học viên hệ ngoài.
+Chỉ huy, Học viên.
 
 ### Mục tiêu
 
@@ -88,7 +88,7 @@ Quản lý lịch học, tự động/tùy chỉnh cắt cơm và yêu cầu li�
 
 ### Trạng thái
 
-**Có trong source**, cần kiểm thử và bổ sung scope hệ khi mở rộng.
+**Có trong source**, cần kiểm thử các luồng hiện hành.
 
 ## F07 - Học phí
 
@@ -130,7 +130,7 @@ Quản lý năm học và học kỳ phục vụ lịch/điểm.
 
 ### Trạng thái
 
-**Có trong source**, cần phân phạm vi theo hệ.
+**Có trong source**.
 
 ## F10 - Thông báo
 
@@ -158,9 +158,9 @@ Xem thống kê và export dữ liệu được phép.
 
 ### Trạng thái
 
-**Có trong source**, cần siết dữ liệu Admin và cách ly hệ.
+**Có trong source**, cần siết dữ liệu Admin.
 
-## F12 - Nền tảng ba hệ đào tạo
+## F12 - Phân hệ đào tạo
 
 ### Người dùng
 
@@ -168,13 +168,13 @@ Toàn hệ thống.
 
 ### Mục tiêu
 
-Mỗi Học viên/Chỉ huy thuộc đúng một hệ; dữ liệu không rò rỉ chéo hệ.
+Không triển khai phân tách dữ liệu theo hệ đào tạo.
 
 ### Trạng thái
 
-**Chưa thực hiện**.
+**Đã hủy khỏi phạm vi sản phẩm**.
 
-## F13 - Môn học riêng theo hệ
+## F13 - Danh mục môn học
 
 ### Người dùng
 
@@ -182,7 +182,7 @@ Chỉ huy.
 
 ### Mục tiêu
 
-Quản lý danh mục môn riêng cho hệ ngoài, quân sự và dân sự.
+Quản lý danh mục môn học dùng chung.
 
 ### Trạng thái
 
