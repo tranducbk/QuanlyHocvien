@@ -18,6 +18,7 @@ const PROFILE_FIELDS = [
   'foreignRelations', 'startWork', 'organization', 'classId', 'organizationId',
   'universityId', 'educationLevelId', 'commanderId',
 ];
+const EXTERNAL_TRAINING_FIELDS = ['classId', 'organizationId', 'universityId', 'educationLevelId'];
 
 const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
@@ -94,7 +95,7 @@ const _checkCommanderAssignmentPermission = (requester, data) => {
   }
 };
 
-const _resolveCommanderId = async (value) => {
+const _resolveCommanderId = async (value, systemType) => {
   const commanderRef = toText(value);
   if (!commanderRef) return null;
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(commanderRef);
@@ -102,6 +103,7 @@ const _resolveCommanderId = async (value) => {
   const byUser = await User.findOne({
     where: {
       role: 'COMMANDER',
+      systemType,
       [db.Sequelize.Op.or]: [
         ...(isUuid ? [{ id: commanderRef }] : []),
         { username: commanderRef },
@@ -112,7 +114,7 @@ const _resolveCommanderId = async (value) => {
 
   const byProfile = await Profile.findOne({
     where: { code: commanderRef },
-    include: [{ model: User, where: { role: 'COMMANDER' }, required: true }],
+    include: [{ model: User, where: { role: 'COMMANDER', systemType }, required: true }],
   });
   if (byProfile?.User) return byProfile.User.id;
 
@@ -121,7 +123,7 @@ const _resolveCommanderId = async (value) => {
 
 const _assertCommanderCanManageUserRecord = (requester, record) => {
   if (requester?.role !== 'COMMANDER') return;
-  if (record.role !== 'STUDENT' || record.Profile?.commanderId !== requester.id) {
+  if (record.role !== 'STUDENT' || record.systemType !== requester.systemType || record.Profile?.commanderId !== requester.id) {
     throw new ForbiddenError('Chi huy chi duoc quan ly hoc vien minh phu trach');
   }
 };
@@ -129,7 +131,7 @@ const _assertCommanderCanManageUserRecord = (requester, record) => {
 const _createProfile = async (data, requester) => {
   _checkCommanderAssignmentPermission(requester, data);
   if (data.commanderId !== undefined) {
-    data.commanderId = await _resolveCommanderId(data.commanderId);
+    data.commanderId = await _resolveCommanderId(data.commanderId, data.systemType);
   }
   if (data.role === 'ADMIN' && requester && requester.role !== 'ADMIN') {
     throw new ForbiddenError('Chỉ admin mới có thể tạo tài khoản admin');
@@ -149,6 +151,7 @@ const _createProfile = async (data, requester) => {
 
     const profileData = { code, fullName: data.fullName, email: data.email };
     for (const field of PROFILE_FIELDS) {
+      if (data.systemType === 'MILITARY' && EXTERNAL_TRAINING_FIELDS.includes(field)) continue;
       if (data[field] !== undefined && field !== 'code' && field !== 'fullName' && field !== 'email') {
         profileData[field] = data[field];
       }
@@ -166,6 +169,7 @@ const _createProfile = async (data, requester) => {
 };
 
 const create = async (data, requester) => {
+  data.systemType = data.role === 'ADMIN' ? null : (data.systemType || 'EXTERNAL');
   await _createProfile(data, requester);
 
   if (data.password) {
@@ -189,6 +193,7 @@ const getAll = async (query, requester) => {
   if (query.fullName) profileWhere.fullName = { [db.Sequelize.Op.iLike]: `%${query.fullName}%` };
   if (requester?.role === 'COMMANDER') {
     where.role = 'STUDENT';
+    where.systemType = requester.systemType;
     profileWhere.commanderId = requester.id;
   }
 
@@ -342,13 +347,18 @@ const getDetail = async (id, requester) => {
 
 const update = async (id, data, requester) => {
   const record = await getDetail(id, requester);
+  if (record.systemType === 'MILITARY' && EXTERNAL_TRAINING_FIELDS.some(field => data[field] !== undefined)) {
+    throw new BadRequestError('Học viên quân sự không sử dụng dữ liệu cơ sở đào tạo hoặc lớp hệ ngoài');
+  }
   _checkRoleHierarchy(requester, record.role);
   _checkCommanderAssignmentPermission(requester, data);
   if (data.commanderId !== undefined) {
-    data.commanderId = await _resolveCommanderId(data.commanderId);
+    data.commanderId = await _resolveCommanderId(data.commanderId, record.systemType);
   }
   if (data.role) {
     _checkRoleHierarchy(requester, data.role);
+    if (data.role === 'ADMIN') data.systemType = null;
+    else if (record.role === 'ADMIN') data.systemType = 'EXTERNAL';
   }
   if (data.password) {
     data.password = await bcrypt.hash(data.password, 10);
@@ -379,6 +389,7 @@ const deleteRecord = async (id, requester) => {
 const createBatchUsers = async (users, requester) => {
   const results = [];
   for (const u of users) {
+    u.systemType = u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL');
     const exist = await User.findOne({ where: { username: u.username } });
     if (exist) {
       results.push({ username: u.username, status: 'SKIPPED', message: 'Tên đăng nhập đã tồn tại' });
@@ -393,6 +404,7 @@ const createBatchUsers = async (users, requester) => {
         username: u.username,
         password: hashedPassword,
         role: u.role || 'STUDENT',
+        systemType: u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL'),
         isAdmin: u.role === 'ADMIN',
         profileId: u.profileId || null,
       });
@@ -456,6 +468,7 @@ const uploadAvatarFile = async (userId, file) => {
 const createBatchUsersProfiles = async (users, requester) => {
   const results = [];
   for (const u of users) {
+    u.systemType = u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL');
     const exist = await User.findOne({ where: { username: u.username } });
     if (exist) {
       results.push({ username: u.username, status: 'SKIPPED', message: 'Tên đăng nhập đã tồn tại' });
@@ -468,6 +481,7 @@ const createBatchUsersProfiles = async (users, requester) => {
         username: u.username,
         password: hashedPassword,
         role: u.role || 'STUDENT',
+        systemType: u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL'),
         isAdmin: u.role === 'ADMIN',
         profileId: u.profileId || null,
       });

@@ -58,6 +58,7 @@ const CreateSingleUser: React.FC = () => {
       fullName: "",
       password: "",
       role: "STUDENT",
+      systemType: "EXTERNAL",
       commanderId: "",
     },
   });
@@ -66,6 +67,7 @@ const CreateSingleUser: React.FC = () => {
   const onSubmit = (data: CreateUserFormValues) => {
     createMutation.mutate({
       ...data,
+      systemType: data.role === "ADMIN" ? null : (data.systemType || "EXTERNAL"),
       commanderId: data.role === "STUDENT" && data.commanderId ? data.commanderId : null,
     });
   };
@@ -111,6 +113,19 @@ const CreateSingleUser: React.FC = () => {
             />
           )}
         />
+
+        {selectedRole !== "ADMIN" && <Controller
+          name="systemType"
+          control={control}
+          render={({ field }) => <Select
+            label="Hệ đào tạo"
+            options={[{ value: "EXTERNAL", label: "Hệ ngoài" }, { value: "MILITARY", label: "Hệ quân sự" }]}
+            value={field.value || "EXTERNAL"}
+            onChange={field.onChange}
+            isLoading={createMutation.isPending}
+            required
+          />}
+        />}
 
         <Input
           label="Mật khẩu"

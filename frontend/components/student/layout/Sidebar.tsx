@@ -6,9 +6,17 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { STUDENT_MENU, MenuItem } from "@/constants/student-menu";
 import Typography from "@/library/Typography";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const systemType = useAuthStore((state) => state.user?.systemType);
+  const items = systemType === "MILITARY"
+    ? [
+      ...STUDENT_MENU.filter((item) => !["/student/meal-schedules", "/student/tuition", "/student/time-table", "/student/results", "/student/achievements"].includes(item.path)),
+      { title: "Lịch học theo lớp", path: "/student/military/time-table", icon: STUDENT_MENU[3].icon },
+    ]
+    : STUDENT_MENU;
 
   return (
     <aside className="relative flex flex-col w-70 bg-white/75 dark:bg-neutral-950 backdrop-blur-xl border-r border-neutral-100/60 dark:border-neutral-800 shadow-sm dark:shadow-none z-50 overflow-hidden">
@@ -35,7 +43,7 @@ const Sidebar: React.FC = () => {
       {/* Danh sách Menu */}
       <nav className="relative flex-1 overflow-y-auto py-4 px-4 no-scrollbar">
         <ul className="space-y-1.5">
-          {STUDENT_MENU.map((item: MenuItem) => {
+          {items.map((item: MenuItem) => {
             const isActive =
               pathname === item.path ||
               (item.path !== "/student" && pathname.startsWith(item.path));

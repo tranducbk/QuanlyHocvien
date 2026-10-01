@@ -121,7 +121,7 @@ const getStudents = async (classId, query) => {
 
   return paginateQuery(Profile, query, {
     where,
-    include: [{ model: User }, { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }],
+    include: [{ model: User, where: { systemType: 'EXTERNAL', role: 'STUDENT' }, required: true }, { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }],
   });
 };
 
@@ -146,6 +146,7 @@ const getStudentProfilesByUserIds = async (userIds = []) => {
     where: {
       id: { [Op.in]: uniqueIds },
       role: 'STUDENT',
+      systemType: 'EXTERNAL',
     },
     include: [{ model: Profile }],
   });

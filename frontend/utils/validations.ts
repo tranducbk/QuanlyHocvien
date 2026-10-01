@@ -54,6 +54,7 @@ export const createUserSchema = z.object({
   fullName: z.string().min(1, "Họ và tên không được để trống"),
   password: z.string().min(6, "Mật khẩu phải ít nhất 6 ký tự"),
   role: z.enum(["STUDENT", "COMMANDER", "ADMIN"]),
+  systemType: z.enum(["EXTERNAL", "MILITARY"]).nullable().optional(),
   commanderId: z.string().nullable().or(z.literal("")).optional(),
 });
 

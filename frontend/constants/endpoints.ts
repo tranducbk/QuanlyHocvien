@@ -48,6 +48,18 @@ export const ENDPOINTS = {
     ASSIGN_STUDENTS_BATCH: (id: string | number) =>
       `/api/classes/${id}/students/batch`,
   },
+  MILITARY_CLASSES: {
+    BASE: "/api/military/classes",
+    STUDENTS: (id: string) => `/api/military/classes/${id}/students`,
+    STUDENT_DETAIL: (id: string, userId: string) => `/api/military/classes/${id}/students/${userId}`,
+    ASSIGN_STUDENTS_BY_CODE: (id: string) => `/api/military/classes/${id}/students/by-code`,
+  },
+  MILITARY_ACADEMIC: {
+    SEMESTERS: "/api/military/academic/semesters",
+    SUBJECTS: (classId: string) => `/api/military/academic/classes/${classId}/subjects`,
+    TIME_TABLE: (classId: string) => `/api/military/academic/classes/${classId}/time-table`,
+    MY_TIME_TABLE: "/api/military/academic/me/time-table",
+  },
   SEMESTERS: {
     BASE: "/api/semesters",
     SCHOOL_YEARS: "/api/semesters/school-years",

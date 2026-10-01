@@ -30,7 +30,7 @@ const applyCommanderScope = (where, requester) => {
 };
 
 const assertCommanderCanAccessProfile = (profile, requester) => {
-  if (isCommander(requester) && profile?.commanderId !== requester.id) {
+  if (isCommander(requester) && (profile?.commanderId !== requester.id || profile?.User?.systemType !== requester.systemType)) {
     throw new NotFoundError('Khong tim thay hoc vien');
   }
 };
@@ -154,7 +154,12 @@ const getAll = async (query, requester) => {
 
   const opts = {
     where,
-    include: [{ model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }, { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] }],
+    include: [
+      ...(isCommander(requester) ? [{ model: User, attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true }] : []),
+      { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel },
+      ...(requester?.systemType === 'MILITARY' ? [{ model: db.militaryClass }] : []),
+      { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
+    ],
   };
 
   if (query.schoolYear) {
@@ -170,7 +175,12 @@ const getAll = async (query, requester) => {
 
 const getDetail = async (id, requester) => {
   const record = await Student.findByPk(id, {
-    include: [{ model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }, { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] }],
+    include: [
+      { model: User, ...(isCommander(requester) ? { attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true } : {}) },
+      { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel },
+      ...(requester?.systemType === 'MILITARY' ? [{ model: db.militaryClass }] : []),
+      { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
+    ],
   });
   if (!record) throw new NotFoundError('Không tìm thấy học viên');
   assertCommanderCanAccessProfile(record, requester);
@@ -178,6 +188,9 @@ const getDetail = async (id, requester) => {
 };
 
 const update = async (id, data, requester) => {
+  if (requester?.systemType === 'MILITARY' && ['classId', 'organizationId', 'universityId', 'educationLevelId'].some(field => data[field] !== undefined)) {
+    throw new BadRequestError('Hồ sơ quân sự không sử dụng dữ liệu cơ sở đào tạo hoặc lớp hệ ngoài');
+  }
   if (isCommander(requester) && data.commanderId !== undefined) {
     throw new ForbiddenError('Chi admin moi duoc gan chi huy quan ly hoc vien');
   }
@@ -195,7 +208,10 @@ const deleteRecord = async (id, requester) => {
 
 const exportStudents = async (query, requester) => {
   const where = {};
-  const include = [{ model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }, { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] }];
+  const include = [
+    ...(isCommander(requester) ? [{ model: User, attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true }] : []),
+    { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }, { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
+  ];
 
   const filterFields = ['code', 'fullName', 'gender', 'enrollment', 'unit', 'rank', 'classId', 'organizationId', 'universityId', 'educationLevelId', 'commanderId'];
   for (const field of filterFields) {

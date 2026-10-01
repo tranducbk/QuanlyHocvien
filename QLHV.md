@@ -1,6 +1,6 @@
 # Đặc tả mở rộng Hệ thống Quản lý Học viên
 
-> **Trạng thái:** Kế hoạch phân tách ba hệ đào tạo trong tài liệu này đã được hủy theo quyết định ngày 29/09/2026. Nội dung bên dưới chỉ được giữ làm lịch sử tham khảo; không triển khai `system_type`, bảng dữ liệu riêng theo hệ hoặc scope theo hệ. Hệ thống tiếp tục dùng ba role `ADMIN`, `COMMANDER`, `STUDENT` và mô hình dữ liệu dùng chung hiện tại.
+> **Trạng thái:** Quyết định hủy phân tách hệ ngày 29/09/2026 được thay thế theo yêu cầu ngày 01/10/2026. Đang triển khai hệ quân sự trước, quản lý học viên theo lớp, gồm lớp, môn, học kỳ, lịch học và kết quả học tập. Không áp dụng cơ sở đào tạo, học phí hoặc cắt cơm cho hệ quân sự. Hệ thứ hai được hoãn. Các chi tiết cũ bên dưới chỉ là lịch sử nếu không được TASK-003 xác nhận lại.
 
 ## 1. Mục tiêu và phạm vi
 

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../controllers/user.controller');
-const { authMiddleware, requireRole, requireStudent, requireAdmin } = require('../middlewares/auth.middleware');
+const { authMiddleware, requireRole, requireStudent, requireAdmin, requireSystemType } = require('../middlewares/auth.middleware');
 const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware');
 
 /**
@@ -1467,24 +1467,24 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
 router.use(authMiddleware);
 
 // ===================== Student: Học tập =====================
-router.get('/academic-results', requireStudent, controller.getAcademicResults);
+router.get('/academic-results', requireStudent, requireSystemType('EXTERNAL'), controller.getAcademicResults);
 
 // ===================== Student: Thời khóa biểu =====================
-router.get('/time-table', requireStudent, controller.getMyTimeTable);
-router.get('/time-table-semesters', requireStudent, controller.getMyTimeTableSemesters);
-router.post('/time-table', requireStudent, controller.denyMyTimeTableMutation);
-router.put('/time-table/:id', requireStudent, controller.denyMyTimeTableMutation);
-router.delete('/time-table/:id', requireStudent, controller.denyMyTimeTableMutation);
+router.get('/time-table', requireStudent, requireSystemType('EXTERNAL'), controller.getMyTimeTable);
+router.get('/time-table-semesters', requireStudent, requireSystemType('EXTERNAL'), controller.getMyTimeTableSemesters);
+router.post('/time-table', requireStudent, requireSystemType('EXTERNAL'), controller.denyMyTimeTableMutation);
+router.put('/time-table/:id', requireStudent, requireSystemType('EXTERNAL'), controller.denyMyTimeTableMutation);
+router.delete('/time-table/:id', requireStudent, requireSystemType('EXTERNAL'), controller.denyMyTimeTableMutation);
 
 // ===================== Student: Cắt cơm =====================
-router.get('/cut-rice', requireStudent, controller.getMyCutRice);
-router.put('/cut-rice', requireStudent, controller.updateMyCutRice);
-router.get('/cut-rice/requests', requireStudent, controller.getMyCutRiceRequests);
-router.post('/cut-rice/requests', requireStudent, controller.createMyCutRiceRequest);
+router.get('/cut-rice', requireStudent, requireSystemType('EXTERNAL'), controller.getMyCutRice);
+router.put('/cut-rice', requireStudent, requireSystemType('EXTERNAL'), controller.updateMyCutRice);
+router.get('/cut-rice/requests', requireStudent, requireSystemType('EXTERNAL'), controller.getMyCutRiceRequests);
+router.post('/cut-rice/requests', requireStudent, requireSystemType('EXTERNAL'), controller.createMyCutRiceRequest);
 
 // ===================== Student: Thành tích & Học phí =====================
 router.get('/achievements', requireStudent, controller.getMyAchievements);
-router.get('/tuition-fees', requireStudent, controller.getMyTuitionFees);
+router.get('/tuition-fees', requireStudent, requireSystemType('EXTERNAL'), controller.getMyTuitionFees);
 
 // ===================== Profile (cá nhân) =====================
 router.get('/profile', requireRole('STUDENT', 'COMMANDER'), controller.getMyProfile);

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { authMiddleware, requireRole, requireStudent } = require('../middlewares/auth.middleware');
+const { authMiddleware, requireRole, requireStudent, requireSystemType } = require('../middlewares/auth.middleware');
 const ctrl = require('../controllers/gradeRequest.controller');
 
 /**
@@ -270,15 +270,15 @@ const ctrl = require('../controllers/gradeRequest.controller');
 
 // ===================== Student (chỉ STUDENT) =====================
 const { uploadEvidence } = require('../middlewares/upload.middleware');
-router.post('/students/grade-requests', authMiddleware, requireStudent, ctrl.create);
-router.post('/students/grade-requests/evidence', authMiddleware, requireStudent, uploadEvidence('file'), ctrl.uploadEvidence);
-router.get('/students/grade-requests', authMiddleware, requireStudent, ctrl.getMyRequests);
-router.get('/students/grade-requests/:id', authMiddleware, requireStudent, ctrl.getMyRequestDetail);
+router.post('/students/grade-requests', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), ctrl.create);
+router.post('/students/grade-requests/evidence', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), uploadEvidence('file'), ctrl.uploadEvidence);
+router.get('/students/grade-requests', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), ctrl.getMyRequests);
+router.get('/students/grade-requests/:id', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), ctrl.getMyRequestDetail);
 
 // ===================== Commander/Admin =====================
-router.get('/commanders/grade-requests', authMiddleware, requireRole('ADMIN', 'COMMANDER'), ctrl.getAll);
-router.get('/commanders/grade-requests/:id', authMiddleware, requireRole('ADMIN', 'COMMANDER'), ctrl.getDetail);
-router.post('/commanders/grade-requests/:id/approve', authMiddleware, requireRole('ADMIN', 'COMMANDER'), ctrl.approve);
-router.post('/commanders/grade-requests/:id/reject', authMiddleware, requireRole('ADMIN', 'COMMANDER'), ctrl.reject);
+router.get('/commanders/grade-requests', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.getAll);
+router.get('/commanders/grade-requests/:id', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.getDetail);
+router.post('/commanders/grade-requests/:id/approve', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.approve);
+router.post('/commanders/grade-requests/:id/reject', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.reject);
 
 module.exports = router;

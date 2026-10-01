@@ -13,7 +13,7 @@ Trước khi triển khai một task:
 3. Đọc task hiện tại trong `docs/tasks/`.
 4. Đọc `docs/architecture/backend-overview.md` và/hoặc `docs/architecture/frontend-overview.md` theo phạm vi.
 5. Đọc `docs/product/feature-list.md` khi task liên quan đến trạng thái hoặc phụ thuộc feature.
-6. Đọc ghi chú trạng thái đầu `QLHV.md` nếu task liên quan đến quản lý lớp hoặc kết quả học tập; đặc tả phân tách ba hệ bên dưới chỉ còn là lịch sử tham khảo.
+6. Đọc trạng thái đầu `QLHV.md` nếu task liên quan đến quản lý lớp hoặc kết quả học tập; chỉ triển khai chi tiết hệ nào đã được quyết định trong task hiện hành.
 7. Đọc source và tài liệu chi tiết trong `doc/` có liên quan.
 
 Khi tài liệu mâu thuẫn:
@@ -56,10 +56,12 @@ Khi tài liệu mâu thuẫn:
 
 ## 5. Bất biến nghiệp vụ hiện hành
 
-- Hệ thống không phân tách người dùng hoặc dữ liệu theo hệ đào tạo.
+- Dữ liệu đào tạo được phân hệ bằng `systemType`; các API nghiệp vụ phải scope ở backend theo hệ của tài khoản đã xác thực.
+- Hệ ngoài hiện có tiếp tục giữ dữ liệu hiện tại. Hệ quân sự đang được triển khai riêng theo TASK-003; hệ đào tạo thứ hai đang hoãn.
+- Hệ quân sự quản lý học viên theo lớp; không dùng cơ sở đào tạo, học phí hoặc cắt cơm.
 - Chỉ Chỉ huy được truy cập các API quản lý kết quả học tập; Học viên chỉ xem dữ liệu cá nhân qua API dành cho Học viên.
 - Điểm đã nhập là bất biến: không có sửa, xóa hoặc mở khóa.
-- Chỉ huy trực tiếp quản lý lớp, môn, học kỳ và điểm.
+- Chỉ huy chỉ quản lý học viên và lớp thuộc hệ mình; hệ quân sự quản lý lớp trực tiếp cùng môn, học kỳ và lịch học.
 - Admin không được xem hồ sơ hoặc điểm nghiệp vụ.
 
 Chi tiết và tiêu chí đầy đủ nằm trong `QLHV.md`.

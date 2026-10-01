@@ -48,7 +48,8 @@ const login = async (username, password) => {
 };
 
 const register = async (data) => {
-  const { username, password, role, fullName, email, code } = data;
+  const { username, password, role, fullName, email, code, systemType, commanderId } = data;
+  const assignedSystemType = role === 'ADMIN' ? null : (systemType || 'EXTERNAL');
 
   const exist = await User.findOne({ where: { username } });
   if (exist) {
@@ -62,10 +63,17 @@ const register = async (data) => {
       if (existing) throw new BadRequestError(`Mã ${code} đã tồn tại`);
     }
     const prefix = (role === 'STUDENT' ? 'HV' : 'CH');
+    let assignedCommanderId = null;
+    if (role === 'STUDENT' && commanderId) {
+      const commander = await User.findOne({ where: { id: commanderId, role: 'COMMANDER', systemType: assignedSystemType } });
+      if (!commander) throw new BadRequestError('Chỉ huy phải thuộc cùng hệ đào tạo');
+      assignedCommanderId = commander.id;
+    }
     const profile = await Profile.create({
       code: code || _generateCode(prefix),
       fullName,
       email,
+      commanderId: assignedCommanderId,
     });
     profileId = profile.id;
   }
@@ -75,6 +83,7 @@ const register = async (data) => {
     username,
     password: hashedPassword,
     role: role || 'STUDENT',
+    systemType: assignedSystemType,
     isAdmin: role === 'ADMIN',
     profileId,
   });

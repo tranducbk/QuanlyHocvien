@@ -14,6 +14,8 @@ const routeMounts = {
   'organization.route.js': '/organizations',
   'educationLevel.route.js': '/education-levels',
   'class.route.js': '/classes',
+  'militaryClass.route.js': '/military/classes',
+  'militaryAcademic.route.js': '/military/academic',
   'yearlyResult.route.js': '/yearly-results',
   'semesterResult.route.js': '/semester-results',
   'subjectResult.route.js': '/subject-results',

@@ -43,6 +43,7 @@ const create = yup.object({
   password: yup.string().max(255).required('Trường này là bắt buộc'),
   isAdmin: yup.boolean().nullable(),
   role: yup.string().max(50).oneOf(['STUDENT', 'COMMANDER', 'ADMIN'], 'Vai trò không hợp lệ').nullable(),
+  systemType: yup.string().oneOf(['EXTERNAL', 'MILITARY']).nullable(),
   refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   ...profileFields,

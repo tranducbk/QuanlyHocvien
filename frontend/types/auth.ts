@@ -13,6 +13,7 @@ export interface User {
   isAdmin: boolean;
   isActive: boolean;
   role: "ADMIN" | "COMMANDER" | "STUDENT";
+  systemType: "EXTERNAL" | "MILITARY" | null;
   refreshToken: string;
   studentId: string | null;
   commanderId: string | null;
@@ -31,6 +32,7 @@ export interface CreateUserRequest {
   username: string;
   password: string;
   role: "ADMIN" | "COMMANDER" | "STUDENT";
+  systemType?: "EXTERNAL" | "MILITARY" | null;
   fullName: string;
   email?: string;
   commanderId?: string | null;

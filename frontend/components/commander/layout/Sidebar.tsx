@@ -6,9 +6,22 @@ import { usePathname } from "next/navigation";
 import { COMMANDER_MENU, MenuItem } from "@/constants/commander-menu";
 import Typography from "@/library/Typography";
 import Image from "next/image";
+import { useAuthStore } from "@/store/useAuthStore";
+import { HiOutlineViewGrid } from "react-icons/hi";
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const systemType = useAuthStore((state) => state.user?.systemType);
+  const items: MenuItem[] = systemType === "MILITARY"
+    ? [
+      COMMANDER_MENU[0],
+      { title: "Hồ sơ học viên", path: "/commander/military/students", icon: HiOutlineViewGrid },
+      { title: "Lớp quân sự", path: "/commander/military/classes", icon: HiOutlineViewGrid },
+      { title: "Học kỳ quân sự", path: "/commander/military/semesters", icon: HiOutlineViewGrid },
+      { title: "Môn học quân sự", path: "/commander/military/subjects", icon: HiOutlineViewGrid },
+      { title: "Lịch học quân sự", path: "/commander/military/time-table", icon: HiOutlineViewGrid },
+    ]
+    : [...COMMANDER_MENU];
 
   return (
     <aside className="relative flex flex-col w-70 bg-white/75 dark:bg-neutral-950 backdrop-blur-xl border-r border-neutral-100/60 dark:border-neutral-800 shadow-sm dark:shadow-none z-50 overflow-hidden">
@@ -35,7 +48,7 @@ const Sidebar: React.FC = () => {
       {/* Danh sách Menu */}
       <nav className="relative flex-1 overflow-y-auto py-4 px-4 no-scrollbar">
         <ul className="space-y-1.5">
-          {COMMANDER_MENU.map((item: MenuItem) => {
+          {items.map((item: MenuItem) => {
             const isActive =
               pathname === item.path ||
               (item.path !== "/commander" && pathname.startsWith(item.path));

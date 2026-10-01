@@ -43,6 +43,11 @@ db.university = require('./university.js')(sequelize, DataTypes);
 db.organization = require('./organization.js')(sequelize, DataTypes);
 db.educationLevel = require('./educationLevel.js')(sequelize, DataTypes);
 db.class = require('./class.js')(sequelize, DataTypes);
+db.militaryClass = require('./militaryClass.js')(sequelize, DataTypes);
+db.militaryClassHistory = require('./militaryClassHistory.js')(sequelize, DataTypes);
+db.militarySemester = require('./militarySemester.js')(sequelize, DataTypes);
+db.militarySubject = require('./militarySubject.js')(sequelize, DataTypes);
+db.militaryTimeTable = require('./militaryTimeTable.js')(sequelize, DataTypes);
 
 // Nhóm Hồ sơ Sinh viên
 db.profile = require('./profile.js')(sequelize, DataTypes);
@@ -89,6 +94,20 @@ db.educationLevel.belongsTo(db.organization, { foreignKey: 'organization_id', on
 // EducationLevel 1:N Class
 db.educationLevel.hasMany(db.class, { foreignKey: 'education_level_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
 db.class.belongsTo(db.educationLevel, { foreignKey: 'education_level_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+
+// Military classes have a direct student relationship and no school hierarchy.
+db.militaryClass.hasMany(db.profile, { foreignKey: 'military_class_id', onUpdate: 'CASCADE', onDelete: 'SET NULL' });
+db.profile.belongsTo(db.militaryClass, { foreignKey: 'military_class_id', onUpdate: 'CASCADE', onDelete: 'SET NULL' });
+db.militaryClassHistory.belongsTo(db.profile, { foreignKey: 'profile_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militaryClassHistory.belongsTo(db.user, { as: 'changer', foreignKey: 'changed_by', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militaryClass.hasMany(db.militarySubject, { foreignKey: 'class_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militarySubject.belongsTo(db.militaryClass, { foreignKey: 'class_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militarySemester.hasMany(db.militarySubject, { foreignKey: 'semester_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militarySubject.belongsTo(db.militarySemester, { foreignKey: 'semester_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militaryClass.hasMany(db.militaryTimeTable, { foreignKey: 'class_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militaryTimeTable.belongsTo(db.militaryClass, { foreignKey: 'class_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militarySemester.hasMany(db.militaryTimeTable, { foreignKey: 'semester_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+db.militaryTimeTable.belongsTo(db.militarySemester, { foreignKey: 'semester_id', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
 
 // --- Nhóm Hồ sơ Sinh viên ---
 

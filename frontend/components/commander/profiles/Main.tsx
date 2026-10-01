@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
+import { CellContext, ColumnDef } from "@tanstack/react-table";
 import ActionButton from "@/library/ActionButton";
 import Avatar from "@/library/Avatar";
 import Badge from "@/library/Badge";
@@ -21,7 +21,7 @@ import ProfileSkeleton from "./ProfileSkeleton";
 import StudentProfileDetail from "./StudentProfileDetail";
 import UpdateStudentProfileForm from "./UpdateStudentProfileForm";
 
-export default function Main() {
+export default function Main({ militaryMode = false }: { militaryMode?: boolean }) {
   const { openModal } = useModalStore();
 
   const {
@@ -45,12 +45,12 @@ export default function Main() {
       openModal({
         title: "Chi tiết hồ sơ học viên",
         content: (
-          <StudentProfileDetail studentId={student.id} initialData={student} />
+          <StudentProfileDetail studentId={student.id} initialData={student} militaryMode={militaryMode} />
         ),
         size: "xl",
       });
     },
-    [openModal]
+    [openModal, militaryMode]
   );
 
   const handleOpenUpdateModal = useCallback(
@@ -110,19 +110,28 @@ export default function Main() {
           </Badge>
         ),
       },
-      {
+      ...(militaryMode ? [{
+        id: "militaryClass",
+        header: "Lớp quân sự",
+        cell: (info: CellContext<Student, unknown>) => <Typography variant="body" color="neutral">{textOrDash(info.row.original.militaryClass?.className || info.row.original.militaryClass?.classCode)}</Typography>,
+      }] : [{
         id: "class",
         header: "Lớp",
-        cell: (info) => (
+        cell: (info: CellContext<Student, unknown>) => (
           <Typography variant="body" color="neutral">
             {textOrDash(info.row.original.class?.className)}
           </Typography>
         ),
-      },
-      {
+      }]),
+      ...(militaryMode ? [{
+        id: "unit",
+        header: "Đơn vị",
+        accessorKey: "unit",
+        cell: (info: CellContext<Student, unknown>) => <Typography variant="body" color="neutral">{textOrDash(info.row.original.unit)}</Typography>,
+      }] : [{
         id: "organization",
         header: "Đơn vị",
-        cell: (info) => (
+        cell: (info: CellContext<Student, unknown>) => (
           <Typography variant="body" color="neutral">
             {textOrDash(
               info.row.original.organization?.organizationName ||
@@ -130,16 +139,16 @@ export default function Main() {
             )}
           </Typography>
         ),
-      },
-      {
+      }]),
+      ...(!militaryMode ? [{
         id: "university",
         header: "Trường đào tạo",
-        cell: (info) => (
+        cell: (info: CellContext<Student, unknown>) => (
           <Typography variant="body" color="neutral">
             {textOrDash(info.row.original.university?.universityName)}
           </Typography>
         ),
-      },
+      }] : []),
       {
         id: "rank",
         header: "Cấp bậc",
@@ -189,7 +198,7 @@ export default function Main() {
         },
       },
     ],
-    [handleOpenDetailModal, handleOpenUpdateModal]
+    [handleOpenDetailModal, handleOpenUpdateModal, militaryMode]
   );
 
   const filterOptions = useMemo<FilterField[]>(

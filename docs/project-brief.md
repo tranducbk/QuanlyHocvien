@@ -6,9 +6,7 @@ Hệ thống Quản lý Học viên (QuanlyHocvien).
 
 ## 2. Mô tả ngắn
 
-Ứng dụng web full-stack quản lý tài khoản, hồ sơ, cơ sở/lớp đào tạo, kết quả học tập, lịch học, lịch cắt cơm, học phí, thành tích, lịch trực, thông báo và báo cáo cho học viên quân đội.
-
-Hệ thống phục vụ tập trung quân nhân được cử đi học và không phân tách dữ liệu theo hệ đào tạo.
+Ứng dụng web full-stack quản lý tài khoản, hồ sơ, lớp, kết quả học tập, lịch học, thành tích, lịch trực, thông báo và báo cáo cho học viên quân đội. Hệ quân sự được quản lý trực tiếp theo lớp, không gắn với cơ sở đào tạo, học phí hay cắt cơm. Dữ liệu được phân tách theo hệ đào tạo; hệ quân sự triển khai trước, hệ thứ hai đang chờ.
 
 ## 3. Mục tiêu
 
@@ -59,7 +57,7 @@ Hệ thống sử dụng ba role `ADMIN`, `COMMANDER`, `STUDENT`; không có rol
 
 ## 8. Nguồn sự thật
 
-- `QLHV.md`: tài liệu lịch sử của phương án ba hệ đã hủy; xem ghi chú trạng thái ở đầu file.
+- `QLHV.md`: ghi quyết định hiện hành ở đầu file; các chi tiết cũ chỉ là lịch sử nếu TASK-003 chưa xác nhận lại.
 - `docs/product/feature-list.md`: bản đồ feature và trạng thái theo source.
 - `docs/architecture/`: mô tả kiến trúc thực tế hiện tại.
 - `doc/`: tài liệu chi tiết của hệ thống cũ; có thể chưa đồng bộ với `QLHV.md`.
