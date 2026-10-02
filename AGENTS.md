@@ -61,7 +61,7 @@ Khi tài liệu mâu thuẫn:
 - Hệ quân sự quản lý học viên theo lớp; không dùng cơ sở đào tạo, học phí hoặc cắt cơm.
 - Chỉ Chỉ huy được truy cập các API quản lý kết quả học tập; Học viên chỉ xem dữ liệu cá nhân qua API dành cho Học viên.
 - Điểm đã nhập là bất biến: không có sửa, xóa hoặc mở khóa.
-- Chỉ huy chỉ quản lý học viên và lớp thuộc hệ mình; hệ quân sự quản lý lớp trực tiếp cùng môn, học kỳ và lịch học.
+- Chỉ huy chỉ quản lý học viên và lớp thuộc hệ mình; với hệ quân sự, Admin tạo lớp và phân công Chỉ huy, Chỉ huy quản lý học viên trong lớp được giao cùng môn, học kỳ và lịch học.
 - Admin không được xem hồ sơ hoặc điểm nghiệp vụ.
 
 Chi tiết và tiêu chí đầy đủ nằm trong `QLHV.md`.

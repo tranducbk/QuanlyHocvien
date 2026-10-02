@@ -1,6 +1,10 @@
 const router = require('express').Router();
 const controller = require('../controllers/militaryClass.controller');
-const { authMiddleware, requireRole, requireSystemType } = require('../middlewares/auth.middleware');
+const {
+  authMiddleware,
+  requireRole,
+  requireSystemType,
+} = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -8,6 +12,9 @@ const { authMiddleware, requireRole, requireSystemType } = require('../middlewar
  *   "/military/classes": {
  *     "get": { "tags": ["Military"], "summary": "Danh sách lớp quân sự của Chỉ huy đăng nhập", "responses": { "200": { "description": "Danh sách lớp và sĩ số" } } },
  *     "post": { "tags": ["Military"], "summary": "Tạo lớp quân sự", "responses": { "201": { "description": "Lớp đã tạo" } } }
+ *   },
+ *   "/military/classes/commanders": {
+ *     "get": { "tags": ["Military"], "summary": "Danh sách tài khoản Chỉ huy quân sự để Admin phân công lớp", "responses": { "200": { "description": "Danh sách ID và tên đăng nhập" } } }
  *   },
  *   "/military/classes/{id}": {
  *     "get": { "tags": ["Military"], "summary": "Chi tiết lớp quân sự", "responses": { "200": { "description": "Thông tin lớp" } } },
@@ -23,15 +30,28 @@ const { authMiddleware, requireRole, requireSystemType } = require('../middlewar
  * }
  */
 
-router.use(authMiddleware, requireRole('COMMANDER'), requireSystemType('MILITARY'));
-router.get('/', controller.getAll);
-router.post('/', controller.create);
-router.delete('/:id/students/:userId', controller.removeStudents);
-router.get('/:id/students', controller.getStudents);
-router.post('/:id/students/by-code', controller.assignStudentsByCode);
-router.post('/:id/students', controller.assignStudents);
-router.get('/:id', controller.getDetail);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
+const militaryCommander = [requireRole('COMMANDER'), requireSystemType('MILITARY')];
+const admin = requireRole('ADMIN');
+router.use(authMiddleware);
+router.get('/commanders', admin, controller.getMilitaryCommanders);
+router.get(
+  '/',
+  requireRole('ADMIN', 'COMMANDER'),
+  requireSystemType('MILITARY'),
+  controller.getAll,
+);
+router.post('/', admin, controller.create);
+router.delete('/:id/students/:userId', ...militaryCommander, controller.removeStudents);
+router.get('/:id/students', ...militaryCommander, controller.getStudents);
+router.post('/:id/students/by-code', ...militaryCommander, controller.assignStudentsByCode);
+router.post('/:id/students', ...militaryCommander, controller.assignStudents);
+router.get(
+  '/:id',
+  requireRole('ADMIN', 'COMMANDER'),
+  requireSystemType('MILITARY'),
+  controller.getDetail,
+);
+router.put('/:id', admin, controller.update);
+router.delete('/:id', admin, controller.delete);
 
 module.exports = router;

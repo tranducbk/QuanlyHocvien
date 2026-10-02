@@ -4,6 +4,7 @@ export interface MilitaryClass {
   classCode: string;
   studentCount: number;
   commanderId: string;
+  commander?: { id: string; username: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -11,6 +12,7 @@ export interface MilitaryClass {
 export interface MilitaryClassRequest {
   className: string;
   classCode: string;
+  commanderId: string;
 }
 
 export interface MilitaryStudentProfile {

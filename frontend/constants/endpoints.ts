@@ -50,15 +50,47 @@ export const ENDPOINTS = {
   },
   MILITARY_CLASSES: {
     BASE: "/api/military/classes",
+    COMMANDERS: "/api/military/classes/commanders",
+    DETAIL: (id: string) => `/api/military/classes/${id}`,
     STUDENTS: (id: string) => `/api/military/classes/${id}/students`,
-    STUDENT_DETAIL: (id: string, userId: string) => `/api/military/classes/${id}/students/${userId}`,
-    ASSIGN_STUDENTS_BY_CODE: (id: string) => `/api/military/classes/${id}/students/by-code`,
+    STUDENT_DETAIL: (id: string, userId: string) =>
+      `/api/military/classes/${id}/students/${userId}`,
+    ASSIGN_STUDENTS_BY_CODE: (id: string) =>
+      `/api/military/classes/${id}/students/by-code`,
   },
   MILITARY_ACADEMIC: {
     SEMESTERS: "/api/military/academic/semesters",
-    SUBJECTS: (classId: string) => `/api/military/academic/classes/${classId}/subjects`,
-    TIME_TABLE: (classId: string) => `/api/military/academic/classes/${classId}/time-table`,
+    SEMESTER_DETAIL: (id: string) => `/api/military/academic/semesters/${id}`,
+    SUBJECTS: (classId: string) =>
+      `/api/military/academic/classes/${classId}/subjects`,
+    SUBJECT_DETAIL: (classId: string, id: string) =>
+      `/api/military/academic/classes/${classId}/subjects/${id}`,
+    TIME_TABLE: (classId: string) =>
+      `/api/military/academic/classes/${classId}/time-table`,
     MY_TIME_TABLE: "/api/military/academic/me/time-table",
+    MY_SUBJECTS: "/api/military/academic/me/subjects",
+    MY_RESULTS: "/api/military/academic/me/results",
+    MY_GRADE_PROPOSALS: "/api/military/academic/me/grade-proposals",
+    CLASS_RESULTS: (classId: string) =>
+      `/api/military/academic/classes/${classId}/results`,
+    CLASS_GRADE_PROPOSALS: "/api/military/academic/grade-proposals",
+    APPROVE_GRADE_PROPOSAL: (id: string) =>
+      `/api/military/academic/grade-proposals/${id}/approve`,
+    REJECT_GRADE_PROPOSAL: (id: string) =>
+      `/api/military/academic/grade-proposals/${id}/reject`,
+  },
+  MILITARY_RECORDS: {
+    MY_ACHIEVEMENTS: "/api/military/records/me/achievements",
+    ACHIEVEMENTS: "/api/military/records/achievements",
+    CLASS_ACHIEVEMENTS: (classId: string) =>
+      `/api/military/records/classes/${classId}/achievements`,
+    ACHIEVEMENT_DETAIL: (id: string) =>
+      `/api/military/records/achievements/${id}`,
+    DUTY_SCHEDULES: "/api/military/records/duty-schedules",
+    CLASS_DUTY_SCHEDULES: (classId: string) =>
+      `/api/military/records/classes/${classId}/duty-schedules`,
+    DUTY_SCHEDULE_DETAIL: (id: string) =>
+      `/api/military/records/duty-schedules/${id}`,
   },
   SEMESTERS: {
     BASE: "/api/semesters",

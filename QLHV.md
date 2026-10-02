@@ -107,7 +107,7 @@ Môn chưa được sử dụng có thể xóa. Môn đã được xếp vào l�
 ### 4.2. Quyền quản lý
 
 - Chỉ huy hệ ngoài quản lý trường ngoài, lớp, môn học và học kỳ của hệ ngoài.
-- Chỉ huy hệ quân sự quản lý lớp quân sự, môn học và học kỳ quân sự.
+- Admin tạo lớp quân sự và phân công Chỉ huy hệ quân sự; Chỉ huy quản lý học viên trong lớp được giao, môn học và học kỳ quân sự.
 - Chỉ huy hệ dân sự quản lý môn học và học kỳ dân sự; quản lý lớp dân sự được triển khai ở giai đoạn sau.
 - Không có role, bảng phân công hoặc cổng làm việc dành cho Giảng viên.
 
@@ -192,7 +192,7 @@ Quản lý môn học, học kỳ và trực tiếp nhập điểm hệ dân s�
 ### 7.1. Hệ ngoài và hệ dân sự
 
 ```text
-Chỉ huy tạo lớp, môn và học kỳ trong hệ của mình
+Admin tạo lớp quân sự và phân công Chỉ huy; Chỉ huy tạo môn và học kỳ trong hệ của mình
 → Chỉ huy chọn đúng hệ, lớp, môn và học viên
 → Chỉ huy nhập đầy đủ điểm
 → Hệ thống kiểm tra và tính tổng kết

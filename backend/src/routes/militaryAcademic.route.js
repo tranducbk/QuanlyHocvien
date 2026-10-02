@@ -1,11 +1,29 @@
 const router = require('express').Router();
 const controller = require('../controllers/militaryAcademic.controller');
-const { authMiddleware, requireRole, requireSystemType } = require('../middlewares/auth.middleware');
+const resultController = require('../controllers/militaryResult.controller');
+const {
+  authMiddleware,
+  requireRole,
+  requireSystemType,
+} = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
  * {
  *   "/military/academic/me/time-table": { "get": { "tags": ["Military"], "summary": "Lịch học của học viên quân sự đăng nhập", "responses": { "200": { "description": "Lịch học theo lớp" } } } },
+ *   "/military/academic/me/subjects": { "get": { "tags": ["Military"], "summary": "Danh sách môn học của lớp học viên", "responses": { "200": { "description": "Danh sách môn học" } } } },
+ *   "/military/academic/me/results": { "get": { "tags": ["Military"], "summary": "Kết quả học tập của học viên quân sự", "responses": { "200": { "description": "Danh sách điểm chính thức" } } } },
+ *   "/military/academic/me/grade-proposals": {
+ *     "get": { "tags": ["Military"], "summary": "Lịch sử đề xuất điểm của học viên", "responses": { "200": { "description": "Danh sách đề xuất" } } },
+ *     "post": { "tags": ["Military"], "summary": "Gửi đề xuất điểm quân sự", "responses": { "201": { "description": "Đề xuất đã gửi" } } }
+ *   },
+ *   "/military/academic/classes/{classId}/results": {
+ *     "get": { "tags": ["Military"], "summary": "Xem điểm của lớp quân sự", "responses": { "200": { "description": "Danh sách điểm" } } },
+ *     "post": { "tags": ["Military"], "summary": "Ghi nhận điểm chính thức cho học viên", "responses": { "201": { "description": "Điểm đã ghi nhận" } } }
+ *   },
+ *   "/military/academic/grade-proposals": { "get": { "tags": ["Military"], "summary": "Danh sách đề xuất điểm theo lớp", "responses": { "200": { "description": "Danh sách đề xuất" } } } },
+ *   "/military/academic/grade-proposals/{id}/approve": { "post": { "tags": ["Military"], "summary": "Phê duyệt đề xuất điểm", "responses": { "200": { "description": "Đề xuất đã duyệt" } } } },
+ *   "/military/academic/grade-proposals/{id}/reject": { "post": { "tags": ["Military"], "summary": "Từ chối đề xuất điểm", "responses": { "200": { "description": "Đề xuất đã từ chối" } } } },
  *   "/military/academic/semesters": {
  *     "get": { "tags": ["Military"], "summary": "Danh sách học kỳ quân sự", "responses": { "200": { "description": "Danh sách học kỳ" } } },
  *     "post": { "tags": ["Military"], "summary": "Tạo học kỳ quân sự", "responses": { "201": { "description": "Học kỳ đã tạo" } } }
@@ -31,8 +49,42 @@ const { authMiddleware, requireRole, requireSystemType } = require('../middlewar
  */
 
 router.use(authMiddleware);
-router.get('/me/time-table', requireRole('STUDENT'), requireSystemType('MILITARY'), controller.studentTimeTable);
+router.get(
+  '/me/time-table',
+  requireRole('STUDENT'),
+  requireSystemType('MILITARY'),
+  controller.studentTimeTable,
+);
+router.get(
+  '/me/subjects',
+  requireRole('STUDENT'),
+  requireSystemType('MILITARY'),
+  controller.studentSubjects,
+);
+router.get(
+  '/me/results',
+  requireRole('STUDENT'),
+  requireSystemType('MILITARY'),
+  resultController.studentResults,
+);
+router.get(
+  '/me/grade-proposals',
+  requireRole('STUDENT'),
+  requireSystemType('MILITARY'),
+  resultController.studentProposals,
+);
+router.post(
+  '/me/grade-proposals',
+  requireRole('STUDENT'),
+  requireSystemType('MILITARY'),
+  resultController.createProposal,
+);
 router.use(requireRole('COMMANDER'), requireSystemType('MILITARY'));
+router.get('/classes/:classId/results', resultController.classResults);
+router.post('/classes/:classId/results', resultController.createResult);
+router.get('/grade-proposals', resultController.classProposals);
+router.post('/grade-proposals/:id/approve', resultController.approve);
+router.post('/grade-proposals/:id/reject', resultController.reject);
 router.get('/semesters', controller.listSemesters);
 router.post('/semesters', controller.createSemester);
 router.get('/semesters/:id', controller.getSemester);

@@ -168,11 +168,11 @@ Toàn hệ thống.
 
 ### Mục tiêu
 
-Không triển khai phân tách dữ liệu theo hệ đào tạo.
+Phân tách nghiệp vụ và scope dữ liệu hệ ngoài/hệ quân sự theo `systemType`; hệ thứ hai đang hoãn.
 
 ### Trạng thái
 
-**Đã hủy khỏi phạm vi sản phẩm**.
+**Có trong source** cho `EXTERNAL` và `MILITARY`; dữ liệu học tập quân sự dùng các bảng riêng.
 
 ## F13 - Danh mục môn học
 
@@ -186,7 +186,7 @@ Quản lý danh mục môn học dùng chung.
 
 ### Trạng thái
 
-**Chưa thực hiện**.
+**Có trong source cho hệ quân sự**: danh mục môn được gắn với lớp và học kỳ; hệ ngoài giữ luồng hiện tại.
 
 ## F14 - Quản lý lớp theo hệ
 
@@ -200,7 +200,7 @@ Chỉ huy quản lý lớp và xếp/chuyển học viên trong đúng hệ; l�
 
 ### Trạng thái
 
-**Chưa thực hiện**.
+**Có trong source cho hệ quân sự**: lớp quân sự độc lập, xếp/chuyển học viên và lưu lịch sử.
 
 ## F15 - Đề xuất và duyệt điểm quân sự
 
@@ -214,7 +214,7 @@ Chỉ huy có thể nhập điểm quân sự trực tiếp. Học viên cũng c
 
 ### Trạng thái
 
-**Chưa thực hiện**.
+**Có trong source cho hệ quân sự**: học viên gửi đề xuất điểm, Chỉ huy duyệt/từ chối; điểm chính thức chỉ được tạo một lần.
 
 ## F16 - Khung hệ dân sự
 

@@ -21,6 +21,7 @@ mountExternal('/education-levels', require('./educationLevel.route'));
 mountExternal('/classes', require('./class.route'));
 router.use('/military/classes', require('./militaryClass.route'));
 router.use('/military/academic', require('./militaryAcademic.route'));
+router.use('/military/records', require('./militaryRecords.route'));
 mountExternal('/yearly-results', require('./yearlyResult.route'));
 mountExternal('/semester-results', require('./semesterResult.route'));
 mountExternal('/subject-results', require('./subjectResult.route'));

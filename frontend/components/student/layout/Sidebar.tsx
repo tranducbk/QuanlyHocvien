@@ -11,12 +11,36 @@ import { useAuthStore } from "@/store/useAuthStore";
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const systemType = useAuthStore((state) => state.user?.systemType);
-  const items = systemType === "MILITARY"
-    ? [
-      ...STUDENT_MENU.filter((item) => !["/student/meal-schedules", "/student/tuition", "/student/time-table", "/student/results", "/student/achievements"].includes(item.path)),
-      { title: "Lịch học theo lớp", path: "/student/military/time-table", icon: STUDENT_MENU[3].icon },
-    ]
-    : STUDENT_MENU;
+  const items =
+    systemType === "MILITARY"
+      ? [
+          ...STUDENT_MENU.filter(
+            (item) =>
+              ![
+                "/student/meal-schedules",
+                "/student/tuition",
+                "/student/time-table",
+                "/student/results",
+                "/student/achievements",
+              ].includes(item.path)
+          ),
+          {
+            title: "Lịch học theo lớp",
+            path: "/student/military/time-table",
+            icon: STUDENT_MENU[3].icon,
+          },
+          {
+            title: "Kết quả học tập",
+            path: "/student/military/results",
+            icon: STUDENT_MENU[2].icon,
+          },
+          {
+            title: "Thành tích",
+            path: "/student/military/achievements",
+            icon: STUDENT_MENU[5].icon,
+          },
+        ]
+      : STUDENT_MENU;
 
   return (
     <aside className="relative flex flex-col w-70 bg-white/75 dark:bg-neutral-950 backdrop-blur-xl border-r border-neutral-100/60 dark:border-neutral-800 shadow-sm dark:shadow-none z-50 overflow-hidden">
@@ -35,7 +59,11 @@ const Sidebar: React.FC = () => {
             style={{ height: "auto" }}
           />
         </div>
-        <Typography variant="h2" weight="black" className="leading-none dark:text-white">
+        <Typography
+          variant="h2"
+          weight="black"
+          className="leading-none dark:text-white"
+        >
           Tiên Phong
         </Typography>
       </div>
@@ -52,10 +80,11 @@ const Sidebar: React.FC = () => {
               <li key={item.title}>
                 <Link
                   href={item.path}
-                  className={`flex items-center gap-3.5 p-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden ${isActive
-                    ? "bg-primary-600 dark:bg-neutral-900 text-white dark:text-neutral-100 shadow-md shadow-primary-600/10 dark:shadow-none ring-1 ring-transparent dark:ring-neutral-800"
-                    : "text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-neutral-900 hover:text-primary-700 dark:hover:text-neutral-100 hover:shadow-sm dark:hover:shadow-none"
-                    }`}
+                  className={`flex items-center gap-3.5 p-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                    isActive
+                      ? "bg-primary-600 dark:bg-neutral-900 text-white dark:text-neutral-100 shadow-md shadow-primary-600/10 dark:shadow-none ring-1 ring-transparent dark:ring-neutral-800"
+                      : "text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-neutral-900 hover:text-primary-700 dark:hover:text-neutral-100 hover:shadow-sm dark:hover:shadow-none"
+                  }`}
                 >
                   <item.icon
                     size={20}

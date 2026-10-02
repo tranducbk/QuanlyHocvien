@@ -7,21 +7,42 @@ import { COMMANDER_MENU, MenuItem } from "@/constants/commander-menu";
 import Typography from "@/library/Typography";
 import Image from "next/image";
 import { useAuthStore } from "@/store/useAuthStore";
-import { HiOutlineViewGrid } from "react-icons/hi";
+import { HiOutlineAcademicCap } from "react-icons/hi";
+
+const MILITARY_PATHS: Record<string, string> = {
+  "/commander": "/commander",
+  "/commander/classes": "/commander/military/classes",
+  "/commander/profiles": "/commander/military/students",
+  "/commander/approvals": "/commander/military/approvals",
+  "/commander/achievements": "/commander/military/achievements",
+  "/commander/time-tables": "/commander/military/time-table",
+  "/commander/academic-results": "/commander/military/academic-results",
+  "/commander/semesters": "/commander/military/semesters",
+  "/commander/duty-schedules": "/commander/military/duty-schedules",
+};
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const systemType = useAuthStore((state) => state.user?.systemType);
-  const items: MenuItem[] = systemType === "MILITARY"
-    ? [
-      COMMANDER_MENU[0],
-      { title: "Hồ sơ học viên", path: "/commander/military/students", icon: HiOutlineViewGrid },
-      { title: "Lớp quân sự", path: "/commander/military/classes", icon: HiOutlineViewGrid },
-      { title: "Học kỳ quân sự", path: "/commander/military/semesters", icon: HiOutlineViewGrid },
-      { title: "Môn học quân sự", path: "/commander/military/subjects", icon: HiOutlineViewGrid },
-      { title: "Lịch học quân sự", path: "/commander/military/time-table", icon: HiOutlineViewGrid },
-    ]
-    : [...COMMANDER_MENU];
+  const items: MenuItem[] =
+    systemType === "MILITARY"
+      ? [
+          ...COMMANDER_MENU.filter(
+            (item) => item.path in MILITARY_PATHS
+          ).flatMap((item) => [
+            { ...item, path: MILITARY_PATHS[item.path] },
+            ...(item.path === "/commander/semesters"
+              ? [
+                  {
+                    title: "Môn học",
+                    path: "/commander/military/subjects",
+                    icon: HiOutlineAcademicCap,
+                  },
+                ]
+              : []),
+          ]),
+        ]
+      : [...COMMANDER_MENU];
 
   return (
     <aside className="relative flex flex-col w-70 bg-white/75 dark:bg-neutral-950 backdrop-blur-xl border-r border-neutral-100/60 dark:border-neutral-800 shadow-sm dark:shadow-none z-50 overflow-hidden">
@@ -40,7 +61,11 @@ const Sidebar: React.FC = () => {
             style={{ height: "auto" }}
           />
         </div>
-        <Typography variant="h2" weight="black" className="leading-none dark:text-white">
+        <Typography
+          variant="h2"
+          weight="black"
+          className="leading-none dark:text-white"
+        >
           Tiên Phong
         </Typography>
       </div>
@@ -57,10 +82,11 @@ const Sidebar: React.FC = () => {
               <li key={item.title}>
                 <Link
                   href={item.path}
-                  className={`flex items-center gap-3.5 p-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden ${isActive
-                    ? "bg-primary-600 dark:bg-neutral-800 text-white shadow-md shadow-primary-600/10"
-                    : "text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-neutral-900 hover:text-primary-700 dark:hover:text-neutral-100 hover:shadow-sm"
-                    }`}
+                  className={`flex items-center gap-3.5 p-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                    isActive
+                      ? "bg-primary-600 dark:bg-neutral-800 text-white shadow-md shadow-primary-600/10"
+                      : "text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-neutral-900 hover:text-primary-700 dark:hover:text-neutral-100 hover:shadow-sm"
+                  }`}
                 >
                   <item.icon
                     size={20}

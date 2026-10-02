@@ -7,9 +7,17 @@ Quyết định ngày 01/10/2026 thay thế quyết định hủy phân hệ ng�
 - `User.systemType` với `EXTERNAL`, `MILITARY`; tài khoản Admin không gán hệ. Hệ thứ hai đang hoãn.
 - Bảng `military_classes`, `military_semesters`, `military_subjects`, `military_time_tables`.
 - `Profile.militaryClassId` tách việc xếp lớp quân sự khỏi `classId` hệ ngoài.
-- API và giao diện Chỉ huy để quản lý lớp, xếp/chuyển học viên bằng mã, quản lý môn, học kỳ và lịch học theo lớp.
+- Admin tạo/sửa/xóa lớp quân sự và phân công Chỉ huy; Chỉ huy xem lớp được giao, xếp/chuyển học viên bằng mã, quản lý môn, học kỳ và lịch học theo lớp.
 - API học viên quân sự xem lịch học của lớp.
 - Route hệ ngoài chặn tài khoản quân sự truy cập lớp, học kỳ, lịch học, kết quả, học phí, cắt cơm và cơ sở đào tạo.
+
+## Đã bổ sung theo yêu cầu mới
+
+- Bảng riêng `military_subject_results`, `military_grade_proposals`, `military_achievements` và `military_duty_schedules`.
+- Chỉ huy ghi điểm mới; học viên gửi đề xuất; Chỉ huy duyệt hoặc từ chối. Điểm chính thức không có API sửa/xóa.
+- Giao diện Chỉ huy quản lý kết quả, duyệt đề xuất, thành tích và lịch trực theo lớp.
+- Học viên quân sự xem lịch học chung của lớp, điểm chính thức, trạng thái đề xuất và thành tích cá nhân.
+- Hệ quân sự không cung cấp cắt cơm hoặc học phí.
 
 ## Chạy migration
 
@@ -17,7 +25,6 @@ Sau khi sao lưu và xác nhận đúng database, chạy `npm run migrate:milita
 
 ## Còn thiếu
 
-- Kết quả học tập quân sự và quy trình đề xuất/duyệt điểm.
-- Trang hồ sơ/portal học viên quân sự đầy đủ và báo cáo theo lớp.
-- Kiểm soát scope của các feature chung còn lại như thành tích, thông báo và báo cáo.
-- Hệ đào tạo thứ hai.
+- Nhập/xuất Excel và báo cáo tổng hợp cho các nghiệp vụ quân sự.
+- Dashboard và thông báo theo lớp cho các sự kiện quân sự.
+- Hệ đào tạo thứ hai đang hoãn.

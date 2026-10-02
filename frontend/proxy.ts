@@ -25,37 +25,95 @@ export default function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const rolePath = role && role in ROLE_PATH_MAP ? ROLE_PATH_MAP[role] : undefined;
+  const rolePath =
+    role && role in ROLE_PATH_MAP ? ROLE_PATH_MAP[role] : undefined;
   // 2. Nếu người dùng ĐÃ có refreshToken và role mà vẫn cố vào trang login/register
-  if (AUTH_ROUTES.some((route) => pathname.startsWith(route)) && refreshToken && role && rolePath) {
+  if (
+    AUTH_ROUTES.some((route) => pathname.startsWith(route)) &&
+    refreshToken &&
+    role &&
+    rolePath
+  ) {
     return NextResponse.redirect(new URL(rolePath, request.url));
   }
 
   // 3. Nếu người dùng ĐÃ có refreshToken và role nhưng cố vào trang của role khác
-  if (pathname.startsWith(ROLES.ADMIN.PATH) && role !== ROLES.ADMIN.ROLE && rolePath) {
+  if (
+    pathname.startsWith(ROLES.ADMIN.PATH) &&
+    role !== ROLES.ADMIN.ROLE &&
+    rolePath
+  ) {
     return NextResponse.redirect(new URL(rolePath, request.url));
   }
-  if (pathname.startsWith(ROLES.COMMANDER.PATH) && role !== ROLES.COMMANDER.ROLE && rolePath) {
+  if (
+    pathname.startsWith(ROLES.COMMANDER.PATH) &&
+    role !== ROLES.COMMANDER.ROLE &&
+    rolePath
+  ) {
     return NextResponse.redirect(new URL(rolePath, request.url));
   }
-  if (pathname.startsWith(ROLES.STUDENT.PATH) && role !== ROLES.STUDENT.ROLE && rolePath) {
+  if (
+    pathname.startsWith(ROLES.STUDENT.PATH) &&
+    role !== ROLES.STUDENT.ROLE &&
+    rolePath
+  ) {
     return NextResponse.redirect(new URL(rolePath, request.url));
   }
 
-  if (role === ROLES.COMMANDER.ROLE && systemType === "MILITARY" && pathname.startsWith("/commander/") && !pathname.startsWith("/commander/military/")) {
-    return NextResponse.redirect(new URL("/commander/military/classes", request.url));
+  if (
+    role === ROLES.COMMANDER.ROLE &&
+    systemType === "MILITARY" &&
+    pathname.startsWith("/commander/") &&
+    !pathname.startsWith("/commander/military/")
+  ) {
+    return NextResponse.redirect(
+      new URL("/commander/military/classes", request.url)
+    );
   }
-  if (role === ROLES.COMMANDER.ROLE && systemType === "MILITARY" && pathname === "/commander") {
-    return NextResponse.redirect(new URL("/commander/military/classes", request.url));
+  if (
+    role === ROLES.COMMANDER.ROLE &&
+    systemType === "MILITARY" &&
+    pathname === "/commander"
+  ) {
+    return NextResponse.redirect(
+      new URL("/commander/military/classes", request.url)
+    );
   }
-  if (role === ROLES.COMMANDER.ROLE && systemType === "EXTERNAL" && pathname.startsWith("/commander/military/")) {
+  if (
+    role === ROLES.COMMANDER.ROLE &&
+    systemType === "EXTERNAL" &&
+    pathname.startsWith("/commander/military/")
+  ) {
     return NextResponse.redirect(new URL("/commander/classes", request.url));
   }
-  if (role === ROLES.STUDENT.ROLE && systemType === "MILITARY" && ["/student/time-table", "/student/meal-schedules", "/student/tuition", "/student/results", "/student/achievements"].some(path => pathname.startsWith(path))) {
+  if (
+    role === ROLES.STUDENT.ROLE &&
+    systemType === "EXTERNAL" &&
+    pathname.startsWith("/student/military/")
+  ) {
+    return NextResponse.redirect(new URL("/student/results", request.url));
+  }
+  if (
+    role === ROLES.STUDENT.ROLE &&
+    systemType === "MILITARY" &&
+    [
+      "/student/time-table",
+      "/student/meal-schedules",
+      "/student/tuition",
+      "/student/results",
+      "/student/achievements",
+    ].some((path) => pathname.startsWith(path))
+  ) {
     return NextResponse.redirect(new URL("/student", request.url));
   }
-  if (role === ROLES.STUDENT.ROLE && systemType === "MILITARY" && pathname === "/student") {
-    return NextResponse.redirect(new URL("/student/military/time-table", request.url));
+  if (
+    role === ROLES.STUDENT.ROLE &&
+    systemType === "MILITARY" &&
+    pathname === "/student"
+  ) {
+    return NextResponse.redirect(
+      new URL("/student/military/time-table", request.url)
+    );
   }
 
   return NextResponse.next();

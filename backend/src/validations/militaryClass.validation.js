@@ -3,12 +3,17 @@ const yup = require('yup');
 const create = yup.object({
   className: yup.string().trim().max(255).required(),
   classCode: yup.string().trim().max(50).required(),
+  commanderId: yup.string().uuid().required(),
 });
 
-const update = yup.object({
-  className: yup.string().trim().max(255),
-  classCode: yup.string().trim().max(50),
-}).noUnknown().test('has-fields', 'Cần có thông tin cập nhật', value => Object.keys(value || {}).length > 0);
+const update = yup
+  .object({
+    className: yup.string().trim().max(255),
+    classCode: yup.string().trim().max(50),
+    commanderId: yup.string().uuid(),
+  })
+  .noUnknown()
+  .test('has-fields', 'Cần có thông tin cập nhật', (value) => Object.keys(value || {}).length > 0);
 
 const query = yup.object({
   page: yup.number().integer().min(1),
@@ -24,4 +29,10 @@ const assignStudentsByCode = yup.object({
   studentCodes: yup.array().of(yup.string().trim().max(50).required()).min(1).required(),
 });
 
-module.exports = { create, update, query, assignStudents, assignStudentsByCode };
+module.exports = {
+  create,
+  update,
+  query,
+  assignStudents,
+  assignStudentsByCode,
+};
