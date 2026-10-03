@@ -31,14 +31,14 @@ React Query được cấu hình tại `frontend/components/providers/QueryProvi
 
 App Router nằm trong `frontend/app`.
 
-Route chính hiện tại:
+Route chính:
 
 - `/login`, `/forgot-password`, `/contact`.
 - `/admin/*`.
-- `/commander/*`, gồm `/commander/military/*` cho Chỉ huy quân sự.
-- `/student/*`, gồm `/student/military/*` cho Học viên quân sự.
+- `/commander/*`, tổ chức các màn hình theo hệ Chỉ huy phụ trách.
+- `/student/*`, chỉ hiển thị thông tin thuộc hệ và học viên đang đăng nhập.
 
-`frontend/proxy.ts` bảo vệ route theo cookie role và điều hướng theo `systemType`. `frontend/constants/constants.ts` khai báo ba role nghiệp vụ `ADMIN`, `COMMANDER`, `STUDENT`; không có role hoặc route Giảng viên.
+`frontend/proxy.ts` bảo vệ route theo role và hệ được gán. `frontend/constants/constants.ts` khai báo ba role nghiệp vụ `ADMIN`, `COMMANDER`, `STUDENT`; không có role hoặc route Giảng viên.
 
 ## 4. State management
 
@@ -84,19 +84,17 @@ Page
 
 Types theo domain nằm trong `frontend/types`; validation dùng chung nằm tại `frontend/utils/validations.ts`.
 
-## 7. Chức năng giao diện hiện có
+## 7. Chức năng giao diện
 
-- Admin: dashboard, tài khoản, trường/lớp và thông báo.
-- Chỉ huy: dashboard, trường/lớp, hồ sơ, kết quả, phê duyệt điểm cũ, học kỳ, lịch học, cắt cơm, học phí, thành tích, lịch trực, thông báo.
-- Học viên: dashboard, hồ sơ, kết quả/đề xuất điểm cũ, lịch học, cắt cơm, học phí, thành tích, thông báo.
+- Admin: dashboard, quản lý tài khoản toàn hệ thống và xem thông tin chính trị nội bộ.
+- Chỉ huy: quản lý học viên, lớp và nghiệp vụ của hệ được phân công.
+- Học viên: xem thông tin chính trị nội bộ, kết quả, lịch và nghiệp vụ cá nhân của hệ mình.
 
 Các page/component tồn tại trong source chưa đồng nghĩa đã được kiểm thử runtime đầy đủ.
 
-## 8. Trạng thái hệ quân sự
+## 8. Giao diện theo hệ
 
-Sidebar và route được tách theo `systemType`. Route quân sự trong `app` giữ mỏng và render `Main` trong `components/commander/military`, cùng cấu trúc với các domain hệ ngoài. Các `Main` quân sự dùng chung `PageContainer`, `Table`, `ActionButton`, `Input`, `Select`, `Textarea`, `Button` và modal hiện có; chỉ dữ liệu, API và thao tác nghiệp vụ được tách theo hệ. Học viên quân sự xem hồ sơ cá nhân, lịch chung của lớp, điểm, trạng thái đề xuất và thành tích. Hệ quân sự không hiển thị học phí hoặc cắt cơm.
-
-Hệ dân sự đang hoãn. Các trang quân sự gọi service/endpoint quân sự riêng; không tái sử dụng endpoint nghiệp vụ hệ ngoài để đọc/ghi dữ liệu học tập.
+Sidebar và route được tổ chức theo role và hệ được phân công. Các trang của Hệ 1, 3, 4 và 7 dùng chung quy trình quản lý học viên, lớp, môn, học kỳ, lịch và kết quả; chương trình đào tạo được cấu hình theo hệ. Hệ 5 có các trang riêng cho cơ sở đào tạo, học phí và lịch cắt cơm. Học viên chỉ xem thông tin chính trị nội bộ, lịch và kết quả của mình.
 
 ## 9. Quy tắc khi mở rộng
 

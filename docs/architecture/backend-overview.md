@@ -48,18 +48,19 @@ route
 - Middleware: `backend/src/middlewares`.
 - Helper response/error: `backend/src/utils/response.js`, `apiError.js`.
 
-## 4. API hiện tại
+## 4. API theo hệ
 
 Router tổng tại `backend/src/routes/index.js`, gồm:
 
 - auth, files, users;
-- universities, organizations, education-levels, classes;
-- military classes and military academic/records routes under `/military/*`;
-- yearly/semester/subject results và grade requests;
-- semesters, time tables, tuition fees;
-- achievements, achievement profiles, yearly achievements;
-- scientific initiatives/topics;
-- cut rice, duty schedules, notifications;
+- tài khoản, role, trạng thái và phân công hệ;
+- thông tin chính trị nội bộ dùng chung;
+- đơn vị, khóa, chương trình đào tạo và lớp của Hệ 1, 3, 4, 7;
+- cơ sở đào tạo, tổ chức, trình độ và lớp của Hệ 5;
+- môn, học kỳ, lịch học và kết quả được scope theo hệ;
+- rèn luyện, thành tích, khen thưởng, kỷ luật, lịch trực và đăng ký ra ngoài;
+- học phí, lịch cắt cơm, đề tài và sáng kiến của Hệ 5;
+- đề xuất/duyệt điểm, thông báo, audit log và báo cáo theo quyền.
 - dashboard/report theo role.
 
 API response dùng dạng chung:
@@ -77,26 +78,25 @@ Danh sách có thêm `pagination`.
 
 ## 5. Xác thực và phân quyền hiện tại
 
-`backend/src/middlewares/auth.middleware.js`:
+Middleware xác thực:
 
 - Xác minh JWT và tải `User` kèm `Profile`.
 - Gắn `req.userId` và `req.user`.
-- Có helper `requireRole`, `requireStudent`, `requireAdmin`, `requireSystemType`.
+- Có helper xác thực role và hệ được gán.
 
-API nghiệp vụ được bảo vệ theo role và `User.systemType` (`EXTERNAL` hoặc `MILITARY`). Các route quân sự dùng prefix `/military`; dữ liệu lớp, môn, học kỳ, lịch theo lớp, kết quả, đề xuất điểm, thành tích và lịch trực có bảng riêng. Hồ sơ cá nhân vẫn dùng `Profile` chung. Hệ thứ hai đang hoãn.
+Mọi API nghiệp vụ được bảo vệ theo role và hệ của tài khoản đã xác thực; không nhận hệ hoặc phạm vi phân quyền từ client. Hệ thống có năm phạm vi: Hệ 1, 3, 4, 5 và 7. Hệ 1 và Hệ 7 dùng chung nghiệp vụ với chương trình đào tạo riêng; Hệ 5 có nghiệp vụ cơ sở đào tạo, học phí và lịch cắt cơm. Thông tin chính trị nội bộ dùng model `Profile` chung.
 
 ## 6. Dữ liệu hiện tại
 
-`backend/src/models/index.js` khởi tạo model và khai báo quan hệ tập trung. Nhóm chính:
+Model và quan hệ dữ liệu được tổ chức theo nhóm nghiệp vụ:
 
-- Tổ chức/cơ sở: University, Organization, EducationLevel, Class; MilitaryClass độc lập với hệ ngoài.
-- Tài khoản/hồ sơ: User, Profile.
-- Học tập hệ ngoài: SchoolYear, Semester, YearlyResult, SemesterResult, SubjectResult, TimeTable, TuitionFee.
-- Học tập quân sự: MilitarySemester, MilitarySubject, MilitaryTimeTable (theo lớp), MilitarySubjectResult và MilitaryGradeProposal.
-- Thành tích/lịch trực quân sự lưu riêng; achievement/research và duty schedule của hệ ngoài giữ luồng riêng.
-- Cắt cơm, lịch trực, thông báo và grade request.
+- Hệ 1, 3, 4, 7: đơn vị, khóa, chương trình, lớp và học viên.
+- Hệ 5: cơ sở đào tạo, tổ chức/chuyên ngành, trình độ và lớp.
+- Chung: User, Profile, môn, học kỳ, lịch học, kết quả, thông báo và audit log.
+- Theo hệ: rèn luyện, thành tích, khen thưởng, kỷ luật, lịch trực, đề xuất điểm.
+- Riêng Hệ 5: học phí, lịch cắt cơm, đề tài và sáng kiến.
 
-`Profile` hiện trộn thông tin cá nhân, quân nhân và đào tạo. `SubjectResult` lưu trực tiếp mã/tên môn thay vì liên kết danh mục môn.
+`Profile` lưu thông tin chính trị nội bộ. Dữ liệu đào tạo được liên kết với học viên, hệ, lớp và chương trình tương ứng.
 
 ## 7. Import/export và transaction
 
@@ -115,9 +115,9 @@ Các script trong `backend/package.json`:
 
 ## 9. Trạng thái so với `QLHV.md`
 
-Đã có nền tảng route/controller/service/model, các nghiệp vụ hệ ngoài và giao diện/API nhập kết quả.
+Đã có nền tảng route/controller/service/model cho tài khoản, thông tin chính trị nội bộ, lớp, học tập và các nghiệp vụ liên quan.
 
-Đã có scope `systemType`, lớp/môn/học kỳ/lịch quân sự riêng, kết quả điểm riêng và luồng học viên đề xuất/Chỉ huy duyệt. Điểm chính thức được tạo một lần, không có API sửa/xóa. Migration quân sự bổ sung schema theo hướng additive và có thể chạy lại.
+Đã có lớp, môn, học kỳ, lịch theo lớp, kết quả điểm và luồng học viên đề xuất/Chỉ huy duyệt. Điểm chính thức được tạo một lần, không có API sửa/xóa. Cần hoàn thiện phân quyền và trải nghiệm theo đủ năm hệ.
 
 Còn thiếu: dashboard/báo cáo tổng hợp quân sự, import/export Excel cho các nghiệp vụ quân sự và audit log đầy đủ.
 

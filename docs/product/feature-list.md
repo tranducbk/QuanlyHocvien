@@ -6,6 +6,8 @@
 - **Cần thay đổi**: có luồng cũ nhưng khác đặc tả mới.
 - **Chưa thực hiện**: chưa thấy nền tảng tương ứng trong source.
 
+Phạm vi nghiệp vụ gồm Hệ 1, 3, 4, 5 và 7. Hệ 1 và Hệ 7 dùng chung nghiệp vụ, khác chương trình đào tạo. Hệ 5 quản lý học viên tại cơ sở đào tạo ngoài quân đội, gồm nghiệp vụ cơ sở đào tạo, lớp, học tập, học phí và lịch cắt cơm. Các trạng thái dưới đây cho biết mức độ triển khai từng feature.
+
 ## F01 - Xác thực và tài khoản
 
 ### Người dùng
@@ -28,21 +30,21 @@ Admin.
 
 ### Mục tiêu
 
-Tạo tài khoản, gán role, khóa/mở và reset mật khẩu mà không truy cập hồ sơ/điểm nghiệp vụ.
+Tạo và chỉnh sửa tài khoản, gán role, khóa/mở và reset mật khẩu; Admin được xem thông tin chính trị nội bộ nhưng không xem điểm nghiệp vụ.
 
 ### Trạng thái
 
-**Cần thay đổi** để phù hợp giới hạn quyền mới.
+**Cần thay đổi** để Admin quản lý tài khoản toàn hệ thống, chỉ xem thông tin chính trị nội bộ và không truy cập điểm.
 
-## F03 - Hồ sơ học viên
+## F03 - Thông tin chính trị nội bộ học viên
 
 ### Người dùng
 
-Chỉ huy, Học viên.
+Admin, Chỉ huy, Học viên.
 
 ### Mục tiêu
 
-Chỉ huy quản lý hồ sơ; Học viên xem hồ sơ của chính mình.
+Chỉ huy quản lý thông tin chính trị nội bộ trong hệ được phân công; Admin chỉ xem thông tin của mọi hệ; Học viên xem thông tin của chính mình.
 
 ### Trạng thái
 
@@ -158,7 +160,7 @@ Xem thống kê và export dữ liệu được phép.
 
 ### Trạng thái
 
-**Có trong source**, cần siết dữ liệu Admin.
+**Cần bảo đảm** dashboard và báo cáo chỉ trả dữ liệu trong phạm vi role và hệ; Admin không nhận dữ liệu điểm.
 
 ## F12 - Phân hệ đào tạo
 
@@ -168,11 +170,11 @@ Toàn hệ thống.
 
 ### Mục tiêu
 
-Phân tách nghiệp vụ và scope dữ liệu hệ ngoài/hệ quân sự theo `systemType`; hệ thứ hai đang hoãn.
+Quản lý năm hệ độc lập và giới hạn dữ liệu theo hệ của tài khoản đã xác thực.
 
 ### Trạng thái
 
-**Có trong source** cho `EXTERNAL` và `MILITARY`; dữ liệu học tập quân sự dùng các bảng riêng.
+**Cần triển khai** phân loại và phân quyền theo Hệ 1, 3, 4, 5 và 7 trên toàn bộ API nghiệp vụ.
 
 ## F13 - Danh mục môn học
 
@@ -182,11 +184,11 @@ Chỉ huy.
 
 ### Mục tiêu
 
-Quản lý danh mục môn học dùng chung.
+Quản lý danh mục môn học riêng theo từng hệ.
 
 ### Trạng thái
 
-**Có trong source cho hệ quân sự**: danh mục môn được gắn với lớp và học kỳ; hệ ngoài giữ luồng hiện tại.
+Quản lý danh mục môn học độc lập theo hệ; Chỉ huy chỉ truy cập môn thuộc hệ được phân công.
 
 ## F14 - Quản lý lớp theo hệ
 
@@ -200,35 +202,35 @@ Chỉ huy quản lý lớp và xếp/chuyển học viên trong đúng hệ; l�
 
 ### Trạng thái
 
-**Có trong source cho hệ quân sự**: lớp quân sự độc lập, xếp/chuyển học viên và lưu lịch sử.
+Quản lý lớp, xếp/chuyển học viên và lưu lịch sử trong phạm vi từng hệ.
 
-## F15 - Đề xuất và duyệt điểm quân sự
-
-### Người dùng
-
-Học viên quân sự, Chỉ huy quân sự.
-
-### Mục tiêu
-
-Chỉ huy có thể nhập điểm quân sự trực tiếp. Học viên cũng có thể tự nhập bảng điểm và gửi đề xuất để Chỉ huy duyệt/từ chối. Điểm chính thức từ cả hai luồng đều không được sửa/xóa.
-
-### Trạng thái
-
-**Có trong source cho hệ quân sự**: học viên gửi đề xuất điểm, Chỉ huy duyệt/từ chối; điểm chính thức chỉ được tạo một lần.
-
-## F16 - Khung hệ dân sự
+## F15 - Nhập, đề xuất và duyệt điểm
 
 ### Người dùng
 
-Chỉ huy dân sự, Học viên dân sự.
+Học viên và Chỉ huy theo quy trình của từng hệ.
 
 ### Mục tiêu
 
-Có model và API cơ bản cho hồ sơ, enrollment, môn và kết quả; chưa làm quản lý lớp hoàn chỉnh.
+Chỉ huy nhập điểm trực tiếp; Học viên gửi đề xuất khi quy trình của hệ cho phép. Điểm chính thức không được sửa, xóa hoặc mở khóa.
 
 ### Trạng thái
 
-**Chưa thực hiện**.
+Hỗ trợ nhập kết quả và các luồng đề xuất/duyệt theo quy định của từng hệ; điểm chính thức bất biến.
+
+## F16 - Nghiệp vụ riêng của Hệ 5
+
+### Người dùng
+
+Admin, Chỉ huy Hệ 5, Học viên Hệ 5.
+
+### Mục tiêu
+
+Quản lý cơ sở đào tạo, tổ chức/chuyên ngành, trình độ, lớp, học phí và lịch cắt cơm cho học viên học ngoài quân đội.
+
+### Trạng thái
+
+**Thuộc phạm vi Hệ 5**; mức độ triển khai được xác định theo từng feature trong source.
 
 ## F17 - Audit nghiệp vụ
 

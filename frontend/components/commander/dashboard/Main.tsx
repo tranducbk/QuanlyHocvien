@@ -20,6 +20,7 @@ import Typography from "@/library/Typography";
 import { BarsChart, DonutChart } from "@/library/charts";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { dashboardService } from "@/services/dashboard";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   DashboardGradeRequestAlert,
   DashboardRecentStudent,
@@ -52,12 +53,39 @@ const toneStyles: Record<Tone, string> = {
 const formatNumber = (value?: number) => (value ?? 0).toLocaleString("vi-VN");
 
 export default function Main() {
+  const systemType = useAuthStore((state) => state.user?.systemType);
   const dashboardQuery = useQuery({
     queryKey: [QUERY_KEYS.COMMANDER_DASHBOARD],
     queryFn: dashboardService.getCommanderDashboard,
   });
 
   const dashboard = dashboardQuery.data?.data;
+
+  if (systemType === "MILITARY") {
+    const militaryStats = [
+      { label: "Học viên", value: dashboard?.overview.totalStudents || 0, href: "/commander/military/students" },
+      { label: "Lớp được giao", value: dashboard?.overview.totalClasses || 0, href: "/commander/military/classes" },
+      { label: "Môn học", value: dashboard?.overview.totalSubjects || 0, href: "/commander/military/subjects" },
+      { label: "Đề xuất chờ duyệt", value: dashboard?.overview.pendingGradeRequests || 0, href: "/commander/military/approvals" },
+      { label: "Thành tích", value: dashboard?.overview.totalAchievements || 0, href: "/commander/military/achievements" },
+      { label: "Lịch trực", value: dashboard?.overview.totalDutySchedules || 0, href: "/commander/military/duty-schedules" },
+    ];
+    return (
+      <PageContainer breadcrumb={[{ label: "Tổng quan" }]} title="Tổng quan hệ quân sự" subtitle="Tình hình các lớp được giao, học tập và công việc cần xử lý." isLoading={dashboardQuery.isLoading} skeleton={<DashboardSkeleton />} isError={dashboardQuery.isError} onRetry={dashboardQuery.refetch} className="space-y-8">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {militaryStats.map((item) => <Link key={item.label} href={item.href} className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"><Typography variant="label" weight="bold" color="gray">{item.label}</Typography><p className="mt-3 text-3xl font-black text-primary-700 dark:text-primary-300">{formatNumber(item.value)}</p></Link>)}
+        </section>
+        <section className="grid gap-6 xl:grid-cols-2">
+          <Panel title="Đề xuất điểm cần xử lý" href="/commander/military/approvals" actionLabel="Xem đề xuất">
+            <div className="space-y-3">{dashboard?.alerts.pendingRequests.length ? dashboard.alerts.pendingRequests.map((request) => <PendingRequestItem key={request.id} request={request} />) : <EmptyLine icon={HiOutlineCheckCircle} title="Không có đề xuất chờ duyệt" description="Đề xuất điểm của học viên sẽ được hiển thị ở đây." />}</div>
+          </Panel>
+          <Panel title="Hồ sơ học viên cập nhật gần đây" href="/commander/military/students" actionLabel="Xem học viên">
+            <div className="space-y-3">{dashboard?.recent.students.length ? dashboard.recent.students.map((student) => <Link key={student.id} href="/commander/military/students" className="block rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"><Typography variant="body" weight="semibold">{student.fullName || "Chưa cập nhật"}</Typography><Typography variant="caption" color="gray" className="mt-1 block">{student.code || "Chưa có mã"} · {student.className || "Chưa xếp lớp"}</Typography></Link>) : <EmptyLine icon={HiOutlineAcademicCap} title="Chưa có học viên trong lớp" description="Học viên thuộc các lớp được giao sẽ hiển thị tại đây." />}</div>
+          </Panel>
+        </section>
+      </PageContainer>
+    );
+  }
 
   const stats = [
     {
@@ -313,9 +341,10 @@ const RiskStudentItem = ({ student }: { student: DashboardRiskStudent }) => (
   </Link>
 );
 
-const PendingRequestItem = ({ request }: { request: DashboardGradeRequestAlert }) => (
-  <Link
-    href="/commander/approvals"
+const PendingRequestItem = ({ request, href }: { request: DashboardGradeRequestAlert; href?: string }) => {
+  const systemType = useAuthStore((state) => state.user?.systemType);
+  return <Link
+    href={href || (systemType === "MILITARY" ? "/commander/military/approvals" : "/commander/approvals")}
     className="flex items-center justify-between gap-4 rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 transition-colors hover:border-primary-200 hover:bg-primary-50/50 dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:border-primary-800 dark:hover:bg-primary-950/20"
   >
     <div className="min-w-0">
@@ -327,8 +356,8 @@ const PendingRequestItem = ({ request }: { request: DashboardGradeRequestAlert }
       </Typography>
     </div>
     <Badge variant="warning">Chờ duyệt</Badge>
-  </Link>
-);
+  </Link>;
+};
 
 const TuitionItem = ({ tuition }: { tuition: DashboardTuitionAlert }) => (
   <Link

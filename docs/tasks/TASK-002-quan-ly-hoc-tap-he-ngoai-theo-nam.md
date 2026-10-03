@@ -13,7 +13,7 @@ Kết quả năm học là dữ liệu tổng hợp của các học kỳ thuộ
 - Trang `/commander/academic-results` hiện chỉ lấy `semester-results`, mặc định hiển thị học kỳ mới nhất của mỗi học viên và mở rộng để xem các học kỳ khác.
 - Portal Học viên đã đọc dữ liệu theo năm rồi trải phẳng thành các nhóm học kỳ; Portal Chỉ huy chưa có giao diện quản lý theo năm.
 - Bộ lọc năm học trên Portal Chỉ huy đang khai báo cứng một số năm thay vì lấy từ danh mục năm học.
-- API kết quả năm hiện cho phép `ADMIN` và còn công khai `POST`, `PUT`, `DELETE`. Điều này mâu thuẫn với `QLHV.md`: Admin không được xem dữ liệu học tập và điểm đã nhập là bất biến.
+- API kết quả năm hiện cho phép `ADMIN` và còn công khai `POST`, `PUT`, `DELETE`. Điều này mâu thuẫn với `QLHV.md`: Admin không được xem điểm nghiệp vụ và điểm đã nhập là bất biến.
 
 ## Người dùng và user story
 

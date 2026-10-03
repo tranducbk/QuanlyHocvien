@@ -308,7 +308,7 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *       "tags": [
  *         "Profile"
  *       ],
- *       "summary": "HV-02: Xem hồ sơ cá nhân",
+ *       "summary": "HV-02: Xem thông tin chính trị nội bộ",
  *       "description": "STUDENT/COMMANDER role.",
  *       "responses": {
  *         "200": {
@@ -320,7 +320,7 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *       "tags": [
  *         "Profile"
  *       ],
- *       "summary": "HV-02: Cập nhật hồ sơ cá nhân",
+ *       "summary": "HV-02: Cập nhật thông tin chính trị nội bộ",
  *       "description": "Cập nhật mọi field của Profile.",
  *       "requestBody": {
  *         "content": {

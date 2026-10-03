@@ -206,7 +206,76 @@ const getRiskStudents = async (requester) => {
   return risks.slice(0, 5);
 };
 
-const getCommanderDashboard = async () => {
+const getMilitaryCommanderDashboard = async (commander) => {
+  const classes = await db.militaryClass.findAll({
+    where: { commanderId: commander.id },
+    attributes: ['id', 'classCode', 'className'],
+    order: [['className', 'ASC']],
+  });
+  const classIds = classes.map((item) => item.id);
+  const profiles = classIds.length
+    ? await Profile.findAll({
+        where: { militaryClassId: classIds },
+        include: [{ model: User, where: { role: 'STUDENT', systemType: 'MILITARY' }, required: true }],
+        order: [['updatedAt', 'DESC']],
+        limit: 5,
+      })
+    : [];
+  const [totalStudents, totalSubjects, pendingRequests, totalAchievements, totalDutySchedules, requests] = await Promise.all([
+    Profile.count({ where: { militaryClassId: classIds } }),
+    db.militarySubject.count({ where: { classId: classIds } }),
+    db.militaryGradeProposal.count({ where: { status: 'PENDING' }, include: [{ model: db.militarySubject, where: { classId: classIds }, required: true }] }),
+    db.militaryAchievement.count({ where: { classId: classIds } }),
+    db.militaryDutySchedule.count({ where: { classId: classIds } }),
+    db.militaryGradeProposal.findAll({
+      where: { status: 'PENDING' },
+      include: [
+        { model: Profile, attributes: ['fullName', 'code'], required: true },
+        { model: db.militarySubject, attributes: ['subjectName'], where: { classId: classIds }, required: true },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 5,
+    }),
+  ]);
+
+  return {
+    overview: { totalStudents, totalClasses: classes.length, totalSubjects, pendingGradeRequests: pendingRequests, totalAchievements, totalDutySchedules, unpaidTuitionRecords: 0, atRiskStudents: 0 },
+    charts: { academicStatus: [], gradeRequests: [{ label: 'Chờ duyệt', value: pendingRequests }], tuitionStatus: [], studentsByUnit: [], achievementsByYear: [] },
+    alerts: { riskStudents: [], unpaidTuition: [], pendingRequests: requests.map((item) => ({ id: item.id, studentName: item.Profile?.fullName || item.Profile?.code || 'Học viên', subjectName: item.MilitarySubject?.subjectName || 'Môn học', createdAt: item.createdAt })) },
+    recent: { students: profiles.map((item) => ({ id: item.id, code: item.code || '', fullName: item.fullName || '', className: classes.find((row) => row.id === item.militaryClassId)?.className || '', updatedAt: item.updatedAt })) },
+  };
+};
+
+const getMilitaryStudentDashboard = async (userId) => {
+  const user = await User.findOne({
+    where: { id: userId, role: 'STUDENT', systemType: 'MILITARY' },
+    include: [{ model: Profile, include: [{ model: db.militaryClass }] }],
+    attributes: { exclude: ['password', 'refreshToken'] },
+  });
+  const profile = user?.Profile;
+  const classId = profile?.militaryClassId;
+  const [results, proposals, achievements, dutySchedules, timeTables, unreadNotifications] = await Promise.all([
+    profile ? db.militarySubjectResult.findAll({ where: { profileId: profile.id }, include: [{ model: db.militarySubject, include: [{ model: db.militarySemester }] }] }) : [],
+    profile ? db.militaryGradeProposal.count({ where: { profileId: profile.id, status: 'PENDING' } }) : 0,
+    db.militaryAchievement.count({ where: { userId } }),
+    db.militaryDutySchedule.findAll({ where: { userId }, order: [['workDay', 'ASC']], limit: 5 }),
+    classId ? db.militaryTimeTable.findAll({ where: { classId }, include: [{ model: db.militarySemester }] }) : [],
+    Notification.count({ where: { userId, isRead: false } }),
+  ]);
+  const passed = results.filter((item) => Number(item.gradePoint10) >= 5).length;
+  const failed = results.length - passed;
+  const average = results.length ? results.reduce((sum, item) => sum + Number(item.gradePoint4), 0) / results.length : null;
+  const scheduleRows = timeTables.flatMap((item) => (item.schedules || []).map((schedule) => ({ ...schedule, schoolYear: item.MilitarySemester?.schoolYear, semester: item.MilitarySemester?.code })));
+  return {
+    profile: user ? { id: user.id, username: user.username, isActive: user.isActive, fullName: profile?.fullName || '', code: profile?.code || '', className: profile?.MilitaryClass?.className || '', unit: profile?.unit || '' } : null,
+    overview: { cpa4: average, credits: results.length, passedSubjects: passed, failedSubjects: failed, scheduleCount: scheduleRows.length, cutMealCount: 0, unpaidTuitionCount: 0, unpaidTuitionAmount: 0, pendingGradeRequests: proposals, totalAchievements: achievements, unreadNotifications },
+    charts: { academicTrend: [], subjectStatus: [{ label: 'Đạt', value: passed }, { label: 'Chưa đạt', value: failed }], tuitionStatus: [] },
+    recent: { schedules: scheduleRows.slice(0, 6), tuition: [], dutySchedules: dutySchedules.map((item) => ({ id: item.id, position: item.position, workDay: item.workDay })), notifications: await Notification.findAll({ where: { userId }, order: [['createdAt', 'DESC']], limit: 5 }) },
+  };
+};
+
+const getCommanderDashboard = async (query, requester) => {
+  if (requester?.systemType === 'MILITARY') return getMilitaryCommanderDashboard(requester);
   const [
     totalStudents,
     totalClasses,
@@ -371,7 +440,8 @@ const getCutMealCount = (record) => {
   }, 0);
 };
 
-const getStudentDashboard = async (userId) => {
+const getStudentDashboard = async (userId, requester) => {
+  if (requester?.systemType === 'MILITARY') return getMilitaryStudentDashboard(userId);
   const [
     user,
     yearlyResults,

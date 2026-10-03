@@ -152,7 +152,7 @@ export const universitySchema = z.object({
 export type UniversityFormValues = z.infer<typeof universitySchema>;
 
 /**
- * Schema validation cho form cập nhật thông tin cá nhân (Profile)
+ * Schema validation cho form cập nhật thông tin chính trị nội bộ (Profile)
  */
 export const profileSchema = z.object({
   fullName: z.string().min(1, "Họ tên không được để trống"),

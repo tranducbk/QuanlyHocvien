@@ -62,7 +62,7 @@ export default function Main() {
     if (!commander) return;
 
     openModal({
-      title: "Cập nhật hồ sơ cá nhân",
+      title: "Cập nhật thông tin chính trị nội bộ",
       content: <UpdateProfileForm initialData={commander} />,
       size: "lg",
       config: {

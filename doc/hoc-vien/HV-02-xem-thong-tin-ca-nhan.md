@@ -1,12 +1,12 @@
-# HV-02 - Xem thông tin cá nhân
+# HV-02 - Xem thông tin chính trị nội bộ
 
 ## Thông tin chung
 - **Nhóm người dùng:** Học viên
 - **Mã chức năng:** HV-02
-- **Tên chức năng:** Xem thông tin cá nhân
+- **Tên chức năng:** Xem thông tin chính trị nội bộ
 
 ## Mô tả
-Học viên có thể xem toàn bộ thông tin cá nhân của mình bao gồm thông tin cơ bản, thông tin học tập và thông tin quân nhân.
+Học viên có thể xem thông tin chính trị nội bộ của mình, gồm thông tin nhận diện và thông tin quân nhân. Thông tin học tập được xem tại các chức năng học tập tương ứng.
 
 ## Module liên quan
 - User Module
@@ -15,32 +15,24 @@ Học viên có thể xem toàn bộ thông tin cá nhân của mình bao gồm 
 
 ## Luồng hoạt động chi tiết
 
-### 1. Xem thông tin cá nhân
+### 1. Xem thông tin chính trị nội bộ
 1. **Thông tin cơ bản:** họ tên, ngày sinh, giới tính, CMND/CCCD, số điện thoại, email, địa chỉ.
 2. **Thông tin học tập:** mã học viên, lớp, khóa học, ngành học, trường đào tạo.
 3. **Thông tin quân nhân:** quân hàm, chức vụ.
 
-### 2. Cập nhật thông tin cá nhân
-1. Học viên vào trang chỉnh sửa hồ sơ.
-2. Các trường có thể tự cập nhật: số điện thoại, email, địa chỉ.
-3. Các trường thông tin quân nhân (nếu có quyền): quân hàm, chức vụ.
-4. Hệ thống kiểm tra định dạng và validate dữ liệu.
-5. Lưu thay đổi, cập nhật `updated_at`.
+Học viên chỉ có quyền xem thông tin chính trị nội bộ của mình; không có thao tác cập nhật trực tiếp.
 
 ## Giao diện & API
 
 | Thứ tự | Method | Endpoint | Auth | Mô tả |
 |--------|--------|----------|------|-------|
-| 1 | `GET` | `/api/auth/profile` | Token | Lấy toàn bộ thông tin cá nhân (học viên + chỉ huy) |
-| 2 | `PUT` | `/api/auth/profile` | Token | Cập nhật thông tin cá nhân (học viên + chỉ huy) |
+| 1 | `GET` | `/api/auth/profile` | Token | Lấy thông tin chính trị nội bộ (học viên + chỉ huy) |
 
 ### Luồng nghiệp vụ
 ```
 1. GET /api/auth/profile → Xem thông tin đầy đủ theo role
 
-2. PUT /api/auth/profile → Cập nhật thông tin (cả học viên + chỉ huy)
-   Body: { currentAddress, phoneNumber, email, rank, unit, positionGovernment, positionParty }
-   - Hệ thống tự động xác định role và cập nhật đúng bảng (students hoặc commanders)
+2. Không cung cấp thao tác cập nhật thông tin từ tài khoản Học viên.
 ```
 
 ## Dữ liệu & Database
@@ -48,5 +40,5 @@ Học viên có thể xem toàn bộ thông tin cá nhân của mình bao gồm 
 - Cột: `full_name`, `dob`, `gender`, `cccd`, `current_address`, `phone_number`, `email`, `student_code`, `class_id`, `course`, `major`, `university_id`, `rank`, `position_government`, `position_party`
 
 ## Lưu ý bảo mật / Quyền hạn
-- Học viên chỉ được xem và cập nhật thông tin của chính mình (`student_id` trong JWT token).
+- Học viên chỉ được xem thông tin của chính mình theo tài khoản đã xác thực.
 - Một số trường nhạy cảm (CCCD, ngày sinh) bị khóa chỉnh sửa, chỉ có thể xem.

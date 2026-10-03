@@ -192,7 +192,7 @@ async function runAllTests() {
   logSection('HV-02: XEM THÔNG TIN CÁ NHÂN');
 
   res = await request('GET', '/auth/profile', null, state.studentToken);
-  const hv02ok = test('HV-02', 'Học viên xem hồ sơ cá nhân (GET /api/auth/profile)', res.status, 200);
+  const hv02ok = test('HV-02', 'Học viên xem thông tin chính trị nội bộ (GET /api/auth/profile)', res.status, 200);
   if (hv02ok && res.body?.data) {
     const profile = res.body.data.student || res.body.data;
     check('HV-02', 'Thông tin cơ bản (họ tên, giới tính, CCCD) có đầy đủ', profile.fullName && profile.gender && profile.cccdNumber);
@@ -201,7 +201,7 @@ async function runAllTests() {
 
     // Update profile via unified endpoint
     res = await request('PUT', '/auth/profile', { phoneNumber: '0912345678', email: 'hv001updated@test.local', currentAddress: 'Hà Nội - Updated' }, state.studentToken);
-    test('HV-02', 'Học viên cập nhật thông tin cá nhân (PUT /api/auth/profile)', res.status, 200);
+    test('HV-02', 'Học viên cập nhật thông tin chính trị nội bộ (PUT /api/auth/profile)', res.status, 200);
   }
 
   // =============================================

@@ -63,7 +63,7 @@ const { authMiddleware, requireAdmin } = require('../middlewares/auth.middleware
  *         "Auth",
  *         "Profile"
  *       ],
- *       "summary": "HV-02: Xem hồ sơ cá nhân",
+ *       "summary": "HV-02: Xem thông tin chính trị nội bộ",
  *       "responses": {
  *         "200": {
  *           "description": "OK"
@@ -75,7 +75,7 @@ const { authMiddleware, requireAdmin } = require('../middlewares/auth.middleware
  *         "Auth",
  *         "Profile"
  *       ],
- *       "summary": "HV-02: Cập nhật hồ sơ cá nhân",
+ *       "summary": "HV-02: Cập nhật thông tin chính trị nội bộ",
  *       "description": "Tất cả role đều có quyền. Cập nhật mọi field của Profile (trừ code).",
  *       "requestBody": {
  *         "content": {

@@ -1,12 +1,12 @@
 # CH-02 - Quản lý cơ sở đào tạo
 
 ## Thông tin chung
-- **Nhóm người dùng:** Chỉ huy
+- **Nhóm người dùng:** Chỉ huy Hệ 5
 - **Mã chức năng:** CH-02
 - **Tên chức năng:** Quản lý cơ sở đào tạo
 
 ## Mô tả
-Quản lý thông tin các trường đại học, chuyên ngành, trình độ đào tạo và lớp học. Mỗi đơn vị có thông tin về thời gian đi lại để tính toán lịch cắt cơm tự động.
+Quản lý cơ sở đào tạo ngoài quân đội, tổ chức/chuyên ngành, trình độ đào tạo và lớp của Hệ 5. Dữ liệu cơ sở đào tạo được scope trong Hệ 5.
 
 ## Module liên quan
 - University Module
@@ -19,7 +19,7 @@ Quản lý thông tin các trường đại học, chuyên ngành, trình độ 
 ### 1. Quản lý trường đại học
 1. Thêm, chỉnh sửa, xóa thông tin các trường đại học nơi học viên được gửi đi đào tạo.
 2. Xem cấu trúc phân cấp: Cơ sở đào tạo → Chuyên ngành → Trình độ đào tạo → Lớp.
-3. Mỗi đơn vị có thông tin về thời gian đi lại để tính toán lịch cắt cơm tự động.
+3. Thông tin cơ sở đào tạo được dùng trong lịch học, học phí và lịch cắt cơm của Hệ 5.
 
 ### 2. Quản lý lớp học
 1. Quản lý các lớp học, liên kết lớp với trường, đơn vị và cấp đào tạo tương ứng.

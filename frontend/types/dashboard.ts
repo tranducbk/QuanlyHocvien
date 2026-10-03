@@ -48,6 +48,8 @@ export interface CommanderDashboard {
     unpaidTuitionRecords: number;
     totalAchievements: number;
     atRiskStudents: number;
+    totalSubjects?: number;
+    totalDutySchedules?: number;
   };
   charts: {
     academicStatus: DashboardChartItem[];
@@ -149,6 +151,7 @@ export interface StudentDashboard {
       schoolYear: string;
       updatedAt: string;
     }>;
+    dutySchedules?: Array<{ id: string; position: string; workDay: string }>;
     notifications: Array<{
       id: string;
       title: string;

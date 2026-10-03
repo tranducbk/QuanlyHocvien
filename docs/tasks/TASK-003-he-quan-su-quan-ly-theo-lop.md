@@ -19,7 +19,7 @@ Yêu cầu ngày 01/10/2026 tái mở rộng hệ thống theo các hệ đào t
 - Lịch học quân sự thuộc lớp và học kỳ; mọi học viên trong cùng lớp xem cùng một lịch.
 - Điểm quân sự lưu trong bảng riêng. Chỉ huy có thể ghi điểm mới; học viên có thể gửi đề xuất điểm để Chỉ huy duyệt hoặc từ chối. Điểm chính thức đã tạo không có API sửa/xóa.
 - Thành tích và lịch trực quân sự lưu riêng, được giới hạn theo lớp của Chỉ huy đã xác thực.
-- Hồ sơ cá nhân dùng chung `Profile`; không dùng chung dữ liệu đào tạo hoặc lớp giữa hai hệ.
+- Thông tin chính trị nội bộ dùng chung model `Profile`; không dùng chung dữ liệu đào tạo hoặc lớp giữa hai hệ.
 
 ## An toàn dữ liệu
 

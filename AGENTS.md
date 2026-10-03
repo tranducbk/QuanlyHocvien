@@ -56,13 +56,13 @@ Khi tài liệu mâu thuẫn:
 
 ## 5. Bất biến nghiệp vụ hiện hành
 
-- Dữ liệu đào tạo được phân hệ bằng `systemType`; các API nghiệp vụ phải scope ở backend theo hệ của tài khoản đã xác thực.
-- Hệ ngoài hiện có tiếp tục giữ dữ liệu hiện tại. Hệ quân sự đang được triển khai riêng theo TASK-003; hệ đào tạo thứ hai đang hoãn.
-- Hệ quân sự quản lý học viên theo lớp; không dùng cơ sở đào tạo, học phí hoặc cắt cơm.
-- Chỉ Chỉ huy được truy cập các API quản lý kết quả học tập; Học viên chỉ xem dữ liệu cá nhân qua API dành cho Học viên.
+- Dữ liệu đào tạo được phân hệ theo Hệ 1, Hệ 3, Hệ 4, Hệ 5 và Hệ 7; API nghiệp vụ phải scope ở backend theo hệ của tài khoản đã xác thực.
+- Hệ 1 và Hệ 7 có cùng nghiệp vụ quản lý, khác chương trình đào tạo; không tạo ngoại lệ nghiệp vụ giữa hai hệ.
+- Hệ 5 quản lý học viên học tại cơ sở đào tạo ngoài quân đội và có các chức năng riêng được mô tả trong `doc/SPEC.md`.
+- Chỉ huy quản lý học viên và nghiệp vụ thuộc hệ được phân công. Với lớp quân sự, Admin tạo lớp và phân công Chỉ huy; Chỉ huy quản lý học viên trong lớp được giao.
+- Chỉ Chỉ huy được truy cập các API quản lý kết quả học tập; Học viên chỉ xem dữ liệu của mình qua API dành cho Học viên.
 - Điểm đã nhập là bất biến: không có sửa, xóa hoặc mở khóa.
-- Chỉ huy chỉ quản lý học viên và lớp thuộc hệ mình; với hệ quân sự, Admin tạo lớp và phân công Chỉ huy, Chỉ huy quản lý học viên trong lớp được giao cùng môn, học kỳ và lịch học.
-- Admin không được xem hồ sơ hoặc điểm nghiệp vụ.
+- Admin được xem và chỉnh sửa tài khoản của mọi hệ; chỉ được xem thông tin chính trị nội bộ, không được chỉnh sửa thông tin này hoặc xem điểm nghiệp vụ.
 
 Chi tiết và tiêu chí đầy đủ nằm trong `QLHV.md`.
 
