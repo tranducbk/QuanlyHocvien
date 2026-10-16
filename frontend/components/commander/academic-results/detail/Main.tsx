@@ -3,10 +3,8 @@
 import { useMemo, useCallback, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlinePencilAlt, HiOutlineTrash, HiPlus, HiOutlineUpload, HiOutlineDownload } from "react-icons/hi";
-import { useConfirmStore } from "@/store/useConfirmStore";
+import { HiPlus, HiOutlineUpload, HiOutlineDownload } from "react-icons/hi";
 import { useToastStore } from "@/store/useToastStore";
-import ActionButton from "@/library/ActionButton";
 import Table from "@/library/Table";
 import Typography from "@/library/Typography";
 import Button from "@/library/Button";
@@ -21,16 +19,19 @@ interface SemesterDetailMainProps {
   semesterResultId: string;
 }
 
-export default function Main({
-  semesterResultId,
-}: SemesterDetailMainProps) {
+export default function Main({ semesterResultId }: SemesterDetailMainProps) {
   const { openModal, closeModal } = useModalStore();
-  const { openConfirm } = useConfirmStore();
   const { addToast } = useToastStore();
 
-  const { data: detailData, isLoading, isError, refetch } = useQuery({
+  const {
+    data: detailData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["semesterResultDetail", semesterResultId],
-    queryFn: () => academicManagementService.getSemesterResultDetail(semesterResultId),
+    queryFn: () =>
+      academicManagementService.getSemesterResultDetail(semesterResultId),
     select: (res) => res.data,
   });
 
@@ -42,7 +43,8 @@ export default function Main({
   const handleDownloadTemplate = async () => {
     setIsDownloading(true);
     try {
-      const blob = await academicManagementService.downloadSubjectResultTemplate();
+      const blob =
+        await academicManagementService.downloadSubjectResultTemplate();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -51,24 +53,35 @@ export default function Main({
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (error: any) {
+    } catch {
       addToast({ variant: "error", message: "Tải file mẫu thất bại" });
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
     try {
-      const res = await academicManagementService.importSubjectResults(semesterResultId, file);
-      addToast({ variant: "success", message: res.message || "Nhập điểm thành công" });
+      const res = await academicManagementService.importSubjectResults(
+        semesterResultId,
+        file
+      );
+      addToast({
+        variant: "success",
+        message: res.message || "Nhập điểm thành công",
+      });
       refetch();
-    } catch (error: any) {
-      addToast({ variant: "error", message: error.message || "Lỗi khi nhập điểm" });
+    } catch (error: unknown) {
+      addToast({
+        variant: "error",
+        message: error instanceof Error ? error.message : "Lỗi khi nhập điểm",
+      });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -77,47 +90,21 @@ export default function Main({
     }
   };
 
-  const handleOpenForm = useCallback(
-    (subjectResult?: SubjectResult) => {
-      openModal({
-        title: subjectResult ? "Cập nhật điểm môn học" : "Thêm điểm môn học",
-        content: (
-          <SubjectResultForm
-            semesterResultId={semesterResultId}
-            initialData={subjectResult}
-            onSuccess={() => {
-              refetch();
-              closeModal();
-            }}
-            onCancel={closeModal}
-          />
-        ),
-      });
-    },
-    [semesterResultId, openModal, closeModal, refetch]
-  );
-
-  const handleDelete = useCallback(
-    (id: string) => {
-      openConfirm({
-        title: "Xóa điểm môn học",
-        message: "Bạn có chắc chắn muốn xóa điểm môn học này không? Hành động này không thể hoàn tác.",
-        confirmText: "Xóa ngay",
-        variant: "danger",
-        mutationKey: ["DELETE_SUBJECT_RESULT", id],
-        onConfirm: async () => {
-          try {
-            await academicManagementService.deleteSubjectResult(id);
-            addToast({ variant: "success", message: "Xóa điểm môn học thành công" });
+  const handleOpenForm = useCallback(() => {
+    openModal({
+      title: "Thêm điểm môn học",
+      content: (
+        <SubjectResultForm
+          semesterResultId={semesterResultId}
+          onSuccess={() => {
             refetch();
-          } catch (error: any) {
-            addToast({ variant: "error", message: error.message || "Xóa thất bại" });
-          }
-        },
-      });
-    },
-    [openConfirm, refetch, addToast]
-  );
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      ),
+    });
+  }, [semesterResultId, openModal, closeModal, refetch]);
 
   const columns = useMemo<ColumnDef<SubjectResult>[]>(
     () => [
@@ -125,31 +112,49 @@ export default function Main({
         id: "subjectCode",
         header: "Mã môn",
         accessorKey: "subjectCode",
-        cell: (info) => <Typography variant="body">{textOrDash(info.row.original.subjectCode)}</Typography>,
+        cell: (info) => (
+          <Typography variant="body">
+            {textOrDash(info.row.original.subjectCode)}
+          </Typography>
+        ),
       },
       {
         id: "subjectName",
         header: "Tên môn",
         accessorKey: "subjectName",
-        cell: (info) => <Typography variant="body" weight="medium">{textOrDash(info.row.original.subjectName)}</Typography>,
+        cell: (info) => (
+          <Typography variant="body" weight="medium">
+            {textOrDash(info.row.original.subjectName)}
+          </Typography>
+        ),
       },
       {
         id: "credits",
         header: "TC",
         accessorKey: "credits",
-        cell: (info) => <Typography variant="body">{info.row.original.credits}</Typography>,
+        cell: (info) => (
+          <Typography variant="body">{info.row.original.credits}</Typography>
+        ),
       },
       {
         id: "gradePoint10",
         header: "Hệ 10",
         accessorKey: "gradePoint10",
-        cell: (info) => <Typography variant="body">{formatScore(info.row.original.gradePoint10)}</Typography>,
+        cell: (info) => (
+          <Typography variant="body">
+            {formatScore(info.row.original.gradePoint10)}
+          </Typography>
+        ),
       },
       {
         id: "gradePoint4",
         header: "Hệ 4",
         accessorKey: "gradePoint4",
-        cell: (info) => <Typography variant="body">{formatScore(info.row.original.gradePoint4)}</Typography>,
+        cell: (info) => (
+          <Typography variant="body">
+            {formatScore(info.row.original.gradePoint4)}
+          </Typography>
+        ),
       },
       {
         id: "letterGrade",
@@ -161,34 +166,13 @@ export default function Main({
           </Typography>
         ),
       },
-      {
-        id: "actions",
-        header: "Hành động",
-        cell: (info) => {
-          const record = info.row.original;
-          return (
-            <div className="flex gap-2">
-              <ActionButton
-                tooltipText="Cập nhật"
-                icon={HiOutlinePencilAlt}
-                onClick={() => handleOpenForm(record)}
-                color="secondary"
-              />
-              <ActionButton
-                tooltipText="Xóa"
-                icon={HiOutlineTrash}
-                onClick={() => handleDelete(record.id)}
-                color="red"
-              />
-            </div>
-          );
-        },
-      },
     ],
-    [handleOpenForm, handleDelete]
+    []
   );
 
-  const pageTitle = detailData ? `Chi tiết điểm học kỳ: ${detailData.semester} - ${detailData.schoolYear}` : "Chi tiết điểm học kỳ";
+  const pageTitle = detailData
+    ? `Chi tiết điểm học kỳ: ${detailData.semester} - ${detailData.schoolYear}`
+    : "Chi tiết điểm học kỳ";
 
   return (
     <PageContainer
@@ -205,12 +189,22 @@ export default function Main({
       <div className="bg-white dark:bg-neutral-950 overflow-hidden relative transition-colors p-4 md:p-6 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <Typography variant="body" weight="semibold" className="text-neutral-600 dark:text-neutral-400 text-lg">
-              Học viên: {(detailData as any)?.user?.profile?.fullName} ({(detailData as any)?.user?.profile?.code})
+            <Typography
+              variant="body"
+              weight="semibold"
+              className="text-neutral-600 dark:text-neutral-400 text-lg"
+            >
+              Học viên: {textOrDash(detailData?.user?.profile?.fullName)} (
+              {textOrDash(detailData?.user?.profile?.code)})
             </Typography>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleDownloadTemplate} icon={HiOutlineDownload} variant="outline" isLoading={isDownloading}>
+            <Button
+              onClick={handleDownloadTemplate}
+              icon={HiOutlineDownload}
+              variant="outline"
+              isLoading={isDownloading}
+            >
               Tải file mẫu
             </Button>
             <input
@@ -220,9 +214,9 @@ export default function Main({
               ref={fileInputRef}
               onChange={handleFileUpload}
             />
-            <Button 
-              onClick={() => fileInputRef.current?.click()} 
-              icon={HiOutlineUpload} 
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              icon={HiOutlineUpload}
               variant="outline"
               isLoading={isUploading}
             >
@@ -239,7 +233,12 @@ export default function Main({
             statusCode: 200,
             message: "Success",
             data: detailData?.subjectResults || [],
-            pagination: { total: detailData?.subjectResults?.length || 0, page: 1, limit: 100, totalPages: 1 },
+            pagination: {
+              total: detailData?.subjectResults?.length || 0,
+              page: 1,
+              limit: 100,
+              totalPages: 1,
+            },
           }}
           pagination={{ pageIndex: 0, pageSize: 100 }}
           onPaginationChange={() => {}}

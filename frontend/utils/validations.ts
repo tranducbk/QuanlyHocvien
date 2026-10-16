@@ -429,10 +429,7 @@ export type UpdateCutRiceFormValues = z.infer<typeof updateCutRiceSchema>;
 
 export const createGradeRequestSchema = z.object({
   subjectResultId: z.string().min(1, "Vui lòng chọn môn học"),
-  requestType: z.enum(
-    ["ADD", "UPDATE", "DELETE"],
-    "Vui lòng chọn loại đề xuất"
-  ),
+  requestType: z.literal("ADD"),
   proposedGradePoint10: z
     .number()
     .min(0, "Điểm đề xuất phải lớn hơn hoặc bằng 0")

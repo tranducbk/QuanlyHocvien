@@ -7,7 +7,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { HiOutlineAcademicCap, HiOutlineCalendar } from "react-icons/hi";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
-import Input from "@/library/Input";
 import Select from "@/library/Select";
 import { DEFAULT_PAGE, ROLES } from "@/constants/constants";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
@@ -75,7 +74,8 @@ export default function UpdateTimeTableForm({
   const studentOptions = useMemo(() => {
     const options =
       studentsData?.map((student) => {
-        const name = student.profile?.fullName || student.username || student.id;
+        const name =
+          student.profile?.fullName || student.username || student.id;
         return {
           value: student.id,
           label: student.profile?.code
@@ -154,66 +154,65 @@ export default function UpdateTimeTableForm({
       className="flex max-h-[85vh] flex-col gap-6 pt-2 pb-4"
     >
       <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Controller
-          name="userId"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Controller
+            name="userId"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Select
+                disabled
+                label="Học viên"
+                placeholder="Chọn học viên"
+                prefixIcon={<HiOutlineAcademicCap />}
+                value={value}
+                onChange={(selectedValue) => onChange(selectedValue)}
+                options={studentOptions}
+                hasNextPage={hasNextStudents}
+                isFetchingNextPage={isFetchingNextStudents}
+                onLoadMore={fetchNextStudents}
+                isLoading={isLoadingStudents || mutation.isPending}
+                error={errors.userId?.message}
+                emptyText="Không tìm thấy học viên"
+                required
+                filter={{
+                  enabled: true,
+                  mode: "server",
+                  onChange: setStudentSearch,
+                  placeholder: "Tìm theo họ tên học viên...",
+                }}
+              />
+            )}
+          />
+
+          <Controller
+            name="semesterId"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Select
+                disabled
+                label="Học kỳ"
+                placeholder="Chọn học kỳ"
+                prefixIcon={<HiOutlineCalendar />}
+                value={value}
+                onChange={(selectedValue) => onChange(String(selectedValue))}
+                options={semesterOptions}
+                isLoading={mutation.isPending || isLoadingSemesters}
+                error={errors.semesterId?.message}
+                emptyText="Chưa có học kỳ"
+                required
+              />
+            )}
+          />
+        </div>
+
+        <TimeTableCalendarForm
           control={control}
-          render={({ field: { value, onChange } }) => (
-            <Select
-              disabled
-              label="Học viên"
-              placeholder="Chọn học viên"
-              prefixIcon={<HiOutlineAcademicCap />}
-              value={value}
-              onChange={(selectedValue) => onChange(selectedValue)}
-              options={studentOptions}
-              hasNextPage={hasNextStudents}
-              isFetchingNextPage={isFetchingNextStudents}
-              onLoadMore={fetchNextStudents}
-              isLoading={isLoadingStudents || mutation.isPending}
-              error={errors.userId?.message}
-              emptyText="Không tìm thấy học viên"
-              required
-              filter={{
-                enabled: true,
-                mode: "server",
-                onChange: setStudentSearch,
-                placeholder: "Tìm theo họ tên học viên...",
-              }}
-            />
-          )}
+          fields={fields}
+          register={register}
+          errors={errors}
+          append={append}
+          remove={remove}
         />
-
-        <Controller
-          name="semesterId"
-          control={control}
-          render={({ field: { value, onChange } }) => (
-            <Select
-              disabled
-              label="Học kỳ"
-              placeholder="Chọn học kỳ"
-              prefixIcon={<HiOutlineCalendar />}
-              value={value}
-              onChange={(selectedValue) => onChange(String(selectedValue))}
-              options={semesterOptions}
-              isLoading={mutation.isPending || isLoadingSemesters}
-              error={errors.semesterId?.message}
-              emptyText="Chưa có học kỳ"
-              required
-            />
-          )}
-        />
-      </div>
-
-      <TimeTableCalendarForm
-        control={control}
-        fields={fields}
-        register={register}
-        errors={errors}
-        append={append}
-        remove={remove}
-      />
-
       </div>
 
       <div className="flex flex-col gap-4 px-4">

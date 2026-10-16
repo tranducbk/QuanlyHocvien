@@ -24,7 +24,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 import {
   DashboardGradeRequestAlert,
   DashboardRecentStudent,
-  DashboardRiskStudent,
   DashboardTuitionAlert,
 } from "@/types/dashboard";
 import {
@@ -63,24 +62,118 @@ export default function Main() {
 
   if (systemType === "MILITARY") {
     const militaryStats = [
-      { label: "Học viên", value: dashboard?.overview.totalStudents || 0, href: "/commander/military/students" },
-      { label: "Lớp được giao", value: dashboard?.overview.totalClasses || 0, href: "/commander/military/classes" },
-      { label: "Môn học", value: dashboard?.overview.totalSubjects || 0, href: "/commander/military/subjects" },
-      { label: "Đề xuất chờ duyệt", value: dashboard?.overview.pendingGradeRequests || 0, href: "/commander/military/approvals" },
-      { label: "Thành tích", value: dashboard?.overview.totalAchievements || 0, href: "/commander/military/achievements" },
-      { label: "Lịch trực", value: dashboard?.overview.totalDutySchedules || 0, href: "/commander/military/duty-schedules" },
+      {
+        label: "Học viên",
+        value: dashboard?.overview.totalStudents || 0,
+        href: "/commander/military/students",
+      },
+      {
+        label: "Lớp được giao",
+        value: dashboard?.overview.totalClasses || 0,
+        href: "/commander/military/classes",
+      },
+      {
+        label: "Môn học",
+        value: dashboard?.overview.totalSubjects || 0,
+        href: "/commander/military/subjects",
+      },
+      {
+        label: "Đề xuất chờ duyệt",
+        value: dashboard?.overview.pendingGradeRequests || 0,
+        href: "/commander/military/approvals",
+      },
+      {
+        label: "Thành tích",
+        value: dashboard?.overview.totalAchievements || 0,
+        href: "/commander/military/achievements",
+      },
+      {
+        label: "Lịch trực",
+        value: dashboard?.overview.totalDutySchedules || 0,
+        href: "/commander/military/duty-schedules",
+      },
     ];
     return (
-      <PageContainer breadcrumb={[{ label: "Tổng quan" }]} title="Tổng quan hệ quân sự" subtitle="Tình hình các lớp được giao, học tập và công việc cần xử lý." isLoading={dashboardQuery.isLoading} skeleton={<DashboardSkeleton />} isError={dashboardQuery.isError} onRetry={dashboardQuery.refetch} className="space-y-8">
+      <PageContainer
+        breadcrumb={[{ label: "Tổng quan" }]}
+        title="Tổng quan hệ quân sự"
+        subtitle="Tình hình các lớp được giao, học tập và công việc cần xử lý."
+        isLoading={dashboardQuery.isLoading}
+        skeleton={<DashboardSkeleton />}
+        isError={dashboardQuery.isError}
+        onRetry={dashboardQuery.refetch}
+        className="space-y-8"
+      >
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {militaryStats.map((item) => <Link key={item.label} href={item.href} className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"><Typography variant="label" weight="bold" color="gray">{item.label}</Typography><p className="mt-3 text-3xl font-black text-primary-700 dark:text-primary-300">{formatNumber(item.value)}</p></Link>)}
+          {militaryStats.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+            >
+              <Typography variant="label" weight="bold" color="gray">
+                {item.label}
+              </Typography>
+              <p className="mt-3 text-3xl font-black text-primary-700 dark:text-primary-300">
+                {formatNumber(item.value)}
+              </p>
+            </Link>
+          ))}
         </section>
         <section className="grid gap-6 xl:grid-cols-2">
-          <Panel title="Đề xuất điểm cần xử lý" href="/commander/military/approvals" actionLabel="Xem đề xuất">
-            <div className="space-y-3">{dashboard?.alerts.pendingRequests.length ? dashboard.alerts.pendingRequests.map((request) => <PendingRequestItem key={request.id} request={request} />) : <EmptyLine icon={HiOutlineCheckCircle} title="Không có đề xuất chờ duyệt" description="Đề xuất điểm của học viên sẽ được hiển thị ở đây." />}</div>
+          <Panel
+            title="Đề xuất điểm cần xử lý"
+            href="/commander/military/approvals"
+            actionLabel="Xem đề xuất"
+          >
+            <div className="space-y-3">
+              {dashboard?.alerts.pendingRequests.length ? (
+                dashboard.alerts.pendingRequests.map((request) => (
+                  <PendingRequestItem key={request.id} request={request} />
+                ))
+              ) : (
+                <EmptyLine
+                  icon={HiOutlineCheckCircle}
+                  title="Không có đề xuất chờ duyệt"
+                  description="Đề xuất điểm của học viên sẽ được hiển thị ở đây."
+                />
+              )}
+            </div>
           </Panel>
-          <Panel title="Hồ sơ học viên cập nhật gần đây" href="/commander/military/students" actionLabel="Xem học viên">
-            <div className="space-y-3">{dashboard?.recent.students.length ? dashboard.recent.students.map((student) => <Link key={student.id} href="/commander/military/students" className="block rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"><Typography variant="body" weight="semibold">{student.fullName || "Chưa cập nhật"}</Typography><Typography variant="caption" color="gray" className="mt-1 block">{student.code || "Chưa có mã"} · {student.className || "Chưa xếp lớp"}</Typography></Link>) : <EmptyLine icon={HiOutlineAcademicCap} title="Chưa có học viên trong lớp" description="Học viên thuộc các lớp được giao sẽ hiển thị tại đây." />}</div>
+          <Panel
+            title="Hồ sơ học viên cập nhật gần đây"
+            href="/commander/military/students"
+            actionLabel="Xem học viên"
+          >
+            <div className="space-y-3">
+              {dashboard?.recent.students.length ? (
+                dashboard.recent.students.map((student) => (
+                  <Link
+                    key={student.id}
+                    href="/commander/military/students"
+                    className="block rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"
+                  >
+                    <Typography variant="body" weight="semibold">
+                      {student.fullName || "Chưa cập nhật"}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="gray"
+                      className="mt-1 block"
+                    >
+                      {student.code || "Chưa có mã"} ·{" "}
+                      {student.className || "Chưa xếp lớp"}
+                    </Typography>
+                  </Link>
+                ))
+              ) : (
+                <EmptyLine
+                  icon={HiOutlineAcademicCap}
+                  title="Chưa có học viên trong lớp"
+                  description="Học viên thuộc các lớp được giao sẽ hiển thị tại đây."
+                />
+              )}
+            </div>
           </Panel>
         </section>
       </PageContainer>
@@ -174,13 +267,18 @@ export default function Main() {
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <Panel title="Học viên theo đơn vị">
-            <BarsChart data={dashboard?.charts.studentsByUnit || []} color="#0ea5e9" />
+            <BarsChart
+              data={dashboard?.charts.studentsByUnit || []}
+              color="#0ea5e9"
+            />
           </Panel>
           <Panel title="Đề xuất điểm">
-            <BarsChart data={dashboard?.charts.gradeRequests || []} color="#f59e0b" />
+            <BarsChart
+              data={dashboard?.charts.gradeRequests || []}
+              color="#f59e0b"
+            />
           </Panel>
         </section>
-
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <Panel
@@ -314,49 +412,35 @@ const Panel = ({
   </section>
 );
 
-const RiskStudentItem = ({ student }: { student: DashboardRiskStudent }) => (
-  <Link
-    href="/commander/profiles"
-    className="block rounded-xl border border-amber-100 bg-amber-50/60 p-4 transition-colors hover:border-amber-200 hover:bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/20 dark:hover:border-amber-800"
-  >
-    <div className="flex items-start justify-between gap-3">
+const PendingRequestItem = ({
+  request,
+  href,
+}: {
+  request: DashboardGradeRequestAlert;
+  href?: string;
+}) => {
+  const systemType = useAuthStore((state) => state.user?.systemType);
+  return (
+    <Link
+      href={
+        href ||
+        (systemType === "MILITARY"
+          ? "/commander/military/approvals"
+          : "/commander/approvals")
+      }
+      className="flex items-center justify-between gap-4 rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 transition-colors hover:border-primary-200 hover:bg-primary-50/50 dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:border-primary-800 dark:hover:bg-primary-950/20"
+    >
       <div className="min-w-0">
         <Typography variant="body" weight="semibold" className="break-words">
-          {student.fullName}
+          {request.studentName}
         </Typography>
         <Typography variant="caption" color="gray" className="mt-1 block">
-          {student.code || "Chưa có mã"} - CPA:{" "}
-          {student.cpa4 !== null ? Number(student.cpa4).toFixed(2) : "Chưa có"}
+          {request.subjectName} - {formatDate(request.createdAt)}
         </Typography>
       </div>
-      <Badge variant="warning">{student.reasons.length} cảnh báo</Badge>
-    </div>
-    <div className="mt-3 flex flex-wrap gap-2">
-      {student.reasons.map((reason) => (
-        <Badge key={reason} variant="neutral">
-          {reason}
-        </Badge>
-      ))}
-    </div>
-  </Link>
-);
-
-const PendingRequestItem = ({ request, href }: { request: DashboardGradeRequestAlert; href?: string }) => {
-  const systemType = useAuthStore((state) => state.user?.systemType);
-  return <Link
-    href={href || (systemType === "MILITARY" ? "/commander/military/approvals" : "/commander/approvals")}
-    className="flex items-center justify-between gap-4 rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 transition-colors hover:border-primary-200 hover:bg-primary-50/50 dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:border-primary-800 dark:hover:bg-primary-950/20"
-  >
-    <div className="min-w-0">
-      <Typography variant="body" weight="semibold" className="break-words">
-        {request.studentName}
-      </Typography>
-      <Typography variant="caption" color="gray" className="mt-1 block">
-        {request.subjectName} - {formatDate(request.createdAt)}
-      </Typography>
-    </div>
-    <Badge variant="warning">Chờ duyệt</Badge>
-  </Link>;
+      <Badge variant="warning">Chờ duyệt</Badge>
+    </Link>
+  );
 };
 
 const TuitionItem = ({ tuition }: { tuition: DashboardTuitionAlert }) => (
@@ -372,7 +456,11 @@ const TuitionItem = ({ tuition }: { tuition: DashboardTuitionAlert }) => (
         {formatSemesterYear(String(tuition.semester), tuition.schoolYear)}
       </Typography>
     </div>
-    <Typography variant="caption" weight="bold" className="whitespace-nowrap text-amber-600">
+    <Typography
+      variant="caption"
+      weight="bold"
+      className="whitespace-nowrap text-amber-600"
+    >
       {formatCurrency(tuition.amount)}
     </Typography>
   </Link>

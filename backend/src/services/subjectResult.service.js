@@ -6,43 +6,58 @@ const ExcelJS = require('exceljs');
 const SubjectResult = db.subjectResult;
 const SemesterResult = db.semesterResult;
 const User = db.user;
+const Profile = db.profile;
 
-const ensureSemesterResult = async (semesterResultId) => {
-  const semesterResult = await SemesterResult.findByPk(semesterResultId);
-  if (!semesterResult) throw new BadRequestError('Không tìm thấy kết quả học kỳ');
-  const user = await User.findByPk(semesterResult.userId);
-  if (!user || user.role !== 'STUDENT') {
-    throw new BadRequestError('Chỉ được nhập môn học cho học viên');
-  }
-};
-
-const create = async (data) => {
-  await ensureSemesterResult(data.semesterResultId);
-  return SubjectResult.create(data);
-};
-const getAll = async (query) => paginateQuery(SubjectResult, query, {
-  filterFields: ['semesterResultId', 'subjectCode', 'subjectName', 'letterGrade'],
-  include: [{ model: SemesterResult }],
+const buildSemesterInclude = (requester) => ({
+  model: SemesterResult,
+  required: true,
+  include: [{
+    model: User,
+    attributes: ['id'],
+    where: {
+      role: 'STUDENT',
+      systemType: requester.systemType,
+    },
+    required: true,
+    include: [{
+      model: Profile,
+      as: 'Profile',
+      attributes: ['id', 'code', 'fullName', 'unit', 'commanderId'],
+      where: { commanderId: requester.id },
+      required: true,
+    }],
+  }],
 });
 
-const getDetail = async (id) => {
-  const record = await SubjectResult.findByPk(id, {
-    include: [{ model: SemesterResult }],
+const ensureSemesterResult = async (semesterResultId, requester, transaction) => {
+  const semesterResult = await SemesterResult.findOne({
+    where: { id: semesterResultId },
+    include: buildSemesterInclude(requester).include,
+    transaction,
   });
-  if (!record) throw new NotFoundError('Không tìm thấy kết quả môn học');
+  if (!semesterResult) {
+    throw new BadRequestError('Không tìm thấy kết quả học kỳ trong phạm vi quản lý');
+  }
+  return semesterResult;
+};
+
+const create = async (data, requester) => {
+  await ensureSemesterResult(data.semesterResultId, requester);
+  return SubjectResult.create(data);
+};
+
+const getAll = async (query, requester) => paginateQuery(SubjectResult, query, {
+  filterFields: ['semesterResultId', 'subjectCode', 'subjectName', 'letterGrade'],
+  include: [buildSemesterInclude(requester)],
+});
+
+const getDetail = async (id, requester) => {
+  const record = await SubjectResult.findOne({
+    where: { id },
+    include: [buildSemesterInclude(requester)],
+  });
+  if (!record) throw new NotFoundError('Không tìm thấy kết quả môn học trong phạm vi quản lý');
   return record;
-};
-
-const update = async (id, data) => {
-  const record = await getDetail(id);
-  if (data.semesterResultId) await ensureSemesterResult(data.semesterResultId);
-  return record.update(data);
-};
-
-const deleteRecord = async (id) => {
-  const record = await getDetail(id);
-  await record.destroy();
-  return { deleted: true };
 };
 
 const downloadTemplate = async () => {
@@ -70,46 +85,50 @@ const downloadTemplate = async () => {
   return workbook.xlsx.writeBuffer();
 };
 
-const importExcel = async (fileBuffer, semesterResultId) => {
-  await ensureSemesterResult(semesterResultId);
-
+const importExcel = async (fileBuffer, semesterResultId, requester) => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(fileBuffer);
-  
+
   const worksheet = workbook.getWorksheet(1);
   if (!worksheet) throw new BadRequestError('File Excel không hợp lệ');
 
   const rows = [];
+  const subjectCodes = new Set();
   worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber === 1) return; // Skip header
+    if (rowNumber === 1) return;
 
     const subjectCode = row.getCell(1).value?.toString()?.trim();
     const subjectName = row.getCell(2).value?.toString()?.trim();
-    const credits = parseFloat(row.getCell(3).value);
-    const gradePoint10 = parseFloat(row.getCell(4).value);
-    const gradePoint4 = parseFloat(row.getCell(5).value);
+    const credits = Number(row.getCell(3).value);
+    const gradePoint10 = Number(row.getCell(4).value);
+    const gradePoint4 = Number(row.getCell(5).value);
     const letterGrade = row.getCell(6).value?.toString()?.trim();
 
-    if (!subjectCode || !subjectName || isNaN(credits) || !letterGrade) {
+    if (!subjectCode || !subjectName || !Number.isFinite(credits) || !letterGrade) {
       throw new BadRequestError(`Dòng ${rowNumber}: Thiếu thông tin bắt buộc (mã môn, tên môn, tín chỉ, điểm chữ)`);
     }
+    if (subjectCodes.has(subjectCode)) {
+      throw new BadRequestError(`Dòng ${rowNumber}: Mã môn ${subjectCode} bị trùng trong file`);
+    }
+    subjectCodes.add(subjectCode);
 
     rows.push({
       semesterResultId,
       subjectCode,
       subjectName,
       credits,
-      gradePoint10: isNaN(gradePoint10) ? null : gradePoint10,
-      gradePoint4: isNaN(gradePoint4) ? null : gradePoint4,
+      gradePoint10: Number.isFinite(gradePoint10) ? gradePoint10 : null,
+      gradePoint4: Number.isFinite(gradePoint4) ? gradePoint4 : null,
       letterGrade,
     });
   });
 
   if (rows.length === 0) throw new BadRequestError('File Excel không có dữ liệu');
 
-  return db.sequelize.transaction(async (t) => {
-    return SubjectResult.bulkCreate(rows, { transaction: t });
+  return db.sequelize.transaction(async (transaction) => {
+    await ensureSemesterResult(semesterResultId, requester, transaction);
+    return SubjectResult.bulkCreate(rows, { transaction });
   });
 };
 
-module.exports = { create, getAll, getDetail, update, delete: deleteRecord, downloadTemplate, importExcel };
+module.exports = { create, getAll, getDetail, downloadTemplate, importExcel };

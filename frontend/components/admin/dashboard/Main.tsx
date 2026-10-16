@@ -9,18 +9,15 @@ import {
   HiOutlineExclamation,
   HiOutlineIdentification,
   HiOutlineOfficeBuilding,
-  HiOutlineShieldCheck,
   HiOutlineUserGroup,
 } from "react-icons/hi";
 import type { IconType } from "react-icons";
-import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import { BarsChart, DonutChart } from "@/library/charts";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { dashboardService } from "@/services/dashboard";
-import { formatDateTime } from "@/utils/fn-common";
 
 type Tone = "primary" | "success" | "warning" | "error" | "sky";
 
@@ -139,7 +136,10 @@ export default function Main() {
 
         <section className="grid gap-6 xl:grid-cols-2">
           <Panel title="Dữ liệu nền">
-            <BarsChart data={dashboard?.charts.masterData || []} color="#747a56" />
+            <BarsChart
+              data={dashboard?.charts.masterData || []}
+              color="#747a56"
+            />
           </Panel>
           <Panel title="Bản ghi theo phân hệ">
             <BarsChart
@@ -216,50 +216,6 @@ const Panel = ({
     </Typography>
     {children}
   </section>
-);
-
-const AlertLine = ({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: IconType;
-  label: string;
-  value: number;
-}) => (
-  <div className="flex items-center justify-between rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
-    <div className="flex items-center gap-3">
-      <div className="flex size-9 items-center justify-center rounded-lg bg-white text-primary-600 dark:bg-neutral-950 dark:text-primary-300">
-        <Icon size={18} />
-      </div>
-      <Typography variant="body" weight="semibold">
-        {label}
-      </Typography>
-    </div>
-    <Badge variant={value ? "warning" : "success"}>{formatNumber(value)}</Badge>
-  </div>
-);
-
-const EmptyState = ({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: IconType;
-  title: string;
-  description: string;
-}) => (
-  <div className="flex items-start gap-3 rounded-xl border border-dashed border-neutral-200 p-5 text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
-    <Icon size={22} className="mt-0.5 shrink-0" />
-    <div>
-      <Typography variant="body" weight="semibold" color="neutral">
-        {title}
-      </Typography>
-      <Typography variant="caption" color="gray" className="mt-1 block">
-        {description}
-      </Typography>
-    </div>
-  </div>
 );
 
 const DashboardSkeleton = () => (
