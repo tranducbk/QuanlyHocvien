@@ -132,6 +132,11 @@ const { authMiddleware, requireAdmin } = require('../middlewares/auth.middleware
  *                 "email": {
  *                   "type": "string"
  *                 },
+ *                 "trainingSystemCode": {
+ *                   "type": "string",
+ *                   "enum": ["HE_1", "HE_3", "HE_4", "HE_5", "HE_7"],
+ *                   "description": "Bắt buộc với Chỉ huy và Học viên; Admin không thuộc hệ nào"
+ *                 },
  *                 "code": {
  *                   "type": "string",
  *                   "description": "Mã HV/CH"

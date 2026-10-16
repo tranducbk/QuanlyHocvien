@@ -58,6 +58,7 @@ db.militaryDutySchedule = require('./militaryDutySchedule.js')(sequelize, DataTy
 // Nhóm Hồ sơ Sinh viên
 db.profile = require('./profile.js')(sequelize, DataTypes);
 db.user = require('./user.js')(sequelize, DataTypes);
+db.trainingSystem = require('./TrainingSystem.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
 db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
@@ -86,6 +87,9 @@ db.gradeRequest = require('./gradeRequest.js')(sequelize, DataTypes);
 // ==========================
 // Relations
 // ==========================
+
+db.trainingSystem.hasMany(db.user, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.user.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
 
 // --- Nhóm Quản lý Tổ chức & Cơ sở ---
 

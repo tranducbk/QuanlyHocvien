@@ -32,7 +32,7 @@ export interface CreateUserRequest {
   username: string;
   password: string;
   role: "ADMIN" | "COMMANDER" | "STUDENT";
-  systemType?: "EXTERNAL" | "MILITARY" | null;
+  trainingSystemCode?: "HE_1" | "HE_3" | "HE_4" | "HE_5" | "HE_7";
   fullName: string;
   email?: string;
   commanderId?: string | null;

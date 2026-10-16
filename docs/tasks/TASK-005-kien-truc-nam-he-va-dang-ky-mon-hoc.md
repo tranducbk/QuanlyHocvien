@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái
 
-- Trạng thái: Đã chốt hướng thiết kế, chưa triển khai code.
+- Trạng thái: Phase 005A hoàn tất; các API học tập chưa được chuyển sang mô hình mới.
 - Loại task: Thiết kế kiến trúc và kế hoạch chuyển đổi nhiều giai đoạn.
 - Phạm vi hệ đào tạo: Hệ 1, Hệ 3, Hệ 4, Hệ 5 và Hệ 7.
 - Điều kiện triển khai: Phải tách thành các phase nhỏ; không triển khai toàn bộ theo kiểu big bang.
@@ -16,7 +16,7 @@ Chuẩn hóa mô hình dữ liệu và luồng nghiệp vụ đào tạo để:
 3. Hệ 5 cho phép từng học viên tự khai báo danh sách môn học thực tế của từng kỳ tại cơ sở đào tạo ngoài quân đội, sau đó Chỉ huy duyệt.
 4. Thống nhất mô hình môn học mở, đăng ký học và kết quả học tập để không phải duy trì các bảng và luồng xử lý riêng lẻ theo từng hệ.
 5. Đặt tên thư mục, file, model, API và field rõ nghĩa, chuyên nghiệp, đồng nhất với kiến trúc hiện tại.
-6. Chuyển đổi an toàn từ mô hình `EXTERNAL | MILITARY` và các bảng lớp/kết quả đang tách rời, không làm mất dữ liệu hiện có.
+6. Tạo dữ liệu mới theo năm hệ sau lần reset database đã được người dùng yêu cầu; không ánh xạ dữ liệu `EXTERNAL | MILITARY` cũ.
 
 ## 3. Căn cứ và thứ tự ưu tiên
 
@@ -33,7 +33,11 @@ Task này phải được triển khai theo các tài liệu sau:
 
 Khi có mâu thuẫn, quyết định bỏ kiến trúc phân hệ tại đầu `QLHV.md`, các bất biến trong `AGENTS.md` và quyết định đã chốt trong task này được ưu tiên. Source hiện tại chỉ được xem là hành vi đang tồn tại cần chuyển đổi, không mặc nhiên là kiến trúc đích.
 
-### 3.1. Mâu thuẫn nghiệp vụ cần được xử lý trước khi code
+### 3.1. Quyết định khởi tạo lại dữ liệu
+
+Người dùng đã yêu cầu xóa dữ liệu trong database PostgreSQL hiện đang cấu hình và chỉ tạo lại danh mục năm hệ cùng tài khoản Admin. Đây là ngoại lệ một lần đối với mục tiêu bảo toàn dữ liệu cũ trong `QLHV.md` và `docs/project-brief.md`. Reset đã hoàn tất và được kiểm tra: 5 hệ, 1 Admin, các bảng nghiệp vụ khác trống. Từ thời điểm này, các migration tiếp theo vẫn phải bảo toàn dữ liệu mới phát sinh.
+
+### 3.2. Mâu thuẫn nghiệp vụ cần được xử lý trước khi code
 
 Yêu cầu mới cho phép Chỉ huy chỉnh sửa kết quả học tập và cho phép Học viên gửi yêu cầu chỉnh sửa điểm. Yêu cầu này mâu thuẫn trực tiếp với bất biến hiện tại trong `AGENTS.md` và `QLHV.md`: điểm đã nhập không có sửa, xóa hoặc mở khóa.
 
@@ -527,35 +531,28 @@ Không cung cấp API để Học viên tự tạo `AcademicSubject`, `CourseOff
 - Cung cấp API xem lịch sử chỉnh sửa cho Chỉ huy và cho chính Học viên có kết quả đó; Admin không được truy cập.
 - Không có endpoint xóa kết quả hoặc sửa/xóa lịch sử chỉnh điểm.
 
-## 10. Kế hoạch migration và tương thích dữ liệu
+## 10. Kế hoạch tạo mới dữ liệu và schema
 
 ### 10.1. Nguyên tắc
 
-1. Chỉ dùng migration; không dùng `sequelize.sync({ force: true })`.
-2. Tạo cấu trúc mới trước, backfill sau, kiểm tra đối soát rồi mới siết constraint.
-3. Không xóa bảng/cột legacy trong cùng phase tạo dữ liệu mới.
-4. Mỗi bước phải có báo cáo số lượng bản ghi nguồn, đích, bản ghi lỗi và bản ghi chưa ánh xạ.
-5. Có thể dùng bảng ánh xạ/audit migration để giữ quan hệ giữa ID cũ và ID mới.
-6. Phải có kế hoạch rollback cho từng migration chưa phá hủy dữ liệu.
+1. Lần reset theo yêu cầu đã hoàn tất; không dùng `sequelize.sync({ force: true })` để tạo kiến trúc mới.
+2. Database được khởi tạo với 5 `TrainingSystem` và 1 Admin, giữ username/hash mật khẩu Admin hiện tại.
+3. Tạo schema mới theo từng phase bằng migration; dữ liệu mới phát sinh sau reset phải được bảo toàn.
+4. Không tự nạp tài khoản, lớp hoặc điểm mẫu ngoài phạm vi người dùng đã chọn.
+5. Chỉ loại bỏ bảng/cột legacy ở task cleanup sau khi API mới thay thế hoàn toàn.
 
-### 10.2. Ánh xạ hệ cũ
+### 10.2. Dữ liệu cũ
 
-- `EXTERNAL` có thể ánh xạ sang `HE_5` sau khi kiểm tra dữ liệu thực tế.
-- `MILITARY` không được tự động ánh xạ về một hệ duy nhất.
-- Trước khi backfill, phải có danh sách ánh xạ rõ ràng cho từng tài khoản, lớp và dữ liệu liên quan từ `MILITARY` sang `HE_1`, `HE_3`, `HE_4` hoặc `HE_7`.
-- Migration phải dừng và báo lỗi nếu còn bản ghi `MILITARY` chưa xác định hệ; tuyệt đối không đoán hệ dựa trên dữ liệu không đáng tin cậy.
+- Dữ liệu `EXTERNAL/MILITARY` trước reset đã bị xóa theo yêu cầu; không còn bước backfill hoặc yêu cầu bảng ánh xạ.
+- Các trường/bảng legacy còn trong schema chỉ nhằm giữ ứng dụng hiện tại hoạt động trong lúc chuyển API. Không dùng chúng làm nguồn dữ liệu cho năm hệ mới.
 
 ### 10.3. Trình tự chuyển đổi
 
-1. Seed năm `TrainingSystem`.
-2. Thêm `trainingSystemId` dạng nullable vào các bảng cần chuyển đổi.
-3. Backfill từ ánh xạ đã được xác nhận.
-4. Đối soát dữ liệu và kiểm tra truy cập chéo hệ.
-5. Chỉ sau khi không còn bản ghi thiếu mới thêm `NOT NULL`/foreign key/unique constraint phù hợp.
-6. Tạo các bảng chương trình, kỳ, môn mở và đăng ký học mới.
-7. Backfill lớp, kỳ, môn, đăng ký và kết quả cũ theo bảng ánh xạ.
-8. Chạy song song lớp tương thích nếu frontend cũ chưa chuyển hết.
-9. Chỉ loại bỏ legacy trong một task cleanup riêng sau khi đã xác nhận parity, backup và phương án rollback.
+1. Tạo `TrainingSystem` và `users.training_system_id`; reset và xác minh dữ liệu khởi đầu.
+2. Bắt buộc gán hệ khi tạo tài khoản Chỉ huy/Học viên mới.
+3. Tạo chương trình, lớp, kỳ, môn mở, đăng ký và kết quả theo phase.
+4. Siết ràng buộc và chuyển API/frontend sang `trainingSystemId`.
+5. Chỉ loại bỏ legacy trong task cleanup sau khi luồng mới đã được kiểm thử.
 
 ## 11. Chia phase triển khai
 
@@ -568,14 +565,14 @@ Task tổng này phải được tách thành các task con trước khi code. M
 - Bổ sung `trainingSystemId` cho tài khoản/phạm vi cần thiết.
 - Chuẩn hóa middleware scope hệ ở backend.
 - Cập nhật auth context và contract tối thiểu cho frontend.
-- Chuẩn bị báo cáo ánh xạ `MILITARY`; chưa ép backfill nếu chưa có dữ liệu ánh xạ.
+- Kiểm tra database sau reset và bắt buộc gán hệ cho tài khoản nghiệp vụ mới.
 
 ### Phase 005B - Chương trình, lớp và quá trình học viên
 
 - Tạo chương trình, phiên bản chương trình và môn trong chương trình.
 - Chuẩn hóa `TrainingClass` và `TrainingClassHistory`.
 - Tạo `StudentProgramEnrollment`, `AcademicTerm`, `StudentTermEnrollment`.
-- Backfill dữ liệu nền có thể ánh xạ an toàn.
+- Tạo dữ liệu nền mới theo năm hệ, không backfill dữ liệu trước reset.
 
 ### Phase 005C - Môn mở và đăng ký học chung
 
@@ -594,7 +591,7 @@ Task tổng này phải được tách thành các task con trước khi code. M
 ### Phase 005E - Hợp nhất đề nghị điểm và kết quả
 
 - Chuyển `GradeProposal` và `SubjectResult` sang tham chiếu `CourseEnrollment`.
-- Backfill kết quả cũ và đối soát.
+- Chuyển API kết quả sang model mới; không backfill kết quả trước reset.
 - Tạo `GradeCorrectionRequest` và `SubjectResultRevision`.
 - Triển khai luồng Học viên yêu cầu chỉnh điểm và Chỉ huy duyệt/từ chối.
 - Triển khai quyền Chỉ huy chủ động sửa điểm, bắt buộc lý do và lưu giá trị trước/sau.
@@ -668,13 +665,11 @@ Task tổng này phải được tách thành các task con trước khi code. M
 - Hai thao tác chỉnh sửa đồng thời không được âm thầm ghi đè nhau.
 - Học viên xem được trạng thái yêu cầu và lịch sử chỉnh sửa của bản thân; Admin không truy cập được.
 
-### 13.6. Migration
+### 13.6. Khởi tạo dữ liệu
 
-- Có báo cáo ánh xạ và đối soát trước/sau migration.
-- `EXTERNAL` chỉ được chuyển sang Hệ 5 sau khi kiểm chứng.
-- Không có bản ghi `MILITARY` bị tự động đoán hệ.
-- Migration dừng an toàn khi thiếu ánh xạ.
-- Không mất dữ liệu và không cần `force sync`.
+- Database sau reset có đúng 5 hệ, 1 Admin và không có bản ghi nghiệp vụ cũ.
+- Tài khoản nghiệp vụ tạo mới phải thuộc đúng một hệ.
+- Migration các phase sau không xóa dữ liệu mới phát sinh và không dùng `force sync`.
 
 ## 14. Kịch bản kiểm tra bắt buộc
 
@@ -708,30 +703,28 @@ Task tổng này phải được tách thành các task con trước khi code. M
 - `npm run type-check`.
 - `npm run build` ở phase ảnh hưởng production build.
 
-### Migration và đối soát
+### Schema và dữ liệu khởi đầu
 
-- So sánh số học viên, lớp, kỳ, môn, đăng ký và kết quả trước/sau.
-- Kiểm tra ngẫu nhiên dữ liệu lịch sử của từng hệ.
-- Kiểm tra danh sách bản ghi chưa ánh xạ bằng không trước khi siết constraint.
-- Kiểm tra rollback trên database test hoặc bản sao dữ liệu phù hợp.
+- Kiểm tra đúng 5 mã hệ và 1 Admin sau reset.
+- Kiểm tra các bảng nghiệp vụ cũ trống.
+- Kiểm tra migration sau reset chạy lặp an toàn và không làm mất dữ liệu mới.
 
 ## 15. Điều kiện cần xác nhận trước khi bắt đầu code
 
-1. Danh sách ánh xạ từng tài khoản/lớp hiện mang loại `MILITARY` sang Hệ 1, 3, 4 hoặc 7.
-2. Quyền tạo chương trình, phiên bản chương trình và kế hoạch kỳ giữa Admin và Chỉ huy.
-3. Danh mục cơ sở đào tạo ngoài quân đội hiện có đủ để scope môn/kỳ Hệ 5 hay cần task chuẩn hóa riêng.
-4. Tập field tối thiểu Hệ 5 phải nhập cho một môn ngoài `subjectCode`, `subjectName`, `credits`.
-5. Có cho phép học viên tạo lại draft sau khi đề nghị bị từ chối hay tạo phiên bản proposal mới; khuyến nghị tạo proposal mới để giữ lịch sử.
-6. Quy tắc xử lý học viên vào lớp hoặc rời lớp sau khi kế hoạch kỳ đã được tạo.
-7. Xác nhận chính thức việc thay đổi bất biến “điểm đã nhập không được sửa” trong `AGENTS.md` và `QLHV.md`.
-8. Danh sách trường điểm nào Chỉ huy được sửa và quy tắc kiểm tra chéo giữa các thành phần điểm/tổng điểm.
-9. Có bắt buộc minh chứng khi Học viên yêu cầu chỉnh điểm hay chỉ bắt buộc lý do; định dạng và giới hạn file nếu có.
-10. Thời hạn Học viên được gửi yêu cầu chỉnh điểm và thời hạn Chỉ huy xử lý, nếu nghiệp vụ có giới hạn.
+1. Quyền tạo chương trình, phiên bản chương trình và kế hoạch kỳ giữa Admin và Chỉ huy.
+2. Danh mục cơ sở đào tạo ngoài quân đội cần tạo mới cho Hệ 5.
+3. Tập field tối thiểu Hệ 5 phải nhập cho một môn ngoài `subjectCode`, `subjectName`, `credits`.
+4. Có cho phép học viên tạo lại draft sau khi đề nghị bị từ chối hay tạo phiên bản proposal mới; khuyến nghị tạo proposal mới để giữ lịch sử.
+5. Quy tắc xử lý học viên vào lớp hoặc rời lớp sau khi kế hoạch kỳ đã được tạo.
+6. Xác nhận chính thức việc thay đổi bất biến “điểm đã nhập không được sửa” trong `AGENTS.md` và `QLHV.md`.
+7. Danh sách trường điểm nào Chỉ huy được sửa và quy tắc kiểm tra chéo giữa các thành phần điểm/tổng điểm.
+8. Có bắt buộc minh chứng khi Học viên yêu cầu chỉnh điểm hay chỉ bắt buộc lý do; định dạng và giới hạn file nếu có.
+9. Thời hạn Học viên được gửi yêu cầu chỉnh điểm và thời hạn Chỉ huy xử lý, nếu nghiệp vụ có giới hạn.
 
 Các mục trên phải được chốt trong task con tương ứng. Không được tự suy đoán nếu quyết định làm thay đổi dữ liệu lịch sử, quyền truy cập hoặc quan hệ cốt lõi.
 
 ## 16. Bàn giao của task thiết kế
 
-- Tài liệu này là đặc tả tổng, chưa tạo migration, model, API hoặc giao diện.
+- Tài liệu này là đặc tả tổng; Phase 005A đã tạo nền tảng và reset dữ liệu theo yêu cầu người dùng.
 - Trước khi code phải tách ít nhất Phase 005A thành task triển khai riêng, có phạm vi file, API contract, migration plan, acceptance criteria và rollback cụ thể.
 - Sau mỗi phase phải cập nhật `docs/product/feature-list.md` và tài liệu kiến trúc nếu trạng thái hoặc kiến trúc thực tế đã thay đổi.

@@ -54,8 +54,12 @@ export const createUserSchema = z.object({
   fullName: z.string().min(1, "Họ và tên không được để trống"),
   password: z.string().min(6, "Mật khẩu phải ít nhất 6 ký tự"),
   role: z.enum(["STUDENT", "COMMANDER", "ADMIN"]),
-  systemType: z.enum(["EXTERNAL", "MILITARY"]).nullable().optional(),
+  trainingSystemCode: z.enum(["HE_1", "HE_3", "HE_4", "HE_5", "HE_7"]).optional(),
   commanderId: z.string().nullable().or(z.literal("")).optional(),
+}).superRefine((data, context) => {
+  if (data.role !== "ADMIN" && !data.trainingSystemCode) {
+    context.addIssue({ code: "custom", path: ["trainingSystemCode"], message: "Phải chọn hệ đào tạo" });
+  }
 });
 
 export const updateUserSchema = z.object({

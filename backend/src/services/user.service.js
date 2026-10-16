@@ -188,6 +188,11 @@ const getAll = async (query, requester) => {
   for (const field of ['username', 'role', 'isAdmin', 'isActive']) {
     if (query[field] !== undefined) where[field] = query[field];
   }
+  if (requester?.role === 'ADMIN' && query.trainingSystemCode) {
+    const trainingSystem = await db.trainingSystem.findOne({ where: { code: query.trainingSystemCode, isActive: true } });
+    if (!trainingSystem) throw new BadRequestError('Hệ đào tạo không hợp lệ');
+    where.trainingSystemId = trainingSystem.id;
+  }
 
   if (query.code) profileWhere.code = query.code;
   if (query.fullName) profileWhere.fullName = { [db.Sequelize.Op.iLike]: `%${query.fullName}%` };

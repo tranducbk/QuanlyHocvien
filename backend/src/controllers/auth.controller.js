@@ -74,9 +74,17 @@ const register = asyncHandler(async (req, res) => {
   const schema = Yup.object().shape({
     username: Yup.string().required().min(3, 'Tên đăng nhập tối thiểu 3 ký tự'),
     password: Yup.string().required().min(6, 'Mật khẩu tối thiểu 6 ký tự'),
-    role: Yup.string().oneOf(['STUDENT', 'COMMANDER', 'ADMIN']),
-    systemType: Yup.string().oneOf(['EXTERNAL', 'MILITARY']).nullable(),
-    fullName: Yup.string().max(100),
+    role: Yup.string().oneOf(['STUDENT', 'COMMANDER', 'ADMIN']).required(),
+    trainingSystemCode: Yup.string().oneOf(['HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7']).when('role', {
+      is: 'ADMIN',
+      then: (schema) => schema.strip(),
+      otherwise: (schema) => schema.required('Phải chọn hệ đào tạo'),
+    }),
+    fullName: Yup.string().max(100).when('role', {
+      is: 'ADMIN',
+      then: (schema) => schema,
+      otherwise: (schema) => schema.required('Phải nhập họ và tên'),
+    }),
     email: Yup.string().max(100).email('Email không hợp lệ'),
     code: Yup.string().max(50),
     commanderId: Yup.string().uuid().nullable(),

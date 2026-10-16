@@ -15,6 +15,7 @@ export interface UserQueryRequest extends QueryRequest {
   username?: string;
   fullName?: string;
   role?: string;
+  trainingSystemCode?: string;
   isActive?: boolean;
 }
 

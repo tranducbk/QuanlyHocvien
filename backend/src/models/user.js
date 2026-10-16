@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       validate: { isIn: [['EXTERNAL', 'MILITARY']] },
     },
+    trainingSystemId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
     refreshToken: {
       type: DataTypes.TEXT,
     },

@@ -20,9 +20,31 @@ const CreateSingleUser: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { closeModal } = useModalStore()
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isDirty },
+  } = useForm<CreateUserFormValues>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      username: "",
+      email: undefined,
+      fullName: "",
+      password: "",
+      role: "STUDENT",
+      trainingSystemCode: undefined,
+      commanderId: "",
+    },
+  });
+  const selectedRole = useWatch({ control, name: "role" });
+  const selectedTrainingSystemCode = useWatch({ control, name: "trainingSystemCode" });
+
   const commandersQuery = useQuery({
-    queryKey: [QUERY_KEYS.USERS, "commanders"],
-    queryFn: () => userService.getAllUsers({ role: "COMMANDER", fetchAll: true }),
+    queryKey: [QUERY_KEYS.USERS, "commanders", selectedTrainingSystemCode],
+    queryFn: () => userService.getAllUsers({ role: "COMMANDER", trainingSystemCode: selectedTrainingSystemCode, fetchAll: true }),
+    enabled: selectedRole === "STUDENT" && Boolean(selectedTrainingSystemCode),
   });
 
   const commanderOptions = React.useMemo(() => {
@@ -45,29 +67,10 @@ const CreateSingleUser: React.FC = () => {
     onSuccess: () => closeModal(),
   });
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors, isDirty },
-  } = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: {
-      username: "",
-      email: undefined,
-      fullName: "",
-      password: "",
-      role: "STUDENT",
-      systemType: "EXTERNAL",
-      commanderId: "",
-    },
-  });
-  const selectedRole = useWatch({ control, name: "role" });
-
   const onSubmit = (data: CreateUserFormValues) => {
     createMutation.mutate({
       ...data,
-      systemType: data.role === "ADMIN" ? null : (data.systemType || "EXTERNAL"),
+      trainingSystemCode: data.role === "ADMIN" ? undefined : data.trainingSystemCode,
       commanderId: data.role === "STUDENT" && data.commanderId ? data.commanderId : null,
     });
   };
@@ -115,13 +118,17 @@ const CreateSingleUser: React.FC = () => {
         />
 
         {selectedRole !== "ADMIN" && <Controller
-          name="systemType"
+          name="trainingSystemCode"
           control={control}
           render={({ field }) => <Select
             label="Hệ đào tạo"
-            options={[{ value: "EXTERNAL", label: "Hệ ngoài" }, { value: "MILITARY", label: "Hệ quân sự" }]}
-            value={field.value || "EXTERNAL"}
-            onChange={field.onChange}
+            options={[1, 3, 4, 5, 7].map((number) => ({ value: `HE_${number}`, label: `Hệ ${number}` }))}
+            value={field.value || ""}
+            onChange={(value) => {
+              field.onChange(value);
+              setValue("commanderId", "");
+            }}
+            error={errors.trainingSystemCode?.message}
             isLoading={createMutation.isPending}
             required
           />}

@@ -7,6 +7,7 @@ const { NotFoundError, UnauthorizedError, BadRequestError } = require('../utils/
 
 const User = db.user;
 const Profile = db.profile;
+const TrainingSystem = db.trainingSystem;
 
 const SELF_PROFILE_FIELDS = [
   'fullName', 'email', 'gender', 'birthday', 'hometown', 'ethnicity',
@@ -48,44 +49,54 @@ const login = async (username, password) => {
 };
 
 const register = async (data) => {
-  const { username, password, role, fullName, email, code, systemType, commanderId } = data;
-  const assignedSystemType = role === 'ADMIN' ? null : (systemType || 'EXTERNAL');
+  const { username, password, role, fullName, email, code, commanderId, trainingSystemCode } = data;
+  const trainingSystem = role === 'ADMIN' ? null : await TrainingSystem.findOne({
+    where: { code: trainingSystemCode, isActive: true },
+  });
+  if (role !== 'ADMIN' && !trainingSystem) throw new BadRequestError('Hệ đào tạo không hợp lệ');
+  const assignedSystemType = role === 'ADMIN' ? null : (trainingSystemCode === 'HE_5' ? 'EXTERNAL' : 'MILITARY');
 
   const exist = await User.findOne({ where: { username } });
   if (exist) {
     throw new BadRequestError('Tên đăng nhập đã tồn tại');
   }
 
-  let profileId = null;
-  if ((role === 'STUDENT' || role === 'COMMANDER') && fullName) {
-    if (code) {
-      const existing = await Profile.findOne({ where: { code } });
-      if (existing) throw new BadRequestError(`Mã ${code} đã tồn tại`);
-    }
-    const prefix = (role === 'STUDENT' ? 'HV' : 'CH');
-    let assignedCommanderId = null;
-    if (role === 'STUDENT' && commanderId) {
-      const commander = await User.findOne({ where: { id: commanderId, role: 'COMMANDER', systemType: assignedSystemType } });
-      if (!commander) throw new BadRequestError('Chỉ huy phải thuộc cùng hệ đào tạo');
-      assignedCommanderId = commander.id;
-    }
-    const profile = await Profile.create({
-      code: code || _generateCode(prefix),
-      fullName,
-      email,
-      commanderId: assignedCommanderId,
-    });
-    profileId = profile.id;
-  }
-
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({
-    username,
-    password: hashedPassword,
-    role: role || 'STUDENT',
-    systemType: assignedSystemType,
-    isAdmin: role === 'ADMIN',
-    profileId,
+  const newUser = await db.sequelize.transaction(async (transaction) => {
+    let profileId = null;
+    if ((role === 'STUDENT' || role === 'COMMANDER') && fullName) {
+      if (code) {
+        const existing = await Profile.findOne({ where: { code }, transaction });
+        if (existing) throw new BadRequestError(`Mã ${code} đã tồn tại`);
+      }
+      const prefix = role === 'STUDENT' ? 'HV' : 'CH';
+      let assignedCommanderId = null;
+      if (role === 'STUDENT' && commanderId) {
+        const commander = await User.findOne({
+          where: { id: commanderId, role: 'COMMANDER', trainingSystemId: trainingSystem.id },
+          transaction,
+        });
+        if (!commander) throw new BadRequestError('Chỉ huy phải thuộc cùng hệ đào tạo');
+        assignedCommanderId = commander.id;
+      }
+      const profile = await Profile.create({
+        code: code || _generateCode(prefix),
+        fullName,
+        email,
+        commanderId: assignedCommanderId,
+      }, { transaction });
+      profileId = profile.id;
+    }
+
+    return User.create({
+      username,
+      password: hashedPassword,
+      role,
+      systemType: assignedSystemType,
+      trainingSystemId: trainingSystem?.id || null,
+      isAdmin: role === 'ADMIN',
+      profileId,
+    }, { transaction });
   });
 
   return _excludePassword(newUser);
