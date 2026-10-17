@@ -39,11 +39,14 @@ const login = async (username, password) => {
   if (!isPasswordValid) {
     throw new UnauthorizedError('Mật khẩu không chính xác');
   }
-
-  user.refreshToken = _generateTokens(user.id).refreshToken;
-  await user.save();
+  if (!user.isActive) {
+    throw new UnauthorizedError('Tài khoản đã bị khóa');
+  }
 
   const { accessToken, refreshToken } = _generateTokens(user.id);
+  user.refreshToken = refreshToken;
+  await user.save();
+
   return { accessToken, refreshToken, user: _excludePassword(user) };
 };
 
@@ -101,8 +104,17 @@ const refreshToken = async (token) => {
   if (!user) {
     throw new UnauthorizedError('Tài khoản không tồn tại');
   }
+  if (!user.isActive) {
+    throw new UnauthorizedError('Tài khoản đã bị khóa');
+  }
+  // Chỉ chấp nhận refresh token đang được lưu (token cũ hoặc bị lộ sẽ bị từ chối)
+  if (!user.refreshToken || user.refreshToken !== token) {
+    throw new UnauthorizedError('Token không hợp lệ');
+  }
 
-  const { accessToken, refreshToken } = _generateTokens(user.id);
+  // Không xoay vòng refresh token: SSR (axios-server) không lưu lại token mới
+  const { accessToken } = _generateTokens(user.id);
+  const refreshToken = token;
   return { accessToken, refreshToken, user: _excludePassword(user) };
 };
 

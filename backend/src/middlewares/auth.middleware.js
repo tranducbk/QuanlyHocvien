@@ -14,11 +14,15 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
   if (!token) throw new BadTokenError();
 
   const decoded = JwtService.jwtVerify(token);
+  if (decoded.token !== 1) throw new BadTokenError('Token không hợp lệ');
   const user = await User.findByPk(decoded.userId, {
     include: [{ model: db.profile }],
   });
   if (!user) {
     throw new BadTokenError('Tài khoản không tồn tại');
+  }
+  if (!user.isActive) {
+    throw new BadTokenError('Tài khoản đã bị khóa');
   }
 
   const plainUser = serialize(user);

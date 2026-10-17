@@ -14,6 +14,8 @@ const serialize = (value) => {
     const result = {};
     for (const [key, val] of Object.entries(plain)) {
       if (key === 'password') continue;
+      // Không trả refreshToken lưu trong bản ghi User (giữ token trong response đăng nhập)
+      if (key === 'refreshToken' && ('username' in plain || 'role' in plain)) continue;
 
       let newKey = key;
       if (/^[A-Z]/.test(key)) {

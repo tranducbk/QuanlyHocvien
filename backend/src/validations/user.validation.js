@@ -44,7 +44,6 @@ const create = yup.object({
   isAdmin: yup.boolean().nullable(),
   role: yup.string().max(50).oneOf(['STUDENT', 'COMMANDER', 'ADMIN'], 'Vai trò không hợp lệ').nullable(),
   systemType: yup.string().oneOf(['EXTERNAL', 'MILITARY']).nullable(),
-  refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   ...profileFields,
 });
@@ -54,7 +53,6 @@ const update = yup.object({
   password: yup.string().max(255).nullable(),
   isAdmin: yup.boolean().nullable(),
   role: yup.string().max(50).nullable(),
-  refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   code: yup.string().max(50).nullable(),
   fullName: yup.string().max(100).nullable(),
@@ -96,7 +94,6 @@ const batch = yup.object({
   password: yup.string().max(255).nullable(),
   isAdmin: yup.boolean().nullable(),
   role: yup.string().max(50).nullable(),
-  refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   ...profileFields,
 });
