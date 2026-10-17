@@ -8,6 +8,12 @@ const ROLE_PATH_MAP: Record<string, string> = {
   [ROLES.STUDENT.ROLE]: ROLES.STUDENT.PATH,
 };
 
+// Các trang dùng chung cho mọi hệ (hồ sơ cá nhân, thông báo)
+const COMMANDER_SHARED_PATHS = ["/commander/profile", "/commander/notification"];
+
+const matchesPath = (pathname: string, path: string) =>
+  pathname === path || pathname.startsWith(`${path}/`);
+
 export default function proxy(request: NextRequest) {
   const refreshToken = request.cookies.get("refreshToken")?.value;
   const role = request.cookies.get("role")?.value;
@@ -64,16 +70,8 @@ export default function proxy(request: NextRequest) {
     role === ROLES.COMMANDER.ROLE &&
     systemType === "MILITARY" &&
     pathname.startsWith("/commander/") &&
-    !pathname.startsWith("/commander/military/")
-  ) {
-    return NextResponse.redirect(
-      new URL("/commander/military/classes", request.url)
-    );
-  }
-  if (
-    role === ROLES.COMMANDER.ROLE &&
-    systemType === "MILITARY" &&
-    pathname === "/commander"
+    !pathname.startsWith("/commander/military/") &&
+    !COMMANDER_SHARED_PATHS.some((path) => matchesPath(pathname, path))
   ) {
     return NextResponse.redirect(
       new URL("/commander/military/classes", request.url)
@@ -105,15 +103,6 @@ export default function proxy(request: NextRequest) {
     ].some((path) => pathname.startsWith(path))
   ) {
     return NextResponse.redirect(new URL("/student", request.url));
-  }
-  if (
-    role === ROLES.STUDENT.ROLE &&
-    systemType === "MILITARY" &&
-    pathname === "/student"
-  ) {
-    return NextResponse.redirect(
-      new URL("/student/military/time-table", request.url)
-    );
   }
 
   return NextResponse.next();
