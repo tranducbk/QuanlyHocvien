@@ -2,6 +2,14 @@ const db = require('../models');
 const { BadRequestError, NotFoundError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 
+// Chỉ nhận các trường hợp lệ từ body (validateOrThrow không loại bỏ khóa lạ)
+const pick = (data = {}, fields) => fields.reduce((acc, key) => {
+  if (data[key] !== undefined) acc[key] = data[key];
+  return acc;
+}, {});
+const SEMESTER_FIELDS = ['code', 'schoolYear'];
+const SUBJECT_FIELDS = ['subjectCode', 'subjectName', 'credits', 'semesterId'];
+
 const ownClass = async (id, commanderId) => {
   const record = await db.militaryClass.findOne({ where: { id, commanderId } });
   if (!record) throw new NotFoundError('Không tìm thấy lớp quân sự');
@@ -17,13 +25,15 @@ const ownSemester = async (id, commanderId) => {
 
 const getSemesters = (query, commanderId) =>
   paginateQuery(db.militarySemester, query, { where: { commanderId } });
-const createSemester = async (data, commanderId) => {
+const createSemester = async (input, commanderId) => {
+  const data = pick(input, SEMESTER_FIELDS);
   if (await db.militarySemester.findOne({ where: { ...data, commanderId } }))
     throw new BadRequestError('Học kỳ đã tồn tại');
   return db.militarySemester.create({ ...data, commanderId });
 };
 const getSemester = async (id, commanderId) => ownSemester(id, commanderId);
-const updateSemester = async (id, data, commanderId) => {
+const updateSemester = async (id, input, commanderId) => {
+  const data = pick(input, SEMESTER_FIELDS);
   const record = await ownSemester(id, commanderId);
   const duplicate = await db.militarySemester.findOne({
     where: { ...data, commanderId },
@@ -49,7 +59,8 @@ const getSubjects = async (classId, query, commanderId) => {
     include: [{ model: db.militarySemester, where: { commanderId }, required: true }],
   });
 };
-const createSubject = async (classId, data, commanderId) => {
+const createSubject = async (classId, input, commanderId) => {
+  const data = pick(input, SUBJECT_FIELDS);
   await ownClass(classId, commanderId);
   await ownSemester(data.semesterId, commanderId);
   if (
@@ -64,10 +75,20 @@ const createSubject = async (classId, data, commanderId) => {
     throw new BadRequestError('Mã môn đã tồn tại trong lớp và học kỳ');
   return db.militarySubject.create({ ...data, classId });
 };
-const updateSubject = async (classId, id, data, commanderId) => {
+const updateSubject = async (classId, id, input, commanderId) => {
+  const data = pick(input, SUBJECT_FIELDS);
   await ownClass(classId, commanderId);
   const record = await db.militarySubject.findOne({ where: { id, classId } });
   if (!record) throw new NotFoundError('Không tìm thấy môn học');
+  const changesGradedFields =
+    (data.semesterId !== undefined && data.semesterId !== record.semesterId) ||
+    (data.credits !== undefined && Number(data.credits) !== Number(record.credits));
+  if (
+    changesGradedFields &&
+    ((await db.militarySubjectResult.count({ where: { militarySubjectId: id } })) ||
+      (await db.militaryGradeProposal.count({ where: { militarySubjectId: id } })))
+  )
+    throw new BadRequestError('Không thể đổi học kỳ hoặc số tín chỉ của môn đã có điểm hoặc đề xuất điểm');
   if (
     data.subjectCode &&
     data.subjectCode !== record.subjectCode &&
@@ -160,7 +181,11 @@ const saveTimeTable = async (classId, data, commanderId) => {
   });
   return record
     ? record.update({ schedules: data.schedules })
-    : db.militaryTimeTable.create({ classId, ...data });
+    : db.militaryTimeTable.create({
+      semesterId: data.semesterId,
+      schedules: data.schedules,
+      classId,
+    });
 };
 const getStudentTimeTable = async (userId, semesterId) => {
   const user = await db.user.findOne({

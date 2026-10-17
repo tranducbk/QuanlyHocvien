@@ -1,4 +1,5 @@
 const db = require('../models');
+const { isCommander, studentUserWhere } = require('../utils/commanderScope');
 
 const User = db.user;
 const Profile = db.profile;
@@ -21,6 +22,25 @@ const toChartRows = (rows, labelKey = 'label') => rows.map((row) => ({
 }));
 
 const getManagedProfileWhere = () => ({});
+
+const SAFE_USER_ATTRIBUTES = { exclude: ['password', 'refreshToken'] };
+
+// Học viên trong phạm vi: chỉ huy chỉ thấy học viên cùng hệ
+const managedStudentWhere = (requester) => studentUserWhere(requester) || { role: 'STUDENT' };
+
+// Include User (không lấy cột) để lọc bản ghi theo phạm vi chỉ huy
+const scopedUserFilter = (requester) => (
+  isCommander(requester)
+    ? [{ model: User, attributes: [], where: studentUserWhere(requester), required: true }]
+    : []
+);
+
+const scopedUserInclude = (requester, include = []) => ({
+  model: User,
+  attributes: SAFE_USER_ATTRIBUTES,
+  include,
+  ...(isCommander(requester) ? { where: studentUserWhere(requester), required: true } : {}),
+});
 
 const getManagedUserInclude = (requester, extraProfileInclude = []) => ({
   model: Profile,
@@ -50,7 +70,7 @@ const getStudentsByUnit = async (requester) => {
       [db.Sequelize.fn('COUNT', db.Sequelize.col('Profile.id')), 'value'],
     ],
     where: getManagedProfileWhere(requester),
-    include: [{ model: User, attributes: [], where: { role: 'STUDENT' }, required: true }],
+    include: [{ model: User, attributes: [], where: managedStudentWhere(requester), required: true }],
     group: [db.Sequelize.fn('COALESCE', db.Sequelize.col('unit'), 'Chưa phân đơn vị')],
     order: [[db.Sequelize.literal('value'), 'DESC']],
     limit: 6,
@@ -67,9 +87,7 @@ const getTuitionStatus = async (requester) => {
       [db.Sequelize.fn('SUM', db.Sequelize.col('total_amount')), 'amount'],
     ],
     group: [db.Sequelize.fn('COALESCE', db.Sequelize.col('status'), 'UNKNOWN')],
-    include: requester?.role === 'COMMANDER'
-      ? [{ model: User, attributes: [], required: true, include: [getManagedUserInclude(requester)] }]
-      : [],
+    include: scopedUserFilter(requester),
     raw: true,
   });
   return toChartRows(rows).map((item) => ({
@@ -85,9 +103,7 @@ const getAchievementsByYear = async (requester) => {
       [db.Sequelize.fn('COUNT', db.Sequelize.col('Achievement.id')), 'value'],
     ],
     group: [db.Sequelize.fn('COALESCE', db.Sequelize.cast(db.Sequelize.col('year'), 'text'), 'Chưa xác định')],
-    include: requester?.role === 'COMMANDER'
-      ? [{ model: User, attributes: [], required: true, include: [getManagedUserInclude(requester)] }]
-      : [],
+    include: scopedUserFilter(requester),
     order: [[db.Sequelize.literal('label'), 'ASC']],
     raw: true,
   });
@@ -96,7 +112,8 @@ const getAchievementsByYear = async (requester) => {
 
 const getRecentStudents = async (requester) => {
   const users = await User.findAll({
-    where: { role: 'STUDENT' },
+    where: managedStudentWhere(requester),
+    attributes: SAFE_USER_ATTRIBUTES,
     include: [getManagedUserInclude(requester, [{ model: Class }])],
     order: [['updatedAt', 'DESC']],
     limit: 5,
@@ -119,7 +136,7 @@ const getPendingRequests = async (requester) => {
   const requests = await GradeRequest.findAll({
     where: { status: 'PENDING' },
     include: [
-      { model: User, required: requester?.role === 'COMMANDER', include: [getManagedUserInclude(requester)] },
+      scopedUserInclude(requester, [getManagedUserInclude(requester)]),
       { model: SubjectResult },
     ],
     order: [['createdAt', 'DESC']],
@@ -142,7 +159,7 @@ const getUnpaidTuition = async (requester) => {
   const records = await TuitionFee.findAll({
     where: { status: 'UNPAID' },
     include: [
-      { model: User, required: requester?.role === 'COMMANDER', include: [getManagedUserInclude(requester)] },
+      scopedUserInclude(requester, [getManagedUserInclude(requester)]),
       { model: db.semester, as: 'semesterInfo', include: [{ model: db.schoolYear, as: 'schoolYearInfo' }] },
     ],
     order: [['updatedAt', 'DESC']],
@@ -164,7 +181,8 @@ const getUnpaidTuition = async (requester) => {
 
 const getRiskStudents = async (requester) => {
   const users = await User.findAll({
-    where: { role: 'STUDENT' },
+    where: managedStudentWhere(requester),
+    attributes: SAFE_USER_ATTRIBUTES,
     include: [
       getManagedUserInclude(requester),
       { model: YearlyResult, required: false },
@@ -204,6 +222,7 @@ const getRiskStudents = async (requester) => {
   return risks.slice(0, 5);
 };
 
+// Chỉ huy hệ quân sự quản lý mọi học viên/lớp thuộc hệ MILITARY (không giới hạn theo commanderId)
 const getMilitaryCommanderDashboard = async (commander) => {
   const classes = await db.militaryClass.findAll({
     where: { commanderId: commander.id },
@@ -214,7 +233,7 @@ const getMilitaryCommanderDashboard = async (commander) => {
   const profiles = classIds.length
     ? await Profile.findAll({
         where: { militaryClassId: classIds },
-        include: [{ model: User, where: { role: 'STUDENT', systemType: 'MILITARY' }, required: true }],
+        include: [{ model: User, attributes: [], where: { role: 'STUDENT', systemType: 'MILITARY' }, required: true }],
         order: [['updatedAt', 'DESC']],
         limit: 5,
       })
@@ -290,20 +309,20 @@ const getCommanderDashboard = async (query, requester) => {
     unpaidTuition,
     riskStudents,
   ] = await Promise.all([
-    User.count({ where: { role: 'STUDENT' } }),
+    User.count({ where: managedStudentWhere(requester) }),
     Class.count(),
-    Achievement.count(),
-    GradeRequest.count({ where: { status: 'PENDING' } }),
-    TuitionFee.count({ where: { status: 'UNPAID' } }),
-    groupCount(YearlyResult, 'academic_status'),
-    groupCount(GradeRequest, 'status'),
-    getTuitionStatus(),
-    getStudentsByUnit(),
-    getAchievementsByYear(),
-    getRecentStudents(),
-    getPendingRequests(),
-    getUnpaidTuition(),
-    getRiskStudents(),
+    Achievement.count({ include: scopedUserFilter(requester) }),
+    GradeRequest.count({ where: { status: 'PENDING' }, include: scopedUserFilter(requester) }),
+    TuitionFee.count({ where: { status: 'UNPAID' }, include: scopedUserFilter(requester) }),
+    groupCount(YearlyResult, 'academic_status', { include: scopedUserFilter(requester) }),
+    groupCount(GradeRequest, 'status', { include: scopedUserFilter(requester) }),
+    getTuitionStatus(requester),
+    getStudentsByUnit(requester),
+    getAchievementsByYear(requester),
+    getRecentStudents(requester),
+    getPendingRequests(requester),
+    getUnpaidTuition(requester),
+    getRiskStudents(requester),
   ]);
 
   return {

@@ -5,20 +5,20 @@ const s = require('../validations/achievement.validation');
 
 const create = asyncHandler(async (req, res) => {
   await validateOrThrow(s.create, req.body);
-  const result = await service.create(req.body);
+  const result = await service.create(req.body, req.user);
   return success(res, result, 'Tạo mới thành công', 201);
 });
 
 const createBatch = asyncHandler(async (req, res) => {
   await validateOrThrow(s.batch, req.body);
-  const result = await service.createBatch(req.body);
+  const result = await service.createBatch(req.body, req.user);
   return success(res, result, 'Nhập thành tích hàng loạt thành công', 201);
 });
 
 const importExcel = asyncHandler(async (req, res) => {
   const data = await service.parseExcelImport(req.file);
   await validateOrThrow(s.batch, data);
-  const result = await service.createBatch(data);
+  const result = await service.createBatch(data, req.user);
   return success(res, result, 'Nhập thành tích từ Excel thành công', 201);
 });
 
@@ -30,30 +30,30 @@ const downloadTemplate = asyncHandler(async (req, res) => {
 });
 
 const exportExcel = asyncHandler(async (req, res) => {
-  const buffer = await service.exportExcel(req.query);
+  const buffer = await service.exportExcel(req.query, req.user);
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=bao-cao-thanh-tich.xlsx');
   return res.send(buffer);
 });
 
 const getAll = asyncHandler(async (req, res) => {
-  const result = await service.getAll(req.query);
+  const result = await service.getAll(req.query, req.user);
   return paginated(res, result.rows, result.pagination);
 });
 
 const getDetail = asyncHandler(async (req, res) => {
-  const result = await service.getDetail(req.params.id);
+  const result = await service.getDetail(req.params.id, req.user);
   return success(res, result);
 });
 
 const update = asyncHandler(async (req, res) => {
   await validateOrThrow(s.update, req.body);
-  const result = await service.update(req.params.id, req.body);
+  const result = await service.update(req.params.id, req.body, req.user);
   return success(res, result, 'Cập nhật thành công');
 });
 
 const deleteRecord = asyncHandler(async (req, res) => {
-  await service.delete(req.params.id);
+  await service.delete(req.params.id, req.user);
   return success(res, null, 'Xóa thành công');
 });
 

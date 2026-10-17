@@ -66,7 +66,8 @@ const assertRoleMatrix = async (path, tokens) => {
   check(`GET ${path} student`, (await request('GET', path, null, tokens.student)).status, 403);
 };
 
-const assertCrossCommanderDetail = async (resource, firstCommanderToken, secondCommanderToken) => {
+// Chỉ huy cùng hệ được xem mọi học viên của hệ; chỉ huy khác hệ bị chặn (route hệ ngoài trả 403)
+const assertCrossCommanderDetail = async (resource, firstCommanderToken, secondCommanderToken, sameSystem) => {
   const list = await request('GET', `/${resource}?limit=10`, null, firstCommanderToken);
   const row = rowsOf(list)[0];
   if (!row?.id) {
@@ -75,9 +76,9 @@ const assertCrossCommanderDetail = async (resource, firstCommanderToken, secondC
   }
 
   check(
-    `GET /${resource}/:id from another commander`,
+    `GET /${resource}/:id from another ${sameSystem ? 'same-system' : 'other-system'} commander`,
     (await request('GET', `/${resource}/${row.id}`, null, secondCommanderToken)).status,
-    404
+    sameSystem ? 200 : 403
   );
 };
 
@@ -107,6 +108,7 @@ async function main() {
     secondCommander: secondCommander.accessToken,
     student: student.accessToken,
   };
+  const sameSystem = commander.user?.systemType === secondCommander.user?.systemType;
 
   if (Object.values(tokens).some(token => !token)) {
     throw new Error('Không lấy đủ token để kiểm tra ma trận quyền');
@@ -158,7 +160,7 @@ async function main() {
   );
 
   for (const resource of ['yearly-results', 'semester-results', 'subject-results']) {
-    await assertCrossCommanderDetail(resource, tokens.commander, tokens.secondCommander);
+    await assertCrossCommanderDetail(resource, tokens.commander, tokens.secondCommander, sameSystem);
   }
 
   const studentId = student.user?.id;
@@ -170,8 +172,7 @@ async function main() {
         null,
         tokens.secondCommander
       );
-      check(`GET ${resource} cross-commander status`, response.status, 200);
-      check(`GET ${resource} cross-commander rows`, rowsOf(response).length, 0);
+      check(`GET ${resource} cross-commander status`, response.status, sameSystem ? 200 : 403);
     }
   } else {
     skip('cross-commander userId filters: student id unavailable');

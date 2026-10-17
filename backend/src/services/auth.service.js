@@ -8,14 +8,16 @@ const { NotFoundError, UnauthorizedError, BadRequestError } = require('../utils/
 const User = db.user;
 const Profile = db.profile;
 
+// Trường người dùng (học viên/chỉ huy) được tự sửa trên hồ sơ của mình.
+// Dùng chung cho PUT /auth/profile và PUT /users/profile.
+// Không cho tự sửa: code, commanderId, CPA, enrollment, graduationDate, lớp/đơn vị/trường/trình độ đào tạo.
+// Giữ các trường lý lịch quân sự/Đảng mà form tự cập nhật hồ sơ (student/commander UpdateProfileForm) đang gửi.
 const SELF_PROFILE_FIELDS = [
   'fullName', 'email', 'gender', 'birthday', 'hometown', 'ethnicity',
   'religion', 'currentAddress', 'placeOfBirth', 'phoneNumber', 'cccd',
-  'partyMemberCardNumber', 'unit', 'rank', 'positionGovernment', 'positionParty',
-  'fullPartyMember', 'probationaryPartyMember', 'dateOfEnlistment',
-  'enrollment', 'graduationDate', 'currentCpa4', 'currentCpa10', 'familyMember',
-  'foreignRelations', 'startWork', 'organization', 'classId', 'organizationId',
-  'universityId', 'educationLevelId',
+  'familyMember', 'foreignRelations',
+  'rank', 'unit', 'positionGovernment', 'positionParty', 'dateOfEnlistment', 'startWork',
+  'partyMemberCardNumber', 'probationaryPartyMember', 'fullPartyMember',
 ];
 
 const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
@@ -158,4 +160,5 @@ module.exports = {
   refreshToken,
   changePassword,
   updateProfile,
+  SELF_PROFILE_FIELDS,
 };

@@ -4,7 +4,7 @@
 
 ## Mục tiêu
 
-Đưa repository về trạng thái kiểm tra tĩnh có thể tin cậy và khóa các API kết quả học tập theo bất biến nghiệp vụ hiện hành: chỉ Chỉ huy được quản lý điểm, dữ liệu phải nằm trong phạm vi học viên được phân công và điểm chính thức không có API sửa/xóa công khai.
+Đưa repository về trạng thái kiểm tra tĩnh có thể tin cậy và khóa các API kết quả học tập theo bất biến nghiệp vụ hiện hành: chỉ Chỉ huy được quản lý điểm, dữ liệu phải nằm trong phạm vi học viên cùng hệ (`systemType`) với Chỉ huy và điểm chính thức không có API sửa/xóa công khai.
 
 ## Phạm vi
 
@@ -17,7 +17,7 @@
 ### Kết quả học tập hệ ngoài hiện hành
 
 - Chỉ `COMMANDER` được truy cập API quản lý kết quả môn, học kỳ, năm và duyệt đề xuất điểm.
-- Danh sách, chi tiết, import và export phải scope theo `systemType` và `commanderId` của tài khoản đã xác thực.
+- Danh sách, chi tiết, import và export phải scope theo `role = STUDENT` và `systemType` trùng với tài khoản Chỉ huy đã xác thực (Chỉ huy quản lý mọi học viên cùng hệ, không còn giới hạn theo `Profile.commanderId`).
 - Loại bỏ `PUT`/`DELETE` công khai của kết quả môn và học kỳ.
 - Loại bỏ thao tác sửa/xóa điểm khỏi frontend.
 - Chỉ cho phép đề xuất `ADD` đối với môn chưa có điểm; không duyệt đề xuất sửa/xóa điểm chính thức.
@@ -34,7 +34,7 @@
 ## Tiêu chí hoàn thành
 
 1. Admin và Học viên nhận `403` tại API quản lý kết quả môn, học kỳ, năm và API Chỉ huy duyệt đề xuất.
-2. Chỉ huy không đọc, nhập, import hoặc export dữ liệu của học viên ngoài phạm vi được phân công.
+2. Chỉ huy không đọc, nhập, import hoặc export dữ liệu của học viên khác hệ (`systemType`), của tài khoản không phải học viên hoặc của Admin.
 3. Không còn route hoặc Swagger `PUT`/`DELETE` cho kết quả môn và học kỳ.
 4. Frontend không hiển thị nút sửa/xóa điểm chính thức.
 5. Đề xuất mới chỉ có loại `ADD` và chỉ áp dụng cho môn chưa có điểm.

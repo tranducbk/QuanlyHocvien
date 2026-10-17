@@ -23,6 +23,12 @@ const resolveSchoolYear = async (data = {}) => {
   return record;
 };
 
+// Chỉ nhận các trường hợp lệ từ body (validateOrThrow không loại bỏ khóa lạ)
+const pickSemesterFields = (data = {}) => ['code', 'schoolYearId', 'schoolYear'].reduce((acc, key) => {
+  if (data[key] !== undefined) acc[key] = data[key];
+  return acc;
+}, {});
+
 const attachSchoolYear = async (data) => {
   if (data.schoolYearId === null) throw new BadRequestError('Năm học là bắt buộc');
   if (data.schoolYearId || data.schoolYear) {
@@ -60,7 +66,8 @@ const createTerm = async (data) => {
   });
 };
 
-const create = async (data) => {
+const create = async (input) => {
+  const data = pickSemesterFields(input);
   await attachSchoolYear(data);
   data.code = Number(data.code);
   const schoolYear = await SchoolYear.findByPk(data.schoolYearId);
@@ -94,9 +101,11 @@ const getDetail = async (id) => {
   return record;
 };
 
-const update = async (id, data) => {
+const update = async (id, input) => {
+  const data = pickSemesterFields(input);
   const record = await getDetail(id);
   await attachSchoolYear(data);
+  if (data.code === null) delete data.code;
   if (data.code !== undefined) data.code = Number(data.code);
   const nextCode = data.code !== undefined ? data.code : record.code;
   const nextSchoolYearId = data.schoolYearId !== undefined ? data.schoolYearId : record.schoolYearId;

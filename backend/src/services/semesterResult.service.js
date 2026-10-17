@@ -8,6 +8,17 @@ const Profile = db.profile;
 const YearlyResult = db.yearlyResult;
 const SubjectResult = db.subjectResult;
 
+const CREATE_FIELDS = [
+  'userId', 'semester', 'schoolYear', 'yearlyResultId', 'totalCredits',
+  'averageGrade4', 'averageGrade10', 'cumulativeCredits', 'cumulativeGrade4',
+  'cumulativeGrade10', 'debtCredits', 'failedSubjects',
+];
+
+const pickFields = (data, fields) => fields.reduce((acc, key) => {
+  if (data[key] !== undefined) acc[key] = data[key];
+  return acc;
+}, {});
+
 const create = async (data, requester) => db.sequelize.transaction(async (transaction) => {
   const student = await User.findOne({
     where: {
@@ -15,12 +26,6 @@ const create = async (data, requester) => db.sequelize.transaction(async (transa
       role: 'STUDENT',
       systemType: requester.systemType,
     },
-    include: [{
-      model: Profile,
-      as: 'Profile',
-      where: { commanderId: requester.id },
-      required: true,
-    }],
     transaction,
   });
   if (!student) {
@@ -51,7 +56,7 @@ const create = async (data, requester) => db.sequelize.transaction(async (transa
     throw new BadRequestError('Kết quả học kỳ này đã tồn tại');
   }
 
-  return SemesterResult.create(data, { transaction });
+  return SemesterResult.create(pickFields(data, CREATE_FIELDS), { transaction });
 });
 
 const buildIncludes = (requester, profileFilters = {}) => [{
@@ -65,11 +70,7 @@ const buildIncludes = (requester, profileFilters = {}) => [{
   include: [{
     model: Profile,
     as: 'Profile',
-    where: {
-      commanderId: requester.id,
-      ...profileFilters,
-    },
-    required: true,
+    ...(Object.keys(profileFilters).length ? { where: profileFilters, required: true } : { required: false }),
   }],
 }, {
   model: YearlyResult,

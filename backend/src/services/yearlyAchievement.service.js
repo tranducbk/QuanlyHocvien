@@ -1,43 +1,53 @@
 const db = require('../models');
-const User = db.user;
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const { findStudentUserByCode } = require('../utils/studentLookup');
+const { assertStudentIdInScope, scopedUserInclude } = require('../utils/commanderScope');
 
 const YearlyAchievement = db.yearlyAchievement;
-const Student = db.profile;
 const ScientificInitiative = db.scientificInitiative;
 const ScientificTopic = db.scientificTopic;
 
-const create = async (data) => YearlyAchievement.create(data);
+// Chỉ các trường nghiệp vụ được phép ghi (chống mass assignment)
+const FIELDS = ['year', 'decisionNumber', 'decisionDate', 'title', 'hasMinistryReward', 'hasNationalReward', 'notes'];
+const SCIENCE_FIELDS = ['title', 'description', 'year', 'status'];
 
-const resolveStudentUserId = async (data) => {
-  if (data.userId) return data.userId;
+const pick = (data = {}, fields) => fields.reduce((acc, key) => {
+  if (data[key] !== undefined) acc[key] = data[key];
+  return acc;
+}, {});
+
+const create = async (data, requester) => {
+  if (!data.userId) throw new BadRequestError('Mã người dùng là bắt buộc');
+  await assertStudentIdInScope(requester, data.userId);
+  return YearlyAchievement.create({ ...pick(data, FIELDS), userId: data.userId });
+};
+
+const resolveStudentUserId = async (data, requester) => {
+  if (data.userId) {
+    await assertStudentIdInScope(requester, data.userId);
+    return data.userId;
+  }
   if (data.studentCode) {
-    const { user } = await findStudentUserByCode(data.studentCode);
+    const { user } = await findStudentUserByCode(data.studentCode, { requester });
     return user.id;
   }
   throw new BadRequestError('Cần truyền userId hoặc studentCode');
 };
 
-const createFull = async (data) => {
+const createFull = async (data, requester) => {
+  // Kiểm tra phạm vi trước khi mở transaction
+  const userId = await resolveStudentUserId(data, requester);
   const transaction = await db.sequelize.transaction();
   try {
-    const userId = await resolveStudentUserId(data);
     const yearlyAchievement = await YearlyAchievement.create({
+      ...pick(data, FIELDS),
       userId,
-      year: data.year,
-      decisionNumber: data.decisionNumber,
-      decisionDate: data.decisionDate,
-      title: data.title,
-      hasMinistryReward: data.hasMinistryReward,
-      hasNationalReward: data.hasNationalReward,
-      notes: data.notes,
     }, { transaction });
 
     const scientificTopics = await ScientificTopic.bulkCreate(
       (data.scientificTopics || []).map((item) => ({
-        ...item,
+        ...pick(item, SCIENCE_FIELDS),
         year: item.year || data.year,
         yearlyAchievementId: yearlyAchievement.id,
       })),
@@ -46,7 +56,7 @@ const createFull = async (data) => {
 
     const scientificInitiatives = await ScientificInitiative.bulkCreate(
       (data.scientificInitiatives || []).map((item) => ({
-        ...item,
+        ...pick(item, SCIENCE_FIELDS),
         year: item.year || data.year,
         yearlyAchievementId: yearlyAchievement.id,
       })),
@@ -66,19 +76,20 @@ const createFull = async (data) => {
   }
 };
 
-const getAll = async (query) => paginateQuery(YearlyAchievement, query, {
+const getAll = async (query, requester) => paginateQuery(YearlyAchievement, query, {
   filterFields: ['userId', 'year', 'hasMinistryReward', 'hasNationalReward'],
   include: [
-    { model: User },
+    scopedUserInclude(requester),
     { model: ScientificInitiative },
     { model: ScientificTopic },
   ],
 });
 
-const getDetail = async (id) => {
-  const record = await YearlyAchievement.findByPk(id, {
+const getDetail = async (id, requester) => {
+  const record = await YearlyAchievement.findOne({
+    where: { id },
     include: [
-      { model: User },
+      scopedUserInclude(requester),
       { model: ScientificInitiative },
       { model: ScientificTopic },
     ],
@@ -87,13 +98,16 @@ const getDetail = async (id) => {
   return record;
 };
 
-const update = async (id, data) => {
-  const record = await getDetail(id);
-  return record.update(data);
+const update = async (id, data, requester) => {
+  const record = await getDetail(id, requester);
+  if (data.userId && data.userId !== record.userId) {
+    throw new BadRequestError('Không được thay đổi học viên của thành tích năm');
+  }
+  return record.update(pick(data, FIELDS));
 };
 
-const deleteRecord = async (id) => {
-  const record = await getDetail(id);
+const deleteRecord = async (id, requester) => {
+  const record = await getDetail(id, requester);
   await record.destroy();
   return { deleted: true };
 };

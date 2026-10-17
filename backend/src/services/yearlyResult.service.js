@@ -38,8 +38,6 @@ const buildQueryParts = (query = {}, requester, { includeSemesters = false } = {
     profileWhere.unit = { [db.Sequelize.Op.iLike]: `%${query.unit}%` };
   }
 
-  profileWhere.commanderId = requester.id;
-
   if (query.isPartyMember === 'true') {
     profileWhere[db.Sequelize.Op.or] = [
       { probationaryPartyMember: { [db.Sequelize.Op.ne]: null } },
@@ -141,7 +139,8 @@ const resolveField = (obj, path) => {
 const exportYearlyResults = async (query, requester) => {
   const { where, include } = buildQueryParts(query, requester);
 
-  const sortBy = query.sortBy || 'schoolYear';
+  const SORTABLE = ['schoolYear', 'averageGrade4', 'averageGrade10', 'cumulativeGrade4', 'cumulativeGrade10', 'totalCredits', 'cumulativeCredits', 'createdAt'];
+  const sortBy = SORTABLE.includes(query.sortBy) ? query.sortBy : 'schoolYear';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
   const order = [[sortBy, sortOrder]];
 

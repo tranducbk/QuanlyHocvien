@@ -9,8 +9,8 @@ exports.create = Yup.object({
   isRead: Yup.boolean().nullable(),
 });
 
+// userId không được phép thay đổi (service bỏ qua nếu gửi lên)
 exports.update = Yup.object({
-  userId: Yup.string().uuid('Mã người dùng không hợp lệ').nullable(),
   title: Yup.string().max(255).nullable(),
   content: Yup.string().nullable(),
   type: Yup.string().max(50).nullable(),

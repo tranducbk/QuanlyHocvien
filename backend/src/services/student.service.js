@@ -23,15 +23,31 @@ const TuitionFee = db.tuitionFee;
 const Notification = db.notification;
 const Semester = db.semester;
 
-const isCommander = (requester) => requester?.role === 'COMMANDER';
+const { isCommander, isStudentInScope } = require('../utils/commanderScope');
+
+// Trường hồ sơ được sửa qua PUT /users/profiles/:id
+const ADMIN_PROFILE_FIELDS = [
+  'code', 'fullName', 'email', 'gender', 'birthday', 'hometown', 'ethnicity',
+  'religion', 'currentAddress', 'placeOfBirth', 'phoneNumber', 'cccd',
+  'partyMemberCardNumber', 'unit', 'rank', 'positionGovernment', 'positionParty',
+  'fullPartyMember', 'probationaryPartyMember', 'dateOfEnlistment',
+  'enrollment', 'graduationDate', 'currentCpa4', 'currentCpa10', 'familyMember',
+  'foreignRelations', 'startWork', 'organization', 'classId', 'organizationId',
+  'universityId', 'educationLevelId', 'commanderId',
+];
+// Chỉ huy: không gán chỉ huy quản lý, không sửa CPA (tính tự động từ kết quả học tập),
+// không đổi lớp/đơn vị/trường/trình độ (gán qua chức năng lớp)
+const COMMANDER_BLOCKED_FIELDS = ['commanderId', 'classId', 'organizationId', 'universityId', 'educationLevelId'];
+const COMMANDER_PROFILE_FIELDS = ADMIN_PROFILE_FIELDS.filter((field) => !COMMANDER_BLOCKED_FIELDS.includes(field));
+const SAFE_USER_ATTRIBUTES = { exclude: ['password', 'refreshToken'] };
 
 const applyCommanderScope = (where, requester) => {
   // Cho phép Chỉ huy quản lý tất cả học viên trường ngoài
 };
 
 const assertCommanderCanAccessProfile = (profile, requester) => {
-  // Cho phép Chỉ huy truy cập tất cả học viên trường ngoài, nhưng chỉ trong hệ của mình
-  if (isCommander(requester) && profile?.User?.systemType !== requester.systemType) {
+  // Chỉ huy truy cập mọi hồ sơ học viên (role STUDENT) cùng hệ với mình
+  if (isCommander(requester) && !isStudentInScope(requester, profile?.User)) {
     throw new NotFoundError('Khong tim thay hoc vien');
   }
 };
@@ -177,7 +193,7 @@ const getAll = async (query, requester) => {
 const getDetail = async (id, requester) => {
   const record = await Student.findByPk(id, {
     include: [
-      { model: User, ...(isCommander(requester) ? { attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true } : {}) },
+      { model: User, ...(isCommander(requester) ? { attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true } : { attributes: SAFE_USER_ATTRIBUTES }) },
       { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel },
       ...(requester?.systemType === 'MILITARY' ? [{ model: db.militaryClass }] : []),
       { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
@@ -196,7 +212,17 @@ const update = async (id, data, requester) => {
     throw new ForbiddenError('Chi admin moi duoc gan chi huy quan ly hoc vien');
   }
   const record = await getDetail(id, requester);
-  return record.update(data);
+  const allowedFields = isCommander(requester) ? COMMANDER_PROFILE_FIELDS : ADMIN_PROFILE_FIELDS;
+  const updateData = {};
+  for (const field of allowedFields) {
+    if (data[field] !== undefined) updateData[field] = data[field];
+  }
+  // Tương thích tên trường cũ trong validation (cccdNumber -> cccd)
+  if (updateData.cccd === undefined && data.cccdNumber !== undefined) updateData.cccd = data.cccdNumber;
+  if (record.User?.systemType === 'MILITARY') {
+    for (const field of ['classId', 'organizationId', 'universityId', 'educationLevelId']) delete updateData[field];
+  }
+  return record.update(updateData);
 };
 
 const deleteRecord = async (id, requester) => {
@@ -430,7 +456,7 @@ const ensureSemester = async (semesterId) => {
 
 const getMyCutRice = async (userId, query = {}) => {
   const include = [
-    { model: User, include: [{ model: Student }] },
+    { model: User, attributes: SAFE_USER_ATTRIBUTES, include: [{ model: Student }] },
     { model: Semester, as: 'semesterInfo', include: [{ model: db.schoolYear, as: 'schoolYearInfo' }] },
   ];
   const semesterId = query.semesterId || await getLatestTimeTableSemesterId(userId);

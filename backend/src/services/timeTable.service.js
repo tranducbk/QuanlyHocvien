@@ -4,6 +4,7 @@ const Semester = db.semester;
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const { findStudentUserByCode } = require('../utils/studentLookup');
+const { isStudentInScope, studentUserWhere } = require('../utils/commanderScope');
 
 const TimeTable = db.timeTable;
 const SchoolYear = db.schoolYear;
@@ -85,11 +86,33 @@ const findSemesterByImportFields = async ({ semesterId, semester, schoolYear }) 
   return record.id;
 };
 
-const ensureStudentUser = async (userId) => {
+const SAFE_USER_ATTRIBUTES = { exclude: ['password', 'refreshToken'] };
+
+// Chỉ huy chỉ được thao tác với học viên cùng hệ
+const ensureStudentUser = async (userId, requester) => {
   const user = await User.findByPk(userId);
-  if (!user || user.role !== 'STUDENT') {
+  if (!user || user.role !== 'STUDENT' || !isStudentInScope(requester, user)) {
     throw new BadRequestError('Chỉ được nhập lịch học cho học viên');
   }
+};
+
+const pickFields = (data, fields) => Object.fromEntries(
+  fields.filter((field) => data[field] !== undefined).map((field) => [field, data[field]])
+);
+
+const WRITABLE_FIELDS = ['userId', 'semesterId', 'schedules'];
+
+const buildInclude = (requester) => {
+  const userWhere = studentUserWhere(requester);
+  return [
+    {
+      model: User,
+      attributes: SAFE_USER_ATTRIBUTES,
+      include: [{ model: db.profile }],
+      ...(userWhere ? { where: { ...userWhere }, required: true } : {}),
+    },
+    { model: Semester, include: [{ model: SchoolYear, as: 'schoolYearInfo' }] },
+  ];
 };
 
 const ensureSemester = async (semesterId) => {
@@ -205,8 +228,9 @@ const syncCutRiceFromTimeTable = async (userId, semesterId) => {
   }
 };
 
-const create = async (data) => {
-  await ensureStudentUser(data.userId);
+const create = async (input, requester) => {
+  const data = pickFields(input, WRITABLE_FIELDS);
+  await ensureStudentUser(data.userId, requester);
   await ensureSemester(data.semesterId);
   await validateAndCombineSchedules(data.userId, data.semesterId, data.schedules);
   const record = await TimeTable.create(data);
@@ -214,7 +238,7 @@ const create = async (data) => {
   return record;
 };
 
-const createBatch = async (data) => {
+const createBatch = async (data, requester) => {
   const items = data.items || [];
   const results = [];
 
@@ -225,7 +249,10 @@ const createBatch = async (data) => {
   for (const item of items) {
     const studentCode = item.studentCode;
     try {
-      const { user } = await findStudentUserByCode(studentCode);
+      const { user } = await findStudentUserByCode(studentCode, { requester });
+      if (!isStudentInScope(requester, user)) {
+        throw new BadRequestError(`Không tìm thấy học viên có mã ${studentCode}`);
+      }
       const payload = {
         userId: user.id,
         semesterId: item.semesterId !== undefined ? item.semesterId : data.semesterId,
@@ -346,8 +373,8 @@ const parseExcelImport = async (file) => {
   return { items };
 };
 
-const exportExcel = async (query = {}) => {
-  const result = await getAll({ ...query, fetchAll: true });
+const exportExcel = async (query = {}, requester) => {
+  const result = await getAll({ ...query, fetchAll: true }, requester);
   const ExcelJS = require('exceljs');
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Bao cao thoi khoa bieu');
@@ -399,14 +426,14 @@ const exportExcel = async (query = {}) => {
 
   return workbook.xlsx.writeBuffer();
 };
-const getAll = async (query) => {
-  const userWhere = {};
+const getAll = async (query, requester) => {
+  const userWhere = { ...(studentUserWhere(requester) || {}) };
   const profileWhere = {};
   const semesterWhere = {};
   const schoolYearWhere = {};
   const opts = {
     filterFields: ['userId'],
-    include: [{ model: User, include: [{ model: db.profile }] }, { model: Semester, include: [{ model: SchoolYear, as: 'schoolYearInfo' }] }],
+    include: buildInclude(requester),
   };
 
   if (query.semesterId) opts.filterFields.push('semesterId');
@@ -459,17 +486,18 @@ const getAll = async (query) => {
   return result;
 };
 
-const getDetail = async (id) => {
+const getDetail = async (id, requester) => {
   const record = await TimeTable.findByPk(id, {
-    include: [{ model: User, include: [{ model: db.profile }] }, { model: Semester, include: [{ model: SchoolYear, as: 'schoolYearInfo' }] }],
+    include: buildInclude(requester),
   });
   if (!record) throw new NotFoundError('Không tìm thấy thời khóa biểu');
   return record;
 };
 
-const update = async (id, data) => {
-  const record = await getDetail(id);
-  if (data.userId) await ensureStudentUser(data.userId);
+const update = async (id, input, requester) => {
+  const data = pickFields(input, WRITABLE_FIELDS);
+  const record = await getDetail(id, requester);
+  if (data.userId) await ensureStudentUser(data.userId, requester);
   if (data.semesterId !== undefined) await ensureSemester(data.semesterId);
   
   const userId = data.userId || record.userId;
@@ -482,16 +510,16 @@ const update = async (id, data) => {
   return record;
 };
 
-const deleteRecord = async (id) => {
-  const record = await getDetail(id);
+const deleteRecord = async (id, requester) => {
+  const record = await getDetail(id, requester);
   await record.destroy();
   await syncCutRiceFromTimeTable(record.userId, record.semesterId);
   return { deleted: true };
 };
 
-const getReport = async () => {
+const getReport = async (requester) => {
   const timetables = await TimeTable.findAll({
-    include: [{ model: User, include: [{ model: db.profile }] }, { model: Semester, include: [{ model: SchoolYear, as: 'schoolYearInfo' }] }],
+    include: buildInclude(requester),
   });
 
   const rows = [];

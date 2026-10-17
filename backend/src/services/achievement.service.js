@@ -1,8 +1,8 @@
 const db = require('../models');
-const User = db.user;
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const { findStudentUserByCode } = require('../utils/studentLookup');
+const { assertStudentIdInScope, scopedUserInclude } = require('../utils/commanderScope');
 
 const Model = db.achievement;
 const Student = db.profile;
@@ -33,20 +33,29 @@ const toNumber = (value) => {
   return Number.isFinite(number) ? number : undefined;
 };
 
-const create = async (data) => Model.create(data);
+// Chỉ các trường nghiệp vụ được phép ghi (chống mass assignment)
+const FIELDS = ['semester', 'schoolYear', 'content', 'year', 'title', 'description', 'award'];
 
-const createBatch = async (data) => {
+const pickFields = (data = {}) => FIELDS.reduce((acc, key) => {
+  if (data[key] !== undefined) acc[key] = data[key];
+  return acc;
+}, {});
+
+const create = async (data, requester) => {
+  if (!data.userId) throw new BadRequestError('Mã người dùng là bắt buộc');
+  await assertStudentIdInScope(requester, data.userId);
+  return Model.create({ ...pickFields(data), userId: data.userId });
+};
+
+const createBatch = async (data, requester) => {
   const items = data.items || [];
   const results = [];
 
   for (const item of items) {
     const studentCode = item.studentCode;
     try {
-      const { user } = await findStudentUserByCode(studentCode);
-      const payload = { ...item, userId: user.id };
-      delete payload.studentCode;
-
-      const record = await Model.create(payload);
+      const { user } = await findStudentUserByCode(studentCode, { requester });
+      const record = await Model.create({ ...pickFields(item), userId: user.id });
       results.push({ studentCode, id: record.id, status: 'CREATED' });
     } catch (err) {
       results.push({ studentCode, status: 'ERROR', message: err.message });
@@ -144,8 +153,8 @@ const parseExcelImport = async (file) => {
   return { items };
 };
 
-const exportExcel = async (query = {}) => {
-  const result = await getAll({ ...query, fetchAll: true });
+const exportExcel = async (query = {}, requester) => {
+  const result = await getAll({ ...query, fetchAll: true }, requester);
   const ExcelJS = require('exceljs');
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Bao cao thanh tich');
@@ -192,14 +201,13 @@ const exportExcel = async (query = {}) => {
 
   return workbook.xlsx.writeBuffer();
 };
-const getAll = async (query) => {
+const getAll = async (query, requester) => {
   const where = {};
   const studentWhere = {};
   const include = [
-    {
-      model: User,
+    scopedUserInclude(requester, {
       include: [{ model: Student, include: [{ model: db.class }] }],
-    },
+    }),
   ];
 
   if (query.userId) where.userId = query.userId;
@@ -220,24 +228,25 @@ const getAll = async (query) => {
   return paginateQuery(Model, query, { where, include });
 };
 
-const getDetail = async (id) => {
-  const record = await Model.findByPk(id, {
-    include: [{
-      model: User,
-      include: [{ model: Student }],
-    }],
+const getDetail = async (id, requester) => {
+  const record = await Model.findOne({
+    where: { id },
+    include: [scopedUserInclude(requester, { include: [{ model: Student }] })],
   });
   if (!record) throw new NotFoundError('Không tìm thấy thành tích');
   return record;
 };
 
-const update = async (id, data) => {
-  const record = await getDetail(id);
-  return record.update(data);
+const update = async (id, data, requester) => {
+  const record = await getDetail(id, requester);
+  if (data.userId && data.userId !== record.userId) {
+    throw new BadRequestError('Không được thay đổi học viên của thành tích');
+  }
+  return record.update(pickFields(data));
 };
 
-const deleteRecord = async (id) => {
-  const record = await getDetail(id);
+const deleteRecord = async (id, requester) => {
+  const record = await getDetail(id, requester);
   await record.destroy();
   return { deleted: true };
 };

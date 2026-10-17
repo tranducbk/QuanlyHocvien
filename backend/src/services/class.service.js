@@ -209,8 +209,8 @@ const assignStudents = async (classId, userIds = []) => {
   return { classId: record.id, updated: uniqueIds.length, studentCount: updatedRecord.dataValues.studentCount };
 };
 
-const assignStudentsByCodes = async (classId, studentCodes = []) => {
-  const students = await findStudentUsersByCodes(studentCodes);
+const assignStudentsByCodes = async (classId, studentCodes = [], requester) => {
+  const students = await findStudentUsersByCodes(studentCodes, { requester });
   const userIds = students.map((student) => student.user.id);
   const result = await assignStudents(classId, userIds);
   return {

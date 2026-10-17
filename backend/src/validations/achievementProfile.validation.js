@@ -12,7 +12,6 @@ const create = yup.object({
 });
 
 const update = yup.object({
-  userId: yup.string().uuid('Mã người dùng không hợp lệ').nullable(),
   totalYears: yup.number().integer().min(0).nullable(),
   totalAdvancedSoldier: yup.number().integer().min(0).nullable(),
   totalCompetitiveSoldier: yup.number().integer().min(0).nullable(),

@@ -33,7 +33,6 @@ const createFull = yup.object({
 }).test('has-student', 'Cần truyền userId hoặc studentCode', (value) => Boolean(value?.userId || value?.studentCode));
 
 const update = yup.object({
-  userId: yup.string().uuid('Mã người dùng không hợp lệ').nullable(),
   year: yup.number().integer().min(0).nullable(),
   decisionNumber: yup.string().max(100).nullable(),
   decisionDate: yup.date().nullable(),

@@ -23,8 +23,7 @@ const buildSemesterInclude = (requester) => ({
       model: Profile,
       as: 'Profile',
       attributes: ['id', 'code', 'fullName', 'unit', 'commanderId'],
-      where: { commanderId: requester.id },
-      required: true,
+      required: false,
     }],
   }],
 });
@@ -41,9 +40,16 @@ const ensureSemesterResult = async (semesterResultId, requester, transaction) =>
   return semesterResult;
 };
 
+const CREATE_FIELDS = ['semesterResultId', 'subjectCode', 'subjectName', 'credits', 'letterGrade', 'gradePoint4', 'gradePoint10'];
+
+const pickFields = (data, fields) => fields.reduce((acc, key) => {
+  if (data[key] !== undefined) acc[key] = data[key];
+  return acc;
+}, {});
+
 const create = async (data, requester) => {
   await ensureSemesterResult(data.semesterResultId, requester);
-  return SubjectResult.create(data);
+  return SubjectResult.create(pickFields(data, CREATE_FIELDS));
 };
 
 const getAll = async (query, requester) => paginateQuery(SubjectResult, query, {

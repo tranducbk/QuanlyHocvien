@@ -25,7 +25,11 @@ const create = async (data) => {
   if (await MilitaryClass.findOne({ where: { classCode: data.classCode } }))
     throw new BadRequestError('Mã lớp đã tồn tại');
   await ensureMilitaryCommander(data.commanderId);
-  return MilitaryClass.create(data);
+  return MilitaryClass.create({
+    className: data.className,
+    classCode: data.classCode,
+    commanderId: data.commanderId,
+  });
 };
 
 const getAll = async (query, requester) => {
@@ -155,6 +159,7 @@ const assignStudentsByCode = async (id, studentCodes, commanderId) => {
     include: [
       {
         model: User,
+        attributes: ['id'],
         where: { role: 'STUDENT', systemType: 'MILITARY' },
         required: true,
       },
@@ -200,6 +205,7 @@ const getStudents = async (id, query, commanderId) => {
     include: [
       {
         model: User,
+        attributes: { exclude: ['password', 'refreshToken'] },
         where: { systemType: 'MILITARY', role: 'STUDENT' },
         required: true,
       },

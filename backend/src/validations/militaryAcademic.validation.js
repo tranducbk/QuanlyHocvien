@@ -3,13 +3,13 @@ const yup = require('yup');
 const semester = yup.object({
   code: yup.number().integer().min(1).max(4).required(),
   schoolYear: yup.string().trim().max(50).required(),
-});
+}).noUnknown('Có trường không hợp lệ');
 const subject = yup.object({
   subjectCode: yup.string().trim().max(50).required(),
   subjectName: yup.string().trim().max(255).required(),
   credits: yup.number().integer().min(0).required(),
   semesterId: yup.string().uuid().required(),
-});
+}).noUnknown('Có trường không hợp lệ');
 const timetable = yup.object({
   semesterId: yup.string().uuid().required(),
   schedules: yup.array().of(yup.object({
@@ -20,7 +20,7 @@ const timetable = yup.object({
     room: yup.string().max(100).nullable(),
     week: yup.array().of(yup.number().integer().min(1).max(60)),
   })).required(),
-});
+}).noUnknown('Có trường không hợp lệ');
 const query = yup.object({
   page: yup.number().integer().min(1),
   limit: yup.number().integer().min(1).max(100),

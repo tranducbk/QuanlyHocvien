@@ -5,7 +5,7 @@ const s = require('../validations/cutRice.validation');
 
 const create = asyncHandler(async (req, res) => {
   await validateOrThrow(s.create, req.body);
-  const result = await service.create(req.body);
+  const result = await service.create(req.body, req.user);
   return success(res, result, 'Tạo mới thành công', 201);
 });
 
@@ -31,7 +31,7 @@ const deleteRecord = asyncHandler(async (req, res) => {
 });
 
 const importExcel = asyncHandler(async (req, res) => {
-  const result = await service.importExcel(req.file);
+  const result = await service.importExcel(req.file, req.user);
   return success(res, result, 'Nhập lịch cắt cơm từ Excel thành công', 201);
 });
 

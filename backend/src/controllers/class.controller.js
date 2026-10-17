@@ -86,14 +86,14 @@ const deleteRecord = asyncHandler(async (req, res) => {
 const assignStudents = asyncHandler(async (req, res) => {
   await validateOrThrow(s.assignStudents, req.body);
   const result = req.body.studentCodes
-    ? await service.assignStudentsByCodes(req.params.id, req.body.studentCodes || [])
+    ? await service.assignStudentsByCodes(req.params.id, req.body.studentCodes || [], req.user)
     : await service.assignStudents(req.params.id, req.body.userIds || []);
   return success(res, result, 'Thêm học viên vào lớp thành công');
 });
 
 const assignStudentsBatch = asyncHandler(async (req, res) => {
   await validateOrThrow(s.assignStudentsByCodes, req.body);
-  const result = await service.assignStudentsByCodes(req.params.id, req.body.studentCodes || []);
+  const result = await service.assignStudentsByCodes(req.params.id, req.body.studentCodes || [], req.user);
   return success(res, result, 'Thêm học viên vào lớp hàng loạt thành công');
 });
 

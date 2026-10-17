@@ -84,7 +84,7 @@ const updateBatchProfiles = asyncHandler(async (req, res) => {
     ? await service.parseBatchProfileUpdateExcelImport(req.file)
     : req.body;
   await validateOrThrow(us.batchProfileUpdate, profiles);
-  const result = await service.updateBatchProfiles(profiles);
+  const result = await service.updateBatchProfiles(profiles, req.user);
   return success(res, result, req.file ? 'Cập nhật hồ sơ từ Excel thành công' : 'Cập nhật hồ sơ hàng loạt thành công');
 });
 
@@ -97,7 +97,7 @@ const downloadBatchProfilesTemplate = asyncHandler(async (req, res) => {
 
 const graduateBatchProfiles = asyncHandler(async (req, res) => {
   await validateOrThrow(us.batchGraduation, req.body);
-  const result = await service.graduateBatchProfiles(req.body);
+  const result = await service.graduateBatchProfiles(req.body, req.user);
   return success(res, result, 'Xác nhận học viên ra trường hàng loạt thành công');
 });
 
@@ -245,27 +245,27 @@ const generateAllCutRice = asyncHandler(async (req, res) => {
 // ===================== Commander: Báo cáo =====================
 
 const getAcademicReport = asyncHandler(async (req, res) => {
-  const result = await commanderService.getAcademicReport(req.query);
+  const result = await commanderService.getAcademicReport(req.query, req.user);
   return success(res, result);
 });
 
 const getPartyTrainingReport = asyncHandler(async (req, res) => {
-  const result = await commanderService.getPartyTrainingReport(req.query);
+  const result = await commanderService.getPartyTrainingReport(req.query, req.user);
   return success(res, result);
 });
 
 const getAchievementReport = asyncHandler(async (req, res) => {
-  const result = await commanderService.getAchievementReport();
+  const result = await commanderService.getAchievementReport(req.user);
   return success(res, result);
 });
 
 const getTuitionReport = asyncHandler(async (req, res) => {
-  const result = await commanderService.getTuitionReport(req.query);
+  const result = await commanderService.getTuitionReport(req.query, req.user);
   return success(res, result);
 });
 
 const exportTuitionReport = asyncHandler(async (req, res) => {
-  const buffer = await commanderService.exportTuitionReport(req.query);
+  const buffer = await commanderService.exportTuitionReport(req.query, req.user);
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=bao-cao-hoc-phi.xlsx');
   return res.send(buffer);

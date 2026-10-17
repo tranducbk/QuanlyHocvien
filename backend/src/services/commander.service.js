@@ -1,6 +1,7 @@
 const db = require('../models');
 const { NotFoundError, ForbiddenError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
+const { isCommander, assertStudentInScope, scopedUserInclude } = require('../utils/commanderScope');
 
 const Commander = db.profile;
 const User = db.user;
@@ -13,15 +14,18 @@ const YearlyAchievement = db.yearlyAchievement;
 const TuitionFee = db.tuitionFee;
 const Notification = db.notification;
 
-const isCommander = (requester) => requester?.role === 'COMMANDER';
-
 const ensureCommanderCanManageUser = async (userId, requester) => {
   if (!isCommander(requester)) return;
-  const user = await User.findByPk(userId, { include: [{ model: Student }] });
+  const user = await User.findByPk(userId, { attributes: ['id', 'role', 'systemType'] });
   if (!user) {
     throw new NotFoundError('Không tìm thấy học viên');
   }
+  // Chỉ huy chỉ được thao tác với học viên cùng hệ
+  assertStudentInScope(requester, user);
 };
+
+// Include User (kèm Profile) cho báo cáo: bỏ password/refreshToken, chỉ huy chỉ thấy học viên cùng hệ
+const reportUserInclude = (requester) => scopedUserInclude(requester, { include: [{ model: db.profile }] });
 
 const toDateOnly = (date) => [
   date.getFullYear(),
@@ -148,10 +152,10 @@ const generateCutRice = async (userId, options = {}, requester) => {
 };
 
 const generateAllCutRice = async (requester) => {
-  const include = isCommander(requester)
-    ? [{ model: Student, where: { commanderId: requester.id }, required: true }]
-    : [];
-  const students = await User.findAll({ where: { role: 'STUDENT' }, include, attributes: ['id'] });
+  // Chỉ huy: mọi học viên cùng hệ; admin: tất cả học viên
+  const where = { role: 'STUDENT' };
+  if (isCommander(requester)) where.systemType = requester.systemType;
+  const students = await User.findAll({ where, attributes: ['id'] });
   let success = 0, skipped = 0;
 
   for (const s of students) {
@@ -193,13 +197,13 @@ const generateAllCutRice = async (requester) => {
 
 // ===================== CH-09: Báo cáo thống kê =====================
 
-const getAcademicReport = async (query = {}) => {
+const getAcademicReport = async (query = {}, requester) => {
   const where = {};
   if (query.schoolYear) where.schoolYear = query.schoolYear;
 
   const results = await YearlyResult.findAll({
     where,
-    include: [{ model: User, include: [{ model: db.profile }] }],
+    include: [reportUserInclude(requester)],
   });
 
   const summary = {
@@ -223,13 +227,13 @@ const getAcademicReport = async (query = {}) => {
   return { detail: results, summary };
 };
 
-const getPartyTrainingReport = async (query = {}) => {
+const getPartyTrainingReport = async (query = {}, requester) => {
   const where = {};
   if (query.schoolYear) where.schoolYear = query.schoolYear;
 
   const results = await YearlyResult.findAll({
     where,
-    include: [{ model: User, include: [{ model: db.profile }] }],
+    include: [reportUserInclude(requester)],
   });
 
   const partySummary = {};
@@ -245,14 +249,14 @@ const getPartyTrainingReport = async (query = {}) => {
   return { detail: results, partySummary, trainingSummary };
 };
 
-const getAchievementReport = async () => {
+const getAchievementReport = async (requester) => {
   const achievements = await Achievement.findAll({
-    include: [{ model: User, include: [{ model: db.profile }] }],
+    include: [reportUserInclude(requester)],
     order: [['year', 'DESC']],
   });
 
   const yearlyAchievements = await YearlyAchievement.findAll({
-    include: [{ model: User, include: [{ model: db.profile }] }],
+    include: [reportUserInclude(requester)],
     order: [['year', 'DESC']],
   });
 
@@ -272,7 +276,7 @@ const getAchievementReport = async () => {
   return { achievements, yearlyAchievements, summary };
 };
 
-const getTuitionReport = async (query = {}) => {
+const getTuitionReport = async (query = {}, requester) => {
   const where = {};
   const semesterWhere = {};
   const schoolYearWhere = {};
@@ -285,7 +289,7 @@ const getTuitionReport = async (query = {}) => {
   const fees = await TuitionFee.findAll({
     where,
     include: [
-      { model: User, include: [{ model: db.profile }] },
+      reportUserInclude(requester),
       {
         model: db.semester,
         as: 'semesterInfo',
@@ -326,9 +330,9 @@ const getTuitionSchoolYearValue = (fee) => {
   return plain.semesterInfo?.schoolYearInfo?.schoolYear || plain.schoolYear || '';
 };
 
-const exportTuitionReport = async (query = {}) => {
+const exportTuitionReport = async (query = {}, requester) => {
   const ExcelJS = require('exceljs');
-  const { detail, summary } = await getTuitionReport(query);
+  const { detail, summary } = await getTuitionReport(query, requester);
 
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Bao cao hoc phi');

@@ -4,6 +4,7 @@ const Semester = db.semester;
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const { findStudentUserByCode } = require('../utils/studentLookup');
+const { isStudentInScope, studentUserWhere } = require('../utils/commanderScope');
 
 const TuitionFee = db.tuitionFee;
 const Student = db.profile;
@@ -64,27 +65,57 @@ const attachSemester = async (data) => {
   return data;
 };
 
-const create = async (data) => {
+const SAFE_USER_ATTRIBUTES = { exclude: ['password', 'refreshToken'] };
+const WRITABLE_FIELDS = ['userId', 'semesterId', 'totalAmount', 'semester', 'schoolYear', 'content', 'status'];
+
+const pickFields = (data, fields) => Object.fromEntries(
+  fields.filter((field) => data[field] !== undefined).map((field) => [field, data[field]])
+);
+
+// Chỉ huy chỉ được ghi học phí cho học viên cùng hệ
+const ensureStudentUser = async (userId, requester) => {
+  const user = await User.findByPk(userId);
+  if (!user || user.role !== 'STUDENT' || !isStudentInScope(requester, user)) {
+    throw new BadRequestError('Chỉ được ghi nhận học phí cho học viên');
+  }
+  return user;
+};
+
+const scopedUser = (requester, include) => {
+  const userWhere = studentUserWhere(requester);
+  return {
+    model: User,
+    attributes: SAFE_USER_ATTRIBUTES,
+    include,
+    ...(userWhere ? { where: { ...userWhere }, required: true } : {}),
+  };
+};
+
+const create = async (input, requester) => {
+  const data = pickFields(input, WRITABLE_FIELDS);
+  await ensureStudentUser(data.userId, requester);
   await attachSemester(data);
   return TuitionFee.create(data);
 };
 
-const createBatch = async (data) => {
+const createBatch = async (data, requester) => {
   const items = data.items || [];
   const results = [];
 
   for (const item of items) {
     const studentCode = item.studentCode;
     try {
-      const { user } = await findStudentUserByCode(studentCode);
+      const { user } = await findStudentUserByCode(studentCode, { requester });
+      if (!isStudentInScope(requester, user)) {
+        throw new BadRequestError(`Không tìm thấy học viên có mã ${studentCode}`);
+      }
       const payload = {
-        ...item,
+        ...pickFields(item, WRITABLE_FIELDS),
         userId: user.id,
         semesterId: item.semesterId !== undefined ? item.semesterId : data.semesterId,
         semester: item.semester !== undefined ? item.semester : data.semester,
         schoolYear: item.schoolYear !== undefined ? item.schoolYear : data.schoolYear,
       };
-      delete payload.studentCode;
 
       await attachSemester(payload);
       const record = await TuitionFee.create(payload);
@@ -183,12 +214,12 @@ const parseExcelImport = async (file) => {
 
   return { items };
 };
-const getAll = async (query) => {
+const getAll = async (query, requester) => {
   const where = {};
   const studentWhere = {};
   const semesterWhere = {};
   const include = [
-    { model: User, include: [{ model: db.profile, include: [{ model: University }] }] },
+    scopedUser(requester, [{ model: db.profile, include: [{ model: University }] }]),
     { model: Semester, as: 'semesterInfo', include: [{ model: SchoolYear, as: 'schoolYearInfo' }] },
   ];
 
@@ -217,16 +248,18 @@ const getAll = async (query) => {
   return paginateQuery(TuitionFee, query, { where, include });
 };
 
-const getDetail = async (id) => {
+const getDetail = async (id, requester) => {
   const record = await TuitionFee.findByPk(id, {
-    include: [{ model: User, include: [{ model: db.profile }] }, { model: Semester, as: 'semesterInfo', include: [{ model: SchoolYear, as: 'schoolYearInfo' }] }],
+    include: [scopedUser(requester, [{ model: db.profile }]), { model: Semester, as: 'semesterInfo', include: [{ model: SchoolYear, as: 'schoolYearInfo' }] }],
   });
   if (!record) throw new NotFoundError('Không tìm thấy học phí');
   return record;
 };
 
-const update = async (id, data, changedBy = null) => {
-  const record = await getDetail(id);
+const update = async (id, input, changedBy = null, requester) => {
+  const data = pickFields(input, WRITABLE_FIELDS);
+  const record = await getDetail(id, requester);
+  if (data.userId) await ensureStudentUser(data.userId, requester);
   const oldStatus = record.status;
   const oldAmount = record.totalAmount;
   
@@ -250,9 +283,8 @@ const update = async (id, data, changedBy = null) => {
   return updated;
 };
 
-const getHistories = async (id) => {
-  const record = await TuitionFee.findByPk(id);
-  if (!record) throw new NotFoundError('Không tìm thấy học phí');
+const getHistories = async (id, requester) => {
+  await getDetail(id, requester);
   
   const histories = await db.tuitionHistory.findAll({
     where: { tuitionFeeId: id },
@@ -262,8 +294,8 @@ const getHistories = async (id) => {
   return histories;
 };
 
-const deleteRecord = async (id) => {
-  const record = await getDetail(id);
+const deleteRecord = async (id, requester) => {
+  const record = await getDetail(id, requester);
   await record.destroy();
   return { deleted: true };
 };

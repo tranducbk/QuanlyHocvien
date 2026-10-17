@@ -113,7 +113,8 @@ const getMyRequestDetail = async (userId, id) => {
 
 const getAll = async (query = {}, requester = {}) => {
   const where = {};
-  const studentWhere = { commanderId: requester.id };
+  // Chỉ huy quản lý mọi học viên cùng hệ (lọc qua User.role/systemType bên dưới)
+  const studentWhere = {};
   const semesterWhere = {};
 
   if (query.semester) semesterWhere.semester = query.semester;
@@ -131,7 +132,7 @@ const getAll = async (query = {}, requester = {}) => {
       attributes: { exclude: ['password', 'refreshToken'] },
       where: { role: 'STUDENT', systemType: requester.systemType },
       required: true,
-      include: [{ model: Student, where: studentWhere, required: true }],
+      include: [{ model: Student, required: false }],
     },
     {
       model: User,
@@ -164,7 +165,10 @@ const getAll = async (query = {}, requester = {}) => {
   if (query.fullName) studentWhere.fullName = { [Op.iLike]: `%${query.fullName}%` };
   if (query.unit) studentWhere.unit = query.unit;
 
-  include[1].include[0].where = studentWhere;
+  if (Object.keys(studentWhere).length > 0) {
+    include[1].include[0].where = studentWhere;
+    include[1].include[0].required = true;
+  }
 
   const result = await paginateQuery(GradeRequest, query, { where, include, order: [['createdAt', 'DESC']] });
 
@@ -194,7 +198,7 @@ const getDetail = async (id, requester, options = {}) => {
         attributes: { exclude: ['password', 'refreshToken'] },
         where: { role: 'STUDENT', systemType: requester.systemType },
         required: true,
-        include: [{ model: Student, where: { commanderId: requester.id }, required: true }],
+        include: [{ model: Student, required: false }],
       },
       { model: User, as: 'reviewer', attributes: { exclude: ['password', 'refreshToken'] } },
     ],

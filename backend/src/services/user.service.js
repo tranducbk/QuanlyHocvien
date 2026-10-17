@@ -4,6 +4,8 @@ const db = require('../models');
 const { NotFoundError, BadRequestError, ForbiddenError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const { findStudentUserByCode } = require('../utils/studentLookup');
+const { isCommander, assertStudentInScope } = require('../utils/commanderScope');
+const { SELF_PROFILE_FIELDS } = require('./auth.service');
 const fileStorage = require('./fileStorage.service');
 
 const User = db.user;
@@ -19,6 +21,21 @@ const PROFILE_FIELDS = [
   'universityId', 'educationLevelId', 'commanderId',
 ];
 const EXTERNAL_TRAINING_FIELDS = ['classId', 'organizationId', 'universityId', 'educationLevelId'];
+// Chỉ huy không được tự gán chỉ huy quản lý, không sửa CPA (được tính tự động) và không đổi cơ sở đào tạo/lớp
+const COMMANDER_BLOCKED_PROFILE_FIELDS = ['commanderId', ...EXTERNAL_TRAINING_FIELDS];
+const COMMANDER_PROFILE_FIELDS = PROFILE_FIELDS.filter((field) => !COMMANDER_BLOCKED_PROFILE_FIELDS.includes(field));
+// Trường tài khoản (bảng User) admin được sửa qua PUT /users/:id; isActive/password có endpoint riêng
+const ADMIN_USER_FIELDS = ['username', 'role', 'systemType'];
+
+const getEditableProfileFields = (requester) => (isCommander(requester) ? COMMANDER_PROFILE_FIELDS : PROFILE_FIELDS);
+
+const pickFields = (data, fields) => {
+  const picked = {};
+  for (const field of fields) {
+    if (data?.[field] !== undefined) picked[field] = data[field];
+  }
+  return picked;
+};
 
 const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
@@ -122,10 +139,7 @@ const _resolveCommanderId = async (value, systemType) => {
 };
 
 const _assertCommanderCanManageUserRecord = (requester, record) => {
-  if (requester?.role !== 'COMMANDER') return;
-  if (record.role !== 'STUDENT' || record.systemType !== requester.systemType || record.Profile?.commanderId !== requester.id) {
-    throw new ForbiddenError('Chi huy chi duoc quan ly hoc vien minh phu trach');
-  }
+  assertStudentInScope(requester, record, 'Chỉ huy chỉ được quản lý học viên cùng hệ');
 };
 
 const _createProfile = async (data, requester) => {
@@ -199,6 +213,7 @@ const getAll = async (query, requester) => {
 
   return paginateQuery(User, query, {
     where,
+    attributes: { exclude: ['password', 'refreshToken'] },
     include: [
       {
         model: Profile,
@@ -323,6 +338,7 @@ const exportUsers = async (query = {}) => {
 
 const getDetail = async (id, requester) => {
   const record = await User.findByPk(id, {
+    attributes: { exclude: ['password', 'refreshToken'] },
     include: [
       {
         model: Profile,
@@ -353,31 +369,40 @@ const update = async (id, data, requester) => {
   }
   _checkRoleHierarchy(requester, record.role);
   _checkCommanderAssignmentPermission(requester, data);
-  if (data.commanderId !== undefined) {
-    data.commanderId = await _resolveCommanderId(data.commanderId, record.systemType);
+
+  // Whitelist rõ ràng: chỉ huy chỉ sửa hồ sơ học viên; admin sửa thêm một số trường tài khoản.
+  // Không bao giờ nhận password/isActive/isAdmin/profileId/refreshToken/deleteAt ở endpoint này.
+  const profileUpdate = pickFields(data, getEditableProfileFields(requester));
+  const userUpdate = isCommander(requester) ? {} : pickFields(data, ADMIN_USER_FIELDS);
+
+  if (profileUpdate.commanderId !== undefined) {
+    profileUpdate.commanderId = await _resolveCommanderId(profileUpdate.commanderId, record.systemType);
   }
-  if (data.role) {
-    _checkRoleHierarchy(requester, data.role);
-    if (data.role === 'ADMIN') data.systemType = null;
-    else if (record.role === 'ADMIN') data.systemType = 'EXTERNAL';
+  if (userUpdate.role !== undefined) {
+    if (!['STUDENT', 'COMMANDER', 'ADMIN'].includes(userUpdate.role)) {
+      throw new BadRequestError('Vai trò không hợp lệ');
+    }
+    userUpdate.isAdmin = userUpdate.role === 'ADMIN';
   }
-  if (data.password) {
-    data.password = await bcrypt.hash(data.password, 10);
+  const nextRole = userUpdate.role || record.role;
+  if (nextRole === 'ADMIN') {
+    userUpdate.systemType = null;
+  } else if (userUpdate.systemType !== undefined) {
+    if (!['EXTERNAL', 'MILITARY'].includes(userUpdate.systemType)) {
+      throw new BadRequestError('Hệ đào tạo không hợp lệ');
+    }
+  } else if (record.role === 'ADMIN') {
+    userUpdate.systemType = 'EXTERNAL';
   }
 
-  const hasProfileFields = PROFILE_FIELDS.some((f) => data[f] !== undefined);
-  if (hasProfileFields && record.Profile) {
-    const profileUpdate = {};
-    for (const field of PROFILE_FIELDS) {
-      if (data[field] !== undefined) {
-        profileUpdate[field] = data[field];
-        delete data[field];
-      }
-    }
+  if (Object.keys(profileUpdate).length > 0 && record.Profile) {
     await record.Profile.update(profileUpdate);
   }
 
-  return record.update(data);
+  if (Object.keys(userUpdate).length > 0) {
+    await record.update(userUpdate);
+  }
+  return record;
 };
 
 const deleteRecord = async (id, requester) => {
@@ -446,10 +471,8 @@ const getMyProfile = async (userId) => {
 const updateMyProfile = async (userId, data) => {
   const user = await User.findByPk(userId, { include: [{ model: Profile }] });
   if (!user || !user.Profile) throw new NotFoundError('Không tìm thấy hồ sơ');
-  const updateData = {};
-  for (const field of PROFILE_FIELDS) {
-    if (data[field] !== undefined) updateData[field] = data[field];
-  }
+  // Tự sửa hồ sơ: chỉ thông tin cá nhân (dùng chung danh sách với PUT /auth/profile)
+  const updateData = pickFields(data, SELF_PROFILE_FIELDS);
   await user.Profile.update(updateData);
   return user.Profile;
 };
@@ -727,18 +750,31 @@ const parseBatchProfileUpdateExcelImport = async (file) => {
   return profiles;
 };
 
-const updateBatchProfiles = async (profiles) => {
+const updateBatchProfiles = async (profiles, requester) => {
   const results = [];
+  const editableFields = getEditableProfileFields(requester);
   for (const p of profiles) {
     try {
-      const profile = await Profile.findOne({ where: { code: p.code } });
+      const profile = await Profile.findOne({
+        where: { code: p.code },
+        include: [{ model: User, attributes: ['id', 'role', 'systemType'] }],
+      });
       if (!profile) {
         results.push({ code: p.code, status: 'ERROR', message: 'Không tìm thấy hồ sơ' });
         continue;
       }
-      const updateData = {};
-      for (const field of PROFILE_FIELDS) {
-        if (p[field] !== undefined) updateData[field] = p[field];
+      if (isCommander(requester)) {
+        // Chỉ huy chỉ cập nhật hồ sơ học viên cùng hệ
+        assertStudentInScope(requester, profile.User, 'Không có quyền cập nhật hồ sơ này');
+      }
+      const updateData = pickFields(p, editableFields);
+      // Hồ sơ không thuộc học viên: không gán chỉ huy quản lý
+      if (profile.User?.role !== 'STUDENT') delete updateData.commanderId;
+      if (updateData.commanderId !== undefined) {
+        updateData.commanderId = await _resolveCommanderId(updateData.commanderId, profile.User?.systemType);
+      }
+      if (profile.User?.systemType === 'MILITARY') {
+        for (const field of EXTERNAL_TRAINING_FIELDS) delete updateData[field];
       }
       await profile.update(updateData);
       results.push({ code: p.code, status: 'UPDATED' });
@@ -749,7 +785,7 @@ const updateBatchProfiles = async (profiles) => {
   return results;
 };
 
-const graduateBatchProfiles = async (data) => {
+const graduateBatchProfiles = async (data, requester) => {
   const graduationDate = data.graduationDate;
   const students = data.students || data.studentCodes.map((code) => ({ code, graduationDate }));
   const results = [];
@@ -757,7 +793,8 @@ const graduateBatchProfiles = async (data) => {
   for (const item of students) {
     const code = item.code || item.studentCode;
     try {
-      const { profile } = await findStudentUserByCode(code);
+      // requester là chỉ huy -> chỉ tìm học viên cùng hệ
+      const { profile } = await findStudentUserByCode(code, { requester });
       await profile.update({ graduationDate: item.graduationDate || graduationDate });
       results.push({ code, status: 'UPDATED' });
     } catch (err) {

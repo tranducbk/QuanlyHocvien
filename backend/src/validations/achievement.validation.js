@@ -13,7 +13,6 @@ const create = yup.object({
 });
 
 const update = yup.object({
-  userId: yup.string().uuid('Mã người dùng không hợp lệ').nullable(),
   semester: semesterCode().nullable(),
   schoolYear: yup.string().max(50).nullable(),
   content: yup.string().nullable(),
