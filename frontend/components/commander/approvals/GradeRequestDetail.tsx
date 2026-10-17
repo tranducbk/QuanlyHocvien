@@ -58,11 +58,19 @@ export default function GradeRequestDetail({ request }: GradeRequestDetailProps)
             className="rounded-2xl px-6"
             onClick={() => {
               if (request.attachmentUrl) {
+                // Chỉ gắn token khi link trỏ về API file nội bộ, tránh lộ token ra ngoài
+                const isInternalFile = request.attachmentUrl.startsWith(
+                  `${process.env.NEXT_PUBLIC_API_URL}/api/files/`
+                );
+                if (!isInternalFile) {
+                  window.open(request.attachmentUrl, "_blank", "noopener,noreferrer");
+                  return;
+                }
                 const token = useAuthStore.getState().accessToken;
-                const url = request.attachmentUrl.includes("?") 
-                  ? `${request.attachmentUrl}&token=${token}` 
+                const url = request.attachmentUrl.includes("?")
+                  ? `${request.attachmentUrl}&token=${token}`
                   : `${request.attachmentUrl}?token=${token}`;
-                window.open(url, "_blank");
+                window.open(url, "_blank", "noopener,noreferrer");
               }
             }}
           >

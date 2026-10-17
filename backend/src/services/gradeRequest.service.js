@@ -1,6 +1,7 @@
 const db = require('../models');
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
+const { bucket, publicBaseUrl } = require('../config/minio');
 
 const GradeRequest = db.gradeRequest;
 const SubjectResult = db.subjectResult;
@@ -62,6 +63,12 @@ const create = async (userId, data) => db.sequelize.transaction(async (transacti
   });
   if (existingPending) {
     throw new BadRequestError('Môn học này đã có đề xuất đang chờ xử lý. Vui lòng chờ phản hồi.');
+  }
+
+  // Chỉ chấp nhận link minh chứng do chính học viên tải lên qua /evidence
+  const evidencePrefix = `${publicBaseUrl}/${bucket}/evidence/${userId}/`;
+  if (data.attachmentUrl && !data.attachmentUrl.startsWith(evidencePrefix)) {
+    throw new BadRequestError('Link minh chứng không hợp lệ');
   }
 
   return GradeRequest.create({
