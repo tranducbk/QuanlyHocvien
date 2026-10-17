@@ -6,28 +6,31 @@ Hệ thống Quản lý Học viên (QuanlyHocvien).
 
 ## 2. Mô tả ngắn
 
-Ứng dụng web full-stack quản lý tài khoản, hồ sơ, lớp, kết quả học tập, lịch học, thành tích, lịch trực, thông báo và báo cáo cho học viên quân đội. Hệ quân sự được quản lý trực tiếp theo lớp, không gắn với cơ sở đào tạo, học phí hay cắt cơm. Dữ liệu được phân tách theo hệ đào tạo; hệ quân sự triển khai trước, hệ thứ hai đang chờ.
+Ứng dụng web full-stack quản lý tài khoản, thông tin chính trị nội bộ, lớp, kết quả học tập, lịch học, thành tích, lịch trực, thông báo và báo cáo cho học viên quân đội. Hệ 1, 3, 4, 5 và 7 là các hệ độc lập; Hệ 1 và Hệ 7 có nghiệp vụ tương tự, khác chương trình đào tạo. Hệ 5 quản lý học viên học tại cơ sở đào tạo ngoài quân đội.
+
+Mỗi tài khoản nghiệp vụ thuộc một trong năm hệ. Backend xác định hệ từ tài khoản đã xác thực và giới hạn mọi API theo hệ đó. Hệ 5 quản lý học viên tại cơ sở đào tạo ngoài quân đội; các hệ còn lại quản lý học viên thuộc các đơn vị trong Học viện.
 
 ## 3. Mục tiêu
 
-- Quản lý tập trung hồ sơ và quá trình đào tạo của học viên.
+- Quản lý tập trung thông tin chính trị nội bộ và quá trình đào tạo của học viên.
 - Cung cấp đúng chức năng theo vai trò.
 - Chuẩn hóa quản lý kết quả theo môn, học kỳ và năm học, báo cáo và truy vết thao tác.
 - Giữ nguyên dữ liệu hiện tại khi nâng cấp kiến trúc.
 
 ## 4. Người dùng
 
-- `ADMIN`: quản trị tài khoản, role, trạng thái và danh mục kỹ thuật; không xem hồ sơ/điểm nghiệp vụ.
-- `COMMANDER`: quản lý học viên, lớp, học kỳ và kết quả học tập.
-- `STUDENT`: xem dữ liệu cá nhân, lịch và kết quả của chính mình.
+- `ADMIN`: xem và chỉnh sửa tài khoản của mọi hệ; chỉ xem thông tin chính trị nội bộ, không xem điểm nghiệp vụ.
+- `COMMANDER`: quản lý học viên, lớp, học kỳ và kết quả học tập trong hệ được phân công.
+- `STUDENT`: xem thông tin chính trị nội bộ, lịch và kết quả của chính mình.
 
 Hệ thống sử dụng ba role `ADMIN`, `COMMANDER`, `STUDENT`; không có role Giảng viên.
 
 ## 5. Chức năng chính
 
 - Xác thực, đổi mật khẩu và quản lý trạng thái tài khoản.
-- Quản lý hồ sơ học viên.
+- Quản lý thông tin chính trị nội bộ của học viên.
 - Quản lý trường, tổ chức/chuyên ngành, trình độ và lớp.
+- Các nghiệp vụ riêng theo từng hệ; Hệ 1 và Hệ 7 dùng chung quy trình nhưng theo chương trình đào tạo riêng, Hệ 5 có chức năng dành cho đào tạo ngoài quân đội.
 - Quản lý học kỳ, lịch học, học phí, thành tích và nghiên cứu khoa học.
 - Quản lý kết quả môn, học kỳ, năm học và báo cáo.
 - Quản lý lịch cắt cơm, yêu cầu cắt cơm, lịch trực và thông báo.
@@ -66,9 +69,9 @@ Hệ thống sử dụng ba role `ADMIN`, `COMMANDER`, `STUDENT`; không có rol
 ## 9. Điều kiện hoàn thành định hướng
 
 - API nghiệp vụ phân quyền đúng theo ba role hiện hành.
-- Chỉ Chỉ huy được truy cập API quản lý điểm; Học viên chỉ xem dữ liệu cá nhân.
+- Chỉ Chỉ huy được truy cập API quản lý điểm; Học viên chỉ xem dữ liệu của chính mình.
 - Điểm đã nhập không thể sửa hoặc xóa.
 - Chỉ huy quản lý lớp và dữ liệu nghiệp vụ.
-- Admin không truy cập được hồ sơ/điểm.
+- Admin xem và chỉnh sửa tài khoản của mọi hệ, chỉ xem thông tin chính trị nội bộ, không xem điểm; không vai trò nào được sửa, xóa hoặc mở khóa điểm chính thức.
 - Dữ liệu hiện tại được bảo toàn.
 - Backend API, frontend và tài liệu được kiểm thử/cập nhật đồng bộ.

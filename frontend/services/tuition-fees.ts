@@ -7,6 +7,20 @@ import {
   UpdateTuitionFeeRequest,
 } from "@/types/tuition-fees";
 
+export interface TuitionHistory {
+  id: string;
+  oldStatus?: "PAID" | "UNPAID" | null;
+  newStatus: "PAID" | "UNPAID";
+  note?: string | null;
+  createdAt: string;
+  changer?: {
+    profile?: {
+      fullName?: string | null;
+      code?: string | null;
+    } | null;
+  } | null;
+}
+
 const toAmount = (value: TuitionFee["totalAmount"]) => {
   const amount = Number(value || 0);
   return Number.isFinite(amount) ? amount : 0;
@@ -129,7 +143,7 @@ export const tuitionFeeService = {
     });
   },
 
-  getHistories: async (id: string): Promise<ApiResponse<any[]>> => {
+  getHistories: async (id: string): Promise<ApiResponse<TuitionHistory[]>> => {
     return apiClient.get(`${ENDPOINTS.TUITION_FEES.BASE}/${id}/histories`);
   },
 };

@@ -1,12 +1,12 @@
-# CH-03 - Quản lý hồ sơ học viên
+# CH-03 - Quản lý thông tin chính trị nội bộ học viên
 
 ## Thông tin chung
 - **Nhóm người dùng:** Chỉ huy
 - **Mã chức năng:** CH-03
-- **Tên chức năng:** Quản lý hồ sơ học viên
+- **Tên chức năng:** Quản lý thông tin chính trị nội bộ học viên
 
 ## Mô tả
-Thêm mới, chỉnh sửa, xóa và tìm kiếm học viên theo nhiều tiêu chí. Hệ thống tự động tạo tài khoản liên kết và xóa dữ liệu liên quan khi cần.
+Chỉ huy quản lý thông tin chính trị nội bộ của học viên trong hệ được phân công, xếp học viên vào lớp, chuyển lớp trong cùng hệ và tìm kiếm theo tiêu chí được phép.
 
 ## Module liên quan
 - Student Record Module
@@ -15,43 +15,34 @@ Thêm mới, chỉnh sửa, xóa và tìm kiếm học viên theo nhiều tiêu 
 
 ## Luồng hoạt động chi tiết
 
-### 1. Thêm học viên mới
-1. Nhập đầy đủ thông tin cá nhân, thông tin học tập và thông tin quân nhân.
-2. Hệ thống tự động tạo tài khoản liên kết với học viên.
+### 1. Tiếp nhận học viên
+1. Tạo hoặc liên kết tài khoản với thông tin chính trị nội bộ.
+2. Gán học viên vào đúng hệ, khóa, chương trình và lớp.
 
-### 2. Chỉnh sửa thông tin học viên
-1. Cập nhật thông tin của học viên khi có thay đổi.
-2. Bao gồm thông tin cá nhân, học tập và quân nhân.
+### 2. Cập nhật thông tin chính trị nội bộ
+Chỉ huy cập nhật thông tin trong phạm vi hệ mình phụ trách. Admin chỉ có quyền xem nội dung này.
 
-### 3. Xóa học viên
-1. Xóa học viên khỏi hệ thống khi cần thiết.
-2. Hệ thống tự động xóa các dữ liệu liên quan.
+### 3. Chuyển lớp hoặc ngừng hoạt động
+Chuyển lớp chỉ thực hiện trong cùng hệ và lưu lịch sử. Khi học viên ngừng hoạt động, khóa tài khoản; không xóa thông tin, điểm hoặc lịch sử.
 
 ### 4. Tìm kiếm học viên
 1. Tìm kiếm theo nhiều tiêu chí: tên, mã học viên, lớp, trường đào tạo, khóa học.
 
 ## Giao diện & API
 
-| Thứ tự | Method | Endpoint | Auth | Mô tả |
-|--------|--------|----------|------|-------|
-| 1 | `GET` | `/api/students` | Token | Xem danh sách học viên (phân trang) |
-| 2 | `GET` | `/api/students?fullName=...` | Token | Tìm kiếm học viên theo tên |
-| 3 | `GET` | `/api/students?studentId=...` | Token | Tìm kiếm theo mã học viên |
-| 4 | `GET` | `/api/students/:id` | Token | Xem chi tiết hồ sơ học viên |
-| 5 | `POST` | `/api/students` | Token | Thêm học viên mới (tự động tạo tài khoản) |
-| 6 | `PUT` | `/api/students/:id` | Token | Cập nhật thông tin học viên |
-| 7 | `DELETE` | `/api/students/:id` | Token | Xóa học viên (tự động xóa dữ liệu liên quan) |
+| Nghiệp vụ | Phạm vi |
+|---|---|
+| Xem/tìm học viên | Chỉ học viên thuộc hệ Chỉ huy phụ trách |
+| Tạo/cập nhật thông tin | Theo quyền Chỉ huy trong hệ được phân công |
+| Xếp/chuyển lớp | Chỉ trong cùng hệ; lưu lịch sử chuyển lớp |
+| Xóa/ngừng hoạt động | Không xóa dữ liệu; khóa tài khoản khi cần |
 
 ### Luồng nghiệp vụ
 ```
-1. GET  /api/students                    → Xem danh sách
-2. GET  /api/students?fullName=Nguyễn    → Tìm kiếm theo tên
-3. POST /api/students                    → Thêm học viên (tự động tạo user)
-   Body: { studentId, fullName, gender, birthday, classId, ... }
-4. GET  /api/students/:id                → Xem chi tiết (kèm class, university, organization)
-5. PUT  /api/students/:id                → Cập nhật thông tin
-6. DEL  /api/students/:id                → Xóa (tự động xóa: user, yearlyResult, semesterResult,
-                                           subjectResult, timeTable, cutRice, tuitionFee, achievement, ...)
+1. Xác thực Chỉ huy và xác định hệ từ tài khoản.
+2. Tìm học viên trong phạm vi hệ được phân công.
+3. Cập nhật thông tin hoặc xếp/chuyển lớp trong cùng hệ.
+4. Lưu lịch sử thao tác; không xóa dữ liệu học viên.
 ```
 
 ## Dữ liệu & Database
@@ -59,5 +50,5 @@ Thêm mới, chỉnh sửa, xóa và tìm kiếm học viên theo nhiều tiêu 
 - Cột chính: `studentId` (mã HV), `fullName`, `gender`, `birthday`, `cccdNumber`, `phoneNumber`, `email`, `currentAddress`, `enrollment`, `rank`, `positionGovernment`, `positionParty`, `classId`, `universityId`, `organizationId`, `educationLevelId`, `currentCpa4`, `currentCpa10`
 
 ## Lưu ý bảo mật / Quyền hạn
-- Chỉ chỉ huy mới được quản lý hồ sơ học viên.
-- Khi xóa học viên, hệ thống tự động xóa tất cả dữ liệu liên quan.
+- Chỉ huy chỉ quản lý học viên thuộc hệ được phân công.
+- Không xóa học viên hoặc dữ liệu nghiệp vụ liên quan.

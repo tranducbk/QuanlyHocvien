@@ -211,6 +211,22 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *       }
  *     }
  *   },
+ *   "/users/cut-rice/requests": {
+ *     "get": {
+ *       "tags": ["Cut Rice"],
+ *       "summary": "Học viên: Danh sách yêu cầu điều chỉnh cắt cơm của tôi",
+ *       "responses": { "200": { "description": "Danh sách yêu cầu" } }
+ *     },
+ *     "post": {
+ *       "tags": ["Cut Rice"],
+ *       "summary": "Học viên: Gửi yêu cầu điều chỉnh cắt cơm",
+ *       "requestBody": {
+ *         "required": true,
+ *         "content": { "application/json": { "schema": { "type": "object" } } }
+ *       },
+ *       "responses": { "201": { "description": "Yêu cầu đã được gửi" } }
+ *     }
+ *   },
  *   "/users/achievements": {
  *     "get": {
  *       "tags": [
@@ -308,7 +324,7 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *       "tags": [
  *         "Profile"
  *       ],
- *       "summary": "HV-02: Xem hồ sơ cá nhân",
+ *       "summary": "HV-02: Xem thông tin chính trị nội bộ",
  *       "description": "STUDENT/COMMANDER role.",
  *       "responses": {
  *         "200": {
@@ -320,7 +336,7 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *       "tags": [
  *         "Profile"
  *       ],
- *       "summary": "HV-02: Cập nhật hồ sơ cá nhân",
+ *       "summary": "HV-02: Cập nhật thông tin chính trị nội bộ",
  *       "description": "Cập nhật mọi field của Profile.",
  *       "requestBody": {
  *         "content": {

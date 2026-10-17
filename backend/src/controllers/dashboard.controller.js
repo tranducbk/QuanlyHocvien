@@ -13,7 +13,7 @@ const getCommanderDashboard = asyncHandler(async (req, res) => {
 });
 
 const getStudentDashboard = asyncHandler(async (req, res) => {
-  const result = await service.getStudentDashboard(req.userId);
+  const result = await service.getStudentDashboard(req.userId, req.user);
   return success(res, result);
 });
 

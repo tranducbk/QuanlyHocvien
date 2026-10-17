@@ -6,7 +6,7 @@
 - **Tên chức năng:** Phân quyền người dùng
 
 ## Mô tả
-Quản trị viên có thể phân quyền cho từng tài khoản, xác định vai trò và quyền truy cập phù hợp.
+Admin quản lý role và hệ được gán cho tài khoản. Ba role nghiệp vụ là Admin, Chỉ huy và Học viên; mỗi Chỉ huy/Học viên thuộc một trong năm hệ.
 
 ## Module liên quan
 - RBAC Module
@@ -14,9 +14,9 @@ Quản trị viên có thể phân quyền cho từng tài khoản, xác định
 - Auth Module
 
 ## Luồng hoạt động chi tiết
-1. Tạo và quản lý các vai trò (Role).
-2. Gán quyền (Permission) chi tiết cho từng vai trò.
-3. Phân quyền cho từng tài khoản người dùng, xác định vai trò và quyền truy cập phù hợp.
+1. Gán một role cho tài khoản.
+2. Gán hệ cho tài khoản Chỉ huy hoặc Học viên; tài khoản Admin không thuộc hệ.
+3. Backend scope API theo role và hệ của tài khoản đã xác thực.
 
 ## Giao diện & API
 
@@ -36,13 +36,14 @@ Quản trị viên có thể phân quyền cho từng tài khoản, xác định
 ### Role hệ thống
 | Role | Quyền |
 |------|-------|
-| `ADMIN` | Toàn quyền (users, students, commanders, báo cáo, cấu hình) |
-| `COMMANDER` | Quản lý học viên, phê duyệt đề xuất, báo cáo, học phí, lịch trực |
-| `STUDENT` | Chỉ xem và quản lý dữ liệu của chính mình |
+| `ADMIN` | Xem/chỉnh sửa tài khoản mọi hệ; chỉ xem thông tin chính trị nội bộ; không xem điểm |
+| `COMMANDER` | Quản lý học viên và nghiệp vụ trong hệ được phân công |
+| `STUDENT` | Chỉ xem thông tin chính trị nội bộ và dữ liệu cá nhân của mình |
 
 ## Dữ liệu & Database
 - Bảng: `users`
 - Cột phân quyền: `role` (ADMIN/COMMANDER/STUDENT), `isAdmin`
 
 ## Lưu ý bảo mật / Quyền hạn
-- Chỉ Quản trị viên mới có quyền phân quyền người dùng.
+- Chỉ Admin mới được quản lý tài khoản và gán role/hệ.
+- Không cấp quyền truy cập điểm cho Admin; điểm chính thức không thể sửa, xóa hoặc mở khóa.

@@ -146,6 +146,8 @@ const Table = <TData,>({
     return [indexColumn, ...userColumns];
   }, [showIndex, userColumns, pagination.pageIndex, pagination.pageSize]);
 
+  // TanStack Table intentionally returns functions that React Compiler cannot memoize.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: displayData,
     columns: finalColumns,

@@ -1,8 +1,10 @@
-# Database Schema - Student Manager
+﻿# Database Schema - Student Manager
 
-## Tổng quan
+## Mô hình dữ liệu theo năm hệ
 
-Hệ thống quản lý học viên/sinh viên trong môi trường quân đội/công an. Gồm **21 bảng** được chia thành 5 nhóm chức năng.
+Dự án dùng PostgreSQL và Sequelize. Mô hình nghiệp vụ gồm Hệ 1, Hệ 3, Hệ 4, Hệ 5 và Hệ 7. Hệ 1 và Hệ 7 dùng chung nghiệp vụ, khác chương trình đào tạo; Hệ 5 quản lý học viên tại cơ sở đào tạo ngoài quân đội.
+
+Các bảng và kiểu dữ liệu bên dưới được giữ làm cơ sở thiết kế. Khi triển khai mô hình năm hệ, cần gắn dữ liệu đào tạo với hệ tương ứng và bổ sung cấu trúc cho đơn vị, chương trình đào tạo và phân quyền theo hệ; không xóa định nghĩa bảng/cột nếu chưa có cấu trúc thay thế.
 
 ---
 

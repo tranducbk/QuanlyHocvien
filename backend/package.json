@@ -7,11 +7,13 @@
     "dev": "npm run install-lib && cross-env NODE_OPTIONS=\"--max-old-space-size=8000 --no-deprecation\" nodemon server.js",
     "start": "cross-env NODE_OPTIONS=--no-deprecation nodemon server.js",
     "seed": "node src/utils/seed.js",
+    "seed:military-demo": "node src/utils/seedMilitaryDemo.js",
     "db:refresh": "node src/utils/fullSeed.js",
     "migrate:school-years": "node src/utils/migrateSchoolYears.js",
     "migrate:military-system": "node src/utils/migrateMilitarySystem.js",
     "swagger:check": "node src/utils/checkSwaggerCoverage.js",
     "test:api": "node src/utils/apiTest.js",
+    "test:task004": "node src/utils/task004ApiTest.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

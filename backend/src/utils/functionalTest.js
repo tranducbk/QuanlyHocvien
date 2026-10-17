@@ -192,7 +192,7 @@ async function runAllTests() {
   logSection('HV-02: XEM THÔNG TIN CÁ NHÂN');
 
   res = await request('GET', '/auth/profile', null, state.studentToken);
-  const hv02ok = test('HV-02', 'Học viên xem hồ sơ cá nhân (GET /api/auth/profile)', res.status, 200);
+  const hv02ok = test('HV-02', 'Học viên xem thông tin chính trị nội bộ (GET /api/auth/profile)', res.status, 200);
   if (hv02ok && res.body?.data) {
     const profile = res.body.data.student || res.body.data;
     check('HV-02', 'Thông tin cơ bản (họ tên, giới tính, CCCD) có đầy đủ', profile.fullName && profile.gender && profile.cccdNumber);
@@ -201,7 +201,7 @@ async function runAllTests() {
 
     // Update profile via unified endpoint
     res = await request('PUT', '/auth/profile', { phoneNumber: '0912345678', email: 'hv001updated@test.local', currentAddress: 'Hà Nội - Updated' }, state.studentToken);
-    test('HV-02', 'Học viên cập nhật thông tin cá nhân (PUT /api/auth/profile)', res.status, 200);
+    test('HV-02', 'Học viên cập nhật thông tin chính trị nội bộ (PUT /api/auth/profile)', res.status, 200);
   }
 
   // =============================================
@@ -231,12 +231,14 @@ async function runAllTests() {
   // Step 1: Student views their existing results to find a subject
   res = await request('GET', '/students/results?schoolYear=2024-2025', null, state.studentToken);
   let subjectResultId = null;
+  let semesterResultId = null;
 
   if (res.body?.data?.length > 0) {
     // Navigate to first year -> first semester -> first subject
     const yearly = res.body.data[0];
     if (yearly.semesterResults?.length > 0) {
       const semester = yearly.semesterResults[0];
+      semesterResultId = semester.id;
       if (semester.subjectResults?.length > 0) {
         subjectResultId = semester.subjectResults[0].id;
         state.createdSubjectResultId = subjectResultId;
@@ -244,29 +246,41 @@ async function runAllTests() {
     }
   }
 
-  // Step 2: Student creates ADD grade request
-  res = await request('POST', '/students/grade-requests', {
-    subjectResultId: subjectResultId,
-    requestType: 'ADD',
-    reason: 'Môn học mới chưa được cập nhật vào hệ thống',
-    proposedLetterGrade: 'A',
-    proposedGradePoint4: 4.0,
-    proposedGradePoint10: 9.0,
-  }, state.studentToken);
-  test('HV-04', 'Học viên tạo đề xuất THÊM kết quả học tập', res.status, [200, 201]);
-
-  // Step 3: Student creates UPDATE grade request
+  // Step 2: Official grades cannot be changed through a proposal.
   if (subjectResultId) {
     res = await request('POST', '/students/grade-requests', {
       subjectResultId: subjectResultId,
       requestType: 'UPDATE',
       reason: 'Điểm thi bị nhập sai, đề nghị cập nhật',
-      proposedLetterGrade: 'B+',
-      proposedGradePoint4: 3.5,
       proposedGradePoint10: 8.0,
     }, state.studentToken);
-    const updatedOk = test('HV-04', 'Học viên tạo đề xuất CẬP NHẬT kết quả học tập', res.status, [200, 201]);
-    if (updatedOk) state.createdGradeRequestId = res.body?.data?.id || res.body?.id;
+    test('HV-04', 'Học viên không thể đề xuất SỬA điểm chính thức', res.status, 400);
+  }
+
+  // Step 3: Commander creates an ungraded subject placeholder, then the
+  // student proposes its initial grade. This is the only supported flow.
+  if (semesterResultId) {
+    const testSubjectCode = `TASK004-${Date.now()}`;
+    res = await request('POST', '/subject-results', {
+      semesterResultId,
+      subjectCode: testSubjectCode,
+      subjectName: 'Môn kiểm thử đề xuất bổ sung điểm',
+      credits: 1,
+    }, state.commanderToken);
+    const createdUngradedSubjectId = res.body?.data?.id || res.body?.id;
+    const subjectCreated = test('CH-03', 'Chỉ huy tạo môn chưa có điểm để kiểm thử đề xuất ADD', res.status, 201);
+
+    if (subjectCreated && createdUngradedSubjectId) {
+      res = await request('POST', '/students/grade-requests', {
+        subjectResultId: createdUngradedSubjectId,
+        requestType: 'ADD',
+        reason: 'Đề nghị bổ sung kết quả lần đầu',
+        proposedGradePoint10: 8.0,
+      }, state.studentToken);
+      if (test('HV-04', 'Học viên tạo đề xuất BỔ SUNG điểm lần đầu', res.status, 201)) {
+        state.createdGradeRequestId = res.body?.data?.id || res.body?.id;
+      }
+    }
   }
 
   // Step 4: Student views own grade requests
@@ -281,29 +295,25 @@ async function runAllTests() {
   res = await request('GET', '/commanders/grade-requests', null, state.commanderToken);
   test('CH-04', 'Chỉ huy xem tất cả đề xuất kết quả học tập', res.status, 200);
 
-  // Step 6: Commander approves the request -> CPA recalculates
+  // Step 6: Commander approves ADD proposal; grade and aggregates are updated
+  // in the same service transaction.
   if (state.createdGradeRequestId) {
-    res = await request('POST', `/commanders/grade-requests/${state.createdGradeRequestId}/approve`, { reviewNote: 'Đồng ý cập nhật sau khi kiểm tra' }, state.commanderToken);
-    test('CH-04', 'Chỉ huy PHÊ DUYỆT đề xuất (tự động tính lại CPA)', res.status, 200, 'CPA được tính lại tự động');
+    res = await request('POST', `/commanders/grade-requests/${state.createdGradeRequestId}/approve`, { reviewNote: 'Đồng ý bổ sung sau khi kiểm tra' }, state.commanderToken);
+    test('CH-04', 'Chỉ huy PHÊ DUYỆT đề xuất ADD (tự động tính lại CPA)', res.status, 200, 'CPA được tính lại tự động');
 
     // Step 7: Student checks the approved request
     res = await request('GET', `/students/grade-requests/${state.createdGradeRequestId}`, null, state.studentToken);
     test('HV-05', 'Học viên xem chi tiết đề xuất đã được phê duyệt (có ghi chú từ chỉ huy)', res.status, 200);
   }
 
-  // Step 8: Create a new request for REJECTION test
+  // Step 8: DELETE proposals are rejected at validation.
   if (subjectResultId) {
     res = await request('POST', '/students/grade-requests', {
       subjectResultId: subjectResultId,
       requestType: 'DELETE',
       reason: 'Môn này không thuộc chương trình đào tạo',
     }, state.studentToken);
-    let rejectReqId = res.body?.data?.id || res.body?.id;
-
-    if (rejectReqId) {
-      res = await request('POST', `/commanders/grade-requests/${rejectReqId}/reject`, { reviewNote: 'Môn học đúng chương trình, không thể xóa' }, state.commanderToken);
-      test('CH-04', 'Chỉ huy TỪ CHỐI đề xuất (có ghi chú lý do)', res.status, 200);
-    }
+    test('HV-04', 'Học viên không thể đề xuất XÓA điểm chính thức', res.status, 400);
   }
 
   // =============================================

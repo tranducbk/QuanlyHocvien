@@ -152,7 +152,7 @@ export const universitySchema = z.object({
 export type UniversityFormValues = z.infer<typeof universitySchema>;
 
 /**
- * Schema validation cho form cập nhật thông tin cá nhân (Profile)
+ * Schema validation cho form cập nhật thông tin chính trị nội bộ (Profile)
  */
 export const profileSchema = z.object({
   fullName: z.string().min(1, "Họ tên không được để trống"),
@@ -428,10 +428,7 @@ export type UpdateCutRiceFormValues = z.infer<typeof updateCutRiceSchema>;
 
 export const createGradeRequestSchema = z.object({
   subjectResultId: z.string().min(1, "Vui lòng chọn môn học"),
-  requestType: z.enum(
-    ["ADD", "UPDATE", "DELETE"],
-    "Vui lòng chọn loại đề xuất"
-  ),
+  requestType: z.literal("ADD"),
   proposedGradePoint10: z
     .number()
     .min(0, "Điểm đề xuất phải lớn hơn hoặc bằng 0")
