@@ -128,6 +128,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
         id: "code",
         header: "Mã học viên",
         accessorKey: "code",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" weight="semibold" color="neutral">
             {textOrDash(info.row.original.code)}
@@ -148,6 +149,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
         id: "unit",
         header: "Đơn vị",
         accessorKey: "unit",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" color="neutral">
             {textOrDash(info.row.original.unit)}
@@ -158,6 +160,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
         id: "rank",
         header: "Cấp bậc",
         accessorKey: "rank",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" color="neutral">
             {textOrDash(info.row.original.rank)}
@@ -167,27 +170,30 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
       ...(!readOnly ? [{
         id: "actions",
         header: "Thao tác",
-        cell: (info: any) => {
+        meta: { align: "center" as const },
+        cell: (info: { row: { original: Student } }) => {
           const student = info.row.original;
           const userId = student.user?.id;
 
           return (
-            <ActionButton
-              tooltipText={"Xóa học viên khỏi lớp"}
-              icon={HiOutlineTrash}
-              color="red"
-              disabled={removeMutation.isPending}
-              onClick={() => {
-                openConfirm({
-                  title: "Bỏ học viên khỏi lớp",
-                  message: `Bạn có chắc chắn muốn bỏ "${student.fullName || student.code}" khỏi lớp "${cls.className}" không?`,
-                  confirmText: "Bỏ khỏi lớp",
-                  variant: "danger",
-                  mutationKey: [QUERY_KEYS.CLASSES, cls.id, "remove-student"],
-                  onConfirm: () => removeMutation.mutate(userId!),
-                });
-              }}
-            />
+            <div className="flex justify-center">
+              <ActionButton
+                tooltipText={"Xóa học viên khỏi lớp"}
+                icon={HiOutlineTrash}
+                color="red"
+                disabled={removeMutation.isPending}
+                onClick={() => {
+                  openConfirm({
+                    title: "Bỏ học viên khỏi lớp",
+                    message: `Bạn có chắc chắn muốn bỏ "${student.fullName || student.code}" khỏi lớp "${cls.className}" không?`,
+                    confirmText: "Bỏ khỏi lớp",
+                    variant: "danger",
+                    mutationKey: [QUERY_KEYS.CLASSES, cls.id, "remove-student"],
+                    onConfirm: () => removeMutation.mutate(userId!),
+                  });
+                }}
+              />
+            </div>
           );
         },
       }] : []),

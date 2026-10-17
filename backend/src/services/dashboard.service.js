@@ -20,14 +20,12 @@ const toChartRows = (rows, labelKey = 'label') => rows.map((row) => ({
   amount: row.amount !== undefined ? toNumber(row.amount) : undefined,
 }));
 
-const getManagedProfileWhere = (requester) => (
-  requester?.role === 'COMMANDER' ? { commanderId: requester.id } : {}
-);
+const getManagedProfileWhere = () => ({});
 
 const getManagedUserInclude = (requester, extraProfileInclude = []) => ({
   model: Profile,
   where: getManagedProfileWhere(requester),
-  required: requester?.role === 'COMMANDER',
+  required: false,
   include: extraProfileInclude,
 });
 
@@ -274,11 +272,7 @@ const getAdminDashboard = async () => {
     totalStudents,
     totalCommanders,
     totalAdmins,
-    totalUniversities,
-    totalOrganizations,
-    totalClasses,
     totalNotifications,
-    pendingGradeRequests,
     usersWithoutProfile,
     recentUsers,
   ] = await Promise.all([
@@ -288,11 +282,7 @@ const getAdminDashboard = async () => {
     User.count({ where: { role: 'STUDENT' } }),
     User.count({ where: { role: 'COMMANDER' } }),
     User.count({ where: { role: 'ADMIN' } }),
-    db.university.count(),
-    db.organization.count(),
-    Class.count(),
     Notification.count(),
-    GradeRequest.count({ where: { status: 'PENDING' } }),
     User.count({ where: { role: ['STUDENT', 'COMMANDER'], profileId: null } }),
     User.findAll({
       include: [{ model: Profile }],
@@ -310,11 +300,7 @@ const getAdminDashboard = async () => {
       totalStudents,
       totalCommanders,
       totalAdmins,
-      totalUniversities,
-      totalOrganizations,
-      totalClasses,
       totalNotifications,
-      pendingGradeRequests,
       usersWithoutProfile,
     },
     charts: {
@@ -327,20 +313,8 @@ const getAdminDashboard = async () => {
         { label: 'Đang hoạt động', value: activeUsers },
         { label: 'Đã khóa', value: inactiveUsers },
       ],
-      masterData: [
-        { label: 'Trường', value: totalUniversities },
-        { label: 'Đơn vị/Khoa', value: totalOrganizations },
-        { label: 'Lớp', value: totalClasses },
-      ],
-      recordsByModule: [
-        { label: 'Kết quả năm', value: await YearlyResult.count() },
-        { label: 'Học phí', value: await TuitionFee.count() },
-        { label: 'Thành tích', value: await Achievement.count() },
-        { label: 'Thông báo', value: totalNotifications },
-      ],
     },
     alerts: {
-      pendingGradeRequests,
       inactiveUsers,
       usersWithoutProfile,
     },
