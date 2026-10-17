@@ -27,6 +27,7 @@ export interface SemesterResult {
   cumulativeGrade10?: number | null;
   debtCredits?: number | null;
   failedSubjects?: number | null;
+  user?: AcademicResultUser;
   subjectResults?: SubjectResult[];
   createdAt?: string;
   updatedAt?: string;
@@ -47,18 +48,48 @@ export interface YearlyResult {
   cumulativeGrade4?: number | null;
   cumulativeGrade10?: number | null;
   academicStatus?: string | null;
-  studentLevel?: string | null;
+  studentLevel?: number | null;
   semesterIds?: string[] | null;
   partyRating?: string | null;
   trainingRating?: string | null;
   partyRatingDecisionNumber?: string | null;
+  user?: AcademicResultUser;
   semesterResults?: SemesterResult[];
   createdAt?: string;
   updatedAt?: string;
 }
 
+export interface AcademicResultUser {
+  id: string;
+  profile?: {
+    id?: string;
+    code?: string | null;
+    fullName?: string | null;
+    unit?: string | null;
+    university?: {
+      id: string;
+      universityName?: string | null;
+    } | null;
+    class?: {
+      id: string;
+      className?: string | null;
+    } | null;
+  } | null;
+}
+
 export interface AcademicResultQueryRequest extends QueryRequest {
   schoolYear?: string;
+}
+
+export interface YearlyResultQueryRequest extends QueryRequest {
+  schoolYear?: string;
+  userId?: string;
+  fullName?: string;
+  unit?: string;
+  gpaFrom?: number;
+  gpaTo?: number;
+  cpaFrom?: number;
+  cpaTo?: number;
 }
 
 export type GradeRequestStatus = "PENDING" | "APPROVED" | "REJECTED";

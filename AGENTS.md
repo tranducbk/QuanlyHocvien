@@ -13,12 +13,12 @@ Trước khi triển khai một task:
 3. Đọc task hiện tại trong `docs/tasks/`.
 4. Đọc `docs/architecture/backend-overview.md` và/hoặc `docs/architecture/frontend-overview.md` theo phạm vi.
 5. Đọc `docs/product/feature-list.md` khi task liên quan đến trạng thái hoặc phụ thuộc feature.
-6. Đọc `QLHV.md` nếu task liên quan đến mở rộng ba hệ đào tạo, quản lý lớp hoặc kết quả học tập.
+6. Đọc ghi chú trạng thái đầu `QLHV.md` nếu task liên quan đến quản lý lớp hoặc kết quả học tập; đặc tả phân tách ba hệ bên dưới chỉ còn là lịch sử tham khảo.
 7. Đọc source và tài liệu chi tiết trong `doc/` có liên quan.
 
 Khi tài liệu mâu thuẫn:
 
-- `QLHV.md` là nguồn nghiệp vụ ưu tiên cho kiến trúc ba hệ và quy trình điểm mới.
+- Quyết định bỏ kiến trúc phân hệ tại đầu `QLHV.md` và task đã chốt là nguồn nghiệp vụ ưu tiên.
 - Source hiện tại là nguồn mô tả hành vi đang tồn tại.
 - Task đã được chốt là nguồn xác định phạm vi thay đổi của lần triển khai.
 - Phải nêu rõ mâu thuẫn; không âm thầm chọn tài liệu cũ.
@@ -56,13 +56,10 @@ Khi tài liệu mâu thuẫn:
 
 ## 5. Bất biến nghiệp vụ hiện hành
 
-- Mỗi học viên chỉ thuộc một hệ đào tạo.
-- Dữ liệu đào tạo, môn học và điểm của các hệ phải được cách ly.
-- Hệ ngoài/dân sự: chỉ Chỉ huy đúng hệ được tạo/import điểm.
-- Hệ quân sự: Chỉ huy được nhập điểm trực tiếp; Học viên cũng có thể tạo đề xuất bảng điểm cho chính mình để Chỉ huy duyệt/từ chối.
-- Điểm quân sự chính thức được tạo từ Chỉ huy nhập trực tiếp hoặc từ đề xuất đã duyệt trong transaction.
+- Hệ thống không phân tách người dùng hoặc dữ liệu theo hệ đào tạo.
+- Chỉ Chỉ huy được truy cập các API quản lý kết quả học tập; Học viên chỉ xem dữ liệu cá nhân qua API dành cho Học viên.
 - Điểm đã nhập là bất biến: không có sửa, xóa hoặc mở khóa.
-- Chỉ huy trực tiếp quản lý lớp, môn, học kỳ và điểm trong đúng hệ.
+- Chỉ huy trực tiếp quản lý lớp, môn, học kỳ và điểm.
 - Admin không được xem hồ sơ hoặc điểm nghiệp vụ.
 
 Chi tiết và tiêu chí đầy đủ nằm trong `QLHV.md`.

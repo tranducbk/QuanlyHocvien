@@ -374,7 +374,7 @@ async function main() {
   section('10. RESOURCE CRUD: GET All (Admin+Commander)');
   const resources = [
     '/universities', '/organizations', '/education-levels', '/classes',
-    '/yearly-results', '/semester-results', '/subject-results', '/semesters',
+    '/semester-results', '/subject-results', '/semesters',
     '/time-tables', '/tuition-fees',
     '/achievements', '/achievement-profiles', '/yearly-achievements',
     '/scientific-initiatives', '/scientific-topics',
@@ -386,6 +386,10 @@ async function main() {
     ok(`GET  ${p.padEnd(22)} | commander `, (await request('GET', p, null, commanderToken)).status, 200);
     ok(`GET  ${p.padEnd(22)} | student   `, (await request('GET', p, null, studentToken)).status, 403);
   }
+
+  ok('GET  /yearly-results       | admin     ', (await request('GET', '/yearly-results', null, adminToken)).status, 403);
+  ok('GET  /yearly-results       | commander ', (await request('GET', '/yearly-results', null, commanderToken)).status, 200);
+  ok('GET  /yearly-results       | student   ', (await request('GET', '/yearly-results', null, studentToken)).status, 403);
 
   // =================================================================
   // 11. RESOURCE: CREATE (Admin+Commander), test with valid data
@@ -446,7 +450,8 @@ async function main() {
   ok('GET  /universities/hierarchy | admin     ', (await request('GET', '/universities/hierarchy', null, adminToken)).status, 200);
   ok('GET  /universities/hierarchy | student   ', (await request('GET', '/universities/hierarchy', null, studentToken)).status, 403);
 
-  ok('GET  /yearly-results/export  | admin     ', (await request('GET', '/yearly-results/export', null, adminToken)).status, 200);
+  ok('GET  /yearly-results/export  | admin     ', (await request('GET', '/yearly-results/export', null, adminToken)).status, 403);
+  ok('GET  /yearly-results/export  | commander ', (await request('GET', '/yearly-results/export', null, commanderToken)).status, 200);
   ok('GET  /yearly-results/export  | student   ', (await request('GET', '/yearly-results/export', null, studentToken)).status, 403);
 
   ok('GET  /cut-rice/export        | admin     ', (await request('GET', '/cut-rice/export', null, adminToken)).status, 200);

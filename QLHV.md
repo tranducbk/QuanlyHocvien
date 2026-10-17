@@ -1,5 +1,7 @@
 # Đặc tả mở rộng Hệ thống Quản lý Học viên
 
+> **Trạng thái:** Kế hoạch phân tách ba hệ đào tạo trong tài liệu này đã được hủy theo quyết định ngày 29/09/2026. Nội dung bên dưới chỉ được giữ làm lịch sử tham khảo; không triển khai `system_type`, bảng dữ liệu riêng theo hệ hoặc scope theo hệ. Hệ thống tiếp tục dùng ba role `ADMIN`, `COMMANDER`, `STUDENT` và mô hình dữ liệu dùng chung hiện tại.
+
 ## 1. Mục tiêu và phạm vi
 
 Mở rộng hệ thống để quản lý ba hệ đào tạo độc lập:

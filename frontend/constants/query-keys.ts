@@ -17,6 +17,8 @@ export const QUERY_KEYS = {
   CUT_RICE_REQUESTS: "cutRiceRequests",
   DUTY_SCHEDULES: "dutySchedules",
   STUDENT_RESULTS: "studentResults",
+  COMMANDER_SEMESTER_RESULTS: "commanderSemesterResults",
+  COMMANDER_YEARLY_RESULTS: "commanderYearlyResults",
   ACHIEVEMENTS: "achievements",
   STUDENT_TIME_TABLE: "studentTimeTable",
   STUDENT_GRADE_REQUESTS: "studentGradeRequests",
