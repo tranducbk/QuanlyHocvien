@@ -17,9 +17,8 @@ import { cutRiceService } from "@/services/cut-rice";
 import { semesterService } from "@/services/semesters";
 import { formatDateTime } from "@/utils/fn-common";
 import { CutRiceRequest } from "@/types/cut-rice";
+import { MEAL_DAYS } from "@/utils/meal-schedule";
 import CutRiceSkeleton from "./CutRiceSkeleton";
-
-const mealDays = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
 
 const getCutRiceUser = (record: CutRiceRequest) => record.User || record.user;
 const getCutRiceProfile = (record: CutRiceRequest) => {
@@ -130,7 +129,7 @@ export default function CutRiceRequestsTab() {
         header: "Đề xuất",
         cell: (info) => (
           <div className="flex max-w-xl flex-wrap gap-1">
-            {mealDays.map((day) => {
+            {MEAL_DAYS.map((day) => {
               const slot = getSlot(info.row.original, day);
               const count = Number(!!slot.morning) + Number(!!slot.noon) + Number(!!slot.evening);
               return count ? (
@@ -200,6 +199,7 @@ export default function CutRiceRequestsTab() {
               />
               <ActionButton
                 tooltipText="Từ chối yêu cầu"
+                tooltipPosition="top-left"
                 icon={HiOutlineX}
                 color="red"
                 onClick={() => rejectMutation.mutate(record.id)}

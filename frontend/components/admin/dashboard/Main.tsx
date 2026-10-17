@@ -3,21 +3,21 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
-  HiOutlineAcademicCap,
   HiOutlineCheckCircle,
-  HiOutlineCollection,
   HiOutlineExclamation,
   HiOutlineIdentification,
-  HiOutlineOfficeBuilding,
+  HiOutlineShieldCheck,
   HiOutlineUserGroup,
 } from "react-icons/hi";
 import type { IconType } from "react-icons";
+import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
-import { BarsChart, DonutChart } from "@/library/charts";
+import { DonutChart } from "@/library/charts";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { dashboardService } from "@/services/dashboard";
+import { formatDateTime } from "@/utils/fn-common";
 
 type Tone = "primary" | "success" | "warning" | "error" | "sky";
 
@@ -46,11 +46,12 @@ export default function Main() {
 
   const stats = [
     {
-      label: "Tài khoản",
+      label: "Tổng tài khoản",
       value: formatNumber(overview?.totalUsers),
-      helper: "Tổng người dùng",
+      helper: "Tổng người dùng toàn hệ thống",
       icon: HiOutlineUserGroup,
       tone: "primary",
+      href: "/admin/accounts",
     },
     {
       label: "Đang hoạt động",
@@ -58,44 +59,38 @@ export default function Main() {
       helper: "Tài khoản khả dụng",
       icon: HiOutlineCheckCircle,
       tone: "success",
+      href: "/admin/accounts",
     },
     {
       label: "Bị khóa",
       value: formatNumber(overview?.inactiveUsers),
-      helper: "Cần rà soát",
+      helper: "Tài khoản tạm dừng",
       icon: HiOutlineExclamation,
       tone: "warning",
+      href: "/admin/accounts",
     },
     {
-      label: "Cơ sở đào tạo",
-      value: formatNumber(overview?.totalUniversities),
-      helper: "Trường/đơn vị cấp trường",
-      icon: HiOutlineOfficeBuilding,
-      tone: "primary",
-      href: "/admin/universities",
-    },
-    {
-      label: "Khoa/Đơn vị",
-      value: formatNumber(overview?.totalOrganizations),
-      helper: "Đơn vị trực thuộc",
-      icon: HiOutlineCollection,
+      label: "Chỉ huy",
+      value: formatNumber(overview?.totalCommanders),
+      helper: "Tài khoản Chỉ huy đơn vị",
+      icon: HiOutlineShieldCheck,
       tone: "sky",
-      href: "/admin/universities",
-    },
-    {
-      label: "Lớp học",
-      value: formatNumber(overview?.totalClasses),
-      helper: "Lớp đang quản lý",
-      icon: HiOutlineAcademicCap,
-      tone: "success",
-      href: "/admin/classes",
+      href: "/admin/accounts",
     },
     {
       label: "Học viên",
       value: formatNumber(overview?.totalStudents),
       helper: "Tài khoản học viên",
       icon: HiOutlineIdentification,
-      tone: "warning",
+      tone: "primary",
+      href: "/admin/accounts",
+    },
+    {
+      label: "Quản trị viên",
+      value: formatNumber(overview?.totalAdmins),
+      helper: "Tài khoản quản trị",
+      icon: HiOutlineUserGroup,
+      tone: "success",
       href: "/admin/accounts",
     },
   ] satisfies Array<{
@@ -111,7 +106,7 @@ export default function Main() {
     <PageContainer
       breadcrumb={[{ label: "Tổng quan" }]}
       title="Tổng quan hệ thống"
-      subtitle="Theo dõi tài khoản, dữ liệu nền và các cảnh báo vận hành."
+      subtitle="Theo dõi và quản lý tài khoản người dùng, phân quyền và trạng thái hệ thống."
       isLoading={dashboardQuery.isLoading}
       skeleton={<DashboardSkeleton />}
       isError={dashboardQuery.isError}
@@ -119,7 +114,7 @@ export default function Main() {
       className="space-y-8"
     >
       <div className="space-y-8">
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {stats.map((item) => (
             <StatCard key={item.label} {...item} />
           ))}
@@ -135,17 +130,60 @@ export default function Main() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
-          <Panel title="Dữ liệu nền">
-            <BarsChart
-              data={dashboard?.charts.masterData || []}
-              color="#747a56"
-            />
+          <Panel title="Cảnh báo vận hành tài khoản">
+            <div className="space-y-3">
+              <AlertLine
+                icon={HiOutlineExclamation}
+                label="Tài khoản bị khóa cần rà soát"
+                value={dashboard?.alerts?.inactiveUsers ?? 0}
+              />
+              <AlertLine
+                icon={HiOutlineIdentification}
+                label="Tài khoản chưa liên kết hồ sơ"
+                value={dashboard?.alerts?.usersWithoutProfile ?? 0}
+              />
+            </div>
           </Panel>
-          <Panel title="Bản ghi theo phân hệ">
-            <BarsChart
-              data={dashboard?.charts.recordsByModule || []}
-              color="#0ea5e9"
-            />
+
+          <Panel title="Người dùng đăng ký gần đây">
+            {dashboard?.recent?.users && dashboard.recent.users.length > 0 ? (
+              <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                {dashboard.recent.users.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+                  >
+                    <div>
+                      <Typography variant="body" weight="semibold">
+                        {user.fullName || user.username}
+                      </Typography>
+                      <Typography variant="caption" color="gray">
+                        {user.username} {user.code ? `• ${user.code}` : ""} •{" "}
+                        {user.role === "ADMIN"
+                          ? "Quản trị viên"
+                          : user.role === "COMMANDER"
+                          ? "Chỉ huy"
+                          : "Học viên"}
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={user.isActive ? "success" : "neutral"}>
+                        {user.isActive ? "Hoạt động" : "Khóa"}
+                      </Badge>
+                      <Typography variant="caption" color="gray">
+                        {formatDateTime(user.createdAt)}
+                      </Typography>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={HiOutlineUserGroup}
+                title="Chưa có người dùng mới"
+                description="Hệ thống chưa ghi nhận tài khoản mới được tạo."
+              />
+            )}
           </Panel>
         </section>
       </div>
@@ -216,6 +254,50 @@ const Panel = ({
     </Typography>
     {children}
   </section>
+);
+
+const AlertLine = ({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: IconType;
+  label: string;
+  value: number;
+}) => (
+  <div className="flex items-center justify-between rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+    <div className="flex items-center gap-3">
+      <div className="flex size-9 items-center justify-center rounded-lg bg-white text-primary-600 dark:bg-neutral-950 dark:text-primary-300">
+        <Icon size={18} />
+      </div>
+      <Typography variant="body" weight="semibold">
+        {label}
+      </Typography>
+    </div>
+    <Badge variant={value ? "warning" : "success"}>{formatNumber(value)}</Badge>
+  </div>
+);
+
+const EmptyState = ({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: IconType;
+  title: string;
+  description: string;
+}) => (
+  <div className="flex items-start gap-3 rounded-xl border border-dashed border-neutral-200 p-5 text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+    <Icon size={22} className="mt-0.5 shrink-0" />
+    <div>
+      <Typography variant="body" weight="semibold" color="neutral">
+        {title}
+      </Typography>
+      <Typography variant="caption" color="gray" className="mt-1 block">
+        {description}
+      </Typography>
+    </div>
+  </div>
 );
 
 const DashboardSkeleton = () => (

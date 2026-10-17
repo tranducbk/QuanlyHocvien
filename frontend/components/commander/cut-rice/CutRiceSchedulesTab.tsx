@@ -33,7 +33,6 @@ import CutRiceSkeleton from "./CutRiceSkeleton";
 import EditCutRiceForm from "./EditCutRiceForm";
 import ImportCutRiceForm from "./ImportCutRiceForm";
 import { useModalStore } from "@/store/useModalStore";
-import styles from "./CutRiceSchedulesTab.module.css";
 
 const getCutRiceUser = (record: CutRice) => record.User || record.user;
 const getCutRiceProfile = (record: CutRice) => {
@@ -177,7 +176,7 @@ export default function CutRiceSchedulesTab() {
       ...MEAL_DAYS.map<ColumnDef<CutRice>>((day) => ({
         id: `day-${day}`,
         header: () => (
-          <span className={styles.dayHeader}>
+          <span className="flex w-full items-center justify-center text-center">
             <span>{day === "Chủ nhật" ? "CN" : day.replace("Thứ ", "T")}</span>
           </span>
         ),
@@ -193,7 +192,7 @@ export default function CutRiceSchedulesTab() {
         cell: (info) => {
           const record = info.row.original;
           return (
-            <div className={styles.rowActions}>
+            <div className="flex items-center justify-center gap-1.5">
               <ActionButton
                 tooltipText="Chỉnh lịch cắt cơm"
                 icon={HiOutlinePencil}
@@ -208,6 +207,7 @@ export default function CutRiceSchedulesTab() {
               />
               <ActionButton
                 tooltipText="Tạo lại tự động"
+                tooltipPosition="top-left"
                 icon={HiOutlineRefresh}
                 color="green"
                 onClick={() =>
@@ -265,7 +265,12 @@ export default function CutRiceSchedulesTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <DailyMealSummary
+        summary={cutRice.data?.summary}
+        weekStartDate={activeWeekStartDate}
+      />
+
       <Table
         data={cutRice.data}
         columns={scheduleColumns}
@@ -280,20 +285,6 @@ export default function CutRiceSchedulesTab() {
         showIndex={false}
         showVisibilityToggle={false}
         enableColumnOrdering={false}
-        className={styles.matrixTable}
-        contentBeforeTable={
-          <div className={styles.overview}>
-            <DailyMealSummary
-              summary={cutRice.data?.summary}
-              weekStartDate={activeWeekStartDate}
-            />
-            <div className={styles.legend}>
-              <strong>Quy ước:</strong>
-              <span className={styles.cutLegend}>×: Cắt cơm</span>
-              <span className={styles.mutedText}>Ô trống: không cắt</span>
-            </div>
-          </div>
-        }
         emptyText="Không tìm thấy lịch cắt cơm"
         actions={
           <div className="flex flex-wrap items-center gap-2">

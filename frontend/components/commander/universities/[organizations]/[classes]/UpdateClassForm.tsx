@@ -29,7 +29,6 @@ export default function UpdateClassForm({ cls, educationLevelId }: Props) {
     resolver: zodResolver(updateClassSchema),
     defaultValues: {
       className: cls.className,
-      studentCount: cls.studentCount,
     },
   });
 
@@ -54,16 +53,18 @@ export default function UpdateClassForm({ cls, educationLevelId }: Props) {
         {...register("className")}
         required
       />
-      <Input
-        label="Số lượng học viên"
-        type="number"
-        placeholder="Nhập số lượng học viên hiện tại..."
-        prefixIcon={<HiOutlineUserGroup />}
-        error={errors.studentCount?.message}
-        isLoading={mutation.isPending}
-        {...register("studentCount", { valueAsNumber: true })}
-        required
-      />
+
+      <div className="p-3 bg-neutral-50 dark:bg-neutral-900/60 rounded-xl border border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <HiOutlineUserGroup className="text-primary-600 dark:text-primary-400" size={18} />
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Số lượng học viên:
+          </span>
+        </div>
+        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-primary-100 text-primary-800 dark:bg-primary-950 dark:text-primary-300">
+          {cls.studentCount ?? 0} học viên
+        </span>
+      </div>
 
       <div className="flex flex-col gap-4">
         <Divide />

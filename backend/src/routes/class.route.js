@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../controllers/class.controller');
-const { authMiddleware, requireRole, requireAdmin } = require('../middlewares/auth.middleware');
+const { authMiddleware, requireRole } = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -496,17 +496,17 @@ const { authMiddleware, requireRole, requireAdmin } = require('../middlewares/au
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
 
-router.post('/', requireAdmin, controller.create);
+router.post('/', controller.create);
 router.get('/', controller.getAll);
-router.post('/:id/students/batch', requireAdmin, controller.assignStudentsBatch);
-router.post('/:id/students', requireAdmin, controller.assignStudents);
-router.delete('/:id/students', requireAdmin, controller.removeStudents);
-router.delete('/:id/students/:userId', requireAdmin, controller.removeStudent);
+router.post('/:id/students/batch', controller.assignStudentsBatch);
+router.post('/:id/students', controller.assignStudents);
+router.delete('/:id/students', controller.removeStudents);
+router.delete('/:id/students/:userId', controller.removeStudent);
 router.get('/:id/students', controller.getStudents);
 router.get('/:id', controller.getDetail);
-router.put('/:id', requireAdmin, controller.update);
-router.delete('/:id', requireAdmin, controller.delete);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
 
 module.exports = router;

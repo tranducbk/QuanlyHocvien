@@ -26,11 +26,12 @@ const Semester = db.semester;
 const isCommander = (requester) => requester?.role === 'COMMANDER';
 
 const applyCommanderScope = (where, requester) => {
-  if (isCommander(requester)) where.commanderId = requester.id;
+  // Cho phép Chỉ huy quản lý tất cả học viên trường ngoài
 };
 
 const assertCommanderCanAccessProfile = (profile, requester) => {
-  if (isCommander(requester) && (profile?.commanderId !== requester.id || profile?.User?.systemType !== requester.systemType)) {
+  // Cho phép Chỉ huy truy cập tất cả học viên trường ngoài, nhưng chỉ trong hệ của mình
+  if (isCommander(requester) && profile?.User?.systemType !== requester.systemType) {
     throw new NotFoundError('Khong tim thay hoc vien');
   }
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import Tooltip from "./Tooltip";
+import Tooltip, { TooltipPosition } from "./Tooltip";
 
 export type ActionButtonColor =
   | "blue"
@@ -12,6 +12,8 @@ export type ActionButtonColor =
 interface ActionButtonProps {
   /** Nội dung tooltip khi hover */
   tooltipText: string;
+  /** Vị trí tooltip: top, bottom, left, right, top-left, top-right... (mặc định: top) */
+  tooltipPosition?: TooltipPosition;
   /** Icon component (từ react-icons) */
   icon: React.ElementType;
   /** Hàm xử lý khi click */
@@ -34,6 +36,7 @@ interface ActionButtonProps {
  */
 const ActionButton: React.FC<ActionButtonProps> = ({
   tooltipText,
+  tooltipPosition = "top",
   icon: Icon,
   onClick,
   color = "blue",
@@ -52,7 +55,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   };
 
   return (
-    <Tooltip content={tooltipText}>
+    <Tooltip content={tooltipText} position={tooltipPosition}>
       <button
         onClick={onClick}
         disabled={disabled}

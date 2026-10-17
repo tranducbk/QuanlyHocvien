@@ -1,20 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
-import type { ColumnDef } from "@tanstack/react-table";
-import Badge from "@/library/Badge";
+import { useMemo, useCallback } from "react";
 import PageContainer from "@/library/PageContainer";
 import Table from "@/library/Table";
-import Typography from "@/library/Typography";
 import { FilterField } from "@/library/table/TableFilter";
 import useTableQuery from "@/hooks/useTableQuery";
-import { QUERY_KEYS } from "@/constants/query-keys";
+import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { universityService } from "@/services/universities";
+import { useModalStore } from "@/store/useModalStore";
 import { University, UniversityQueryRequest } from "@/types/universities";
+import CreateUniversityForm from "./CreateUniversityForm";
+import UpdateUniversityForm from "./UpdateUniversityForm";
 import UniversitySkeleton from "./UniversitySkeleton";
+import { useUniversityColumns } from "./useUniversityColumns";
 
 export default function Main() {
+  const { openModal } = useModalStore();
+
   const {
     data,
     isLoading,
@@ -31,67 +33,34 @@ export default function Main() {
     fetchData: universityService.getUniversities,
   });
 
-  const columns = useMemo<ColumnDef<University>[]>(
-    () => [
-      {
-        id: "universityName",
-        header: "Trường đại học",
-        accessorKey: "universityName",
-        cell: ({ row }) => {
-          const university = row.original;
-          return (
-            <Link
-              href={`/commander/universities/${university.id}`}
-              className="group inline-flex flex-col"
-            >
-              <Typography
-                variant="body"
-                weight="semibold"
-                color="neutral"
-                className="group-hover:text-primary-600 transition-colors"
-              >
-                {university.universityName}
-              </Typography>
-              <Typography variant="caption" color="gray">
-                Xem chuyên ngành / đơn vị
-              </Typography>
-            </Link>
-          );
+  const handleOpenCreateModal = useCallback(() => {
+    openModal({
+      title: "Thêm mới trường đại học",
+      content: <CreateUniversityForm />,
+      size: "md",
+      config: {
+        mutationKey: MUTATION_KEYS.CREATE_UNIVERSITY,
+      },
+    });
+  }, [openModal]);
+
+  const handleOpenUpdateModal = useCallback(
+    (university: University) => {
+      openModal({
+        title: "Chỉnh sửa trường đại học",
+        content: <UpdateUniversityForm university={university} />,
+        size: "md",
+        config: {
+          mutationKey: MUTATION_KEYS.UPDATE_UNIVERSITY,
         },
-      },
-      {
-        id: "universityCode",
-        header: "Mã trường",
-        accessorKey: "universityCode",
-        cell: ({ row }) => (
-          <Typography variant="body" weight="semibold" color="neutral" className="whitespace-nowrap">
-            {row.original.universityCode}
-          </Typography>
-        ),
-      },
-      {
-        id: "totalStudents",
-        header: "Số học viên",
-        accessorKey: "totalStudents",
-        cell: ({ row }) => (
-          <Typography variant="body" color="neutral">
-            {row.original.totalStudents}
-          </Typography>
-        ),
-      },
-      {
-        id: "status",
-        header: "Trạng thái",
-        accessorKey: "status",
-        cell: ({ row }) => (
-          <Badge variant={row.original.status === "ACTIVE" ? "success" : "neutral"}>
-            {row.original.status === "ACTIVE" ? "Hoạt động" : "Tạm dừng"}
-          </Badge>
-        ),
-      },
-    ],
-    []
+      });
+    },
+    [openModal]
   );
+
+  const columns = useUniversityColumns({
+    onEdit: handleOpenUpdateModal,
+  });
 
   const filterOptions = useMemo<FilterField[]>(
     () => [
@@ -147,6 +116,8 @@ export default function Main() {
             onSortingChange={setSorting}
             filterFields={filterOptions}
             emptyText="Không tìm thấy cơ sở đào tạo nào phù hợp"
+            onAdd={handleOpenCreateModal}
+            addLabel="Thêm trường"
           />
         </div>
       </div>
