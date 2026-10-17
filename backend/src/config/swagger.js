@@ -47,6 +47,7 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
       { name: 'Organizations', description: 'CH-02: Đơn vị/Khoa' },
       { name: 'Education Levels', description: 'CH-02: Trình độ đào tạo' },
       { name: 'Classes', description: 'CH-02: Lớp học' },
+      { name: 'Military', description: 'Quản lý lớp, môn, học kỳ và lịch học hệ quân sự' },
       { name: 'Semesters', description: 'CH-08 + CH-11: Học kỳ & Tiện ích điểm' },
       { name: 'Time Tables', description: 'Thời khóa biểu' },
       { name: 'Tuition Fees', description: 'CH-07: Học phí' },

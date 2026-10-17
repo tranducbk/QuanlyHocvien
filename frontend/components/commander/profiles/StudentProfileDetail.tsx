@@ -29,11 +29,13 @@ import {
 interface StudentProfileDetailProps {
   studentId: string;
   initialData: Student;
+  militaryMode?: boolean;
 }
 
 export default function StudentProfileDetail({
   studentId,
   initialData,
+  militaryMode = false,
 }: StudentProfileDetailProps) {
   const {
     data: response,
@@ -75,7 +77,7 @@ export default function StudentProfileDetail({
             <Badge variant="primary">{student.code || "Chưa có mã"}</Badge>
             <Badge variant="neutral">{student.rank || "Học viên"}</Badge>
             <Badge variant="secondary">
-              {student.class?.className || "Chưa phân lớp"}
+              {(militaryMode ? student.militaryClass?.className : student.class?.className) || "Chưa phân lớp"}
             </Badge>
           </div>
         </div>
@@ -126,6 +128,8 @@ export default function StudentProfileDetail({
         </DetailSection>
 
         <DetailSection title="Thông tin học tập">
+          {militaryMode && <DetailItem icon={<HiOutlineAcademicCap />} label="Lớp quân sự" value={student.militaryClass?.className || student.militaryClass?.classCode} />}
+          {!militaryMode && <>
           <DetailItem
             icon={<HiOutlineLibrary />}
             label="Trường đào tạo"
@@ -146,6 +150,7 @@ export default function StudentProfileDetail({
             label="Trình độ"
             value={student.educationLevel?.levelName}
           />
+          </>}
           <DetailItem
             icon={<HiOutlineCalendar />}
             label="Khóa nhập học"

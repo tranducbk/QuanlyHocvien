@@ -158,6 +158,7 @@ export interface Student {
   commanderId: string | null;
   updatedAt: string;
   university?: University;
+  militaryClass?: { id: string; className: string; classCode: string };
   class?: Class;
   organization?: Organization;
   educationLevel?: EducationLevel;

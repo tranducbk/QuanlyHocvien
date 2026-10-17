@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
     role: {
       type: DataTypes.STRING(50),
     },
+    systemType: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+      validate: { isIn: [['EXTERNAL', 'MILITARY']] },
+    },
     refreshToken: {
       type: DataTypes.TEXT,
     },

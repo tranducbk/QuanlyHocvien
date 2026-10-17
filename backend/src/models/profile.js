@@ -101,6 +101,9 @@ module.exports = (sequelize, DataTypes) => {
     classId: {
       type: DataTypes.UUID,
     },
+    militaryClassId: {
+      type: DataTypes.UUID,
+    },
     organizationId: {
       type: DataTypes.UUID,
     },
@@ -114,6 +117,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'profiles',
     timestamps: true,
     underscored: true,
+    indexes: [{ fields: ['military_class_id'] }],
   });
 
   return Profile;

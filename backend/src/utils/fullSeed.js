@@ -16,7 +16,7 @@ async function fullSeed() {
     // ==========================
     // Admin
     const admin = await db.user.create({
-      username: 'admin', password: await bcrypt.hash('admin123', 10), role: 'ADMIN', isAdmin: true,
+      username: 'admin', password: await bcrypt.hash('admin123', 10), role: 'ADMIN', systemType: null, isAdmin: true,
     });
 
     // Commanders (create user + profile)
@@ -29,7 +29,7 @@ async function fullSeed() {
       startWork: 2008,
     });
     const chiHuy1 = await db.user.create({
-      username: 'chihuy01', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER',
+      username: 'chihuy01', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER', systemType: 'EXTERNAL',
       profileId: cmd1Profile.id,
     });
 
@@ -42,7 +42,7 @@ async function fullSeed() {
       startWork: 2010,
     });
     const chiHuy2 = await db.user.create({
-      username: 'chihuy02', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER',
+      username: 'chihuy02', password: await bcrypt.hash('chihuy123', 10), role: 'COMMANDER', systemType: 'EXTERNAL',
       profileId: cmd2Profile.id,
     });
 
@@ -134,6 +134,7 @@ async function fullSeed() {
         username: `hv${String(i + 1).padStart(3, '0')}`,
         password: await bcrypt.hash('hocvien123', 10),
         role: 'STUDENT',
+        systemType: 'EXTERNAL',
         profileId: profile.id,
       });
       hocVienUsers.push(user);

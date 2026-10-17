@@ -35,10 +35,10 @@ Route chính hiện tại:
 
 - `/login`, `/forgot-password`, `/contact`.
 - `/admin/*`.
-- `/commander/*`.
-- `/student/*`.
+- `/commander/*`, gồm `/commander/military/*` cho Chỉ huy quân sự.
+- `/student/*`, gồm `/student/military/*` cho Học viên quân sự.
 
-`frontend/proxy.ts` bảo vệ route theo cookie role. `frontend/constants/constants.ts` khai báo ba role nghiệp vụ `ADMIN`, `COMMANDER`, `STUDENT`; không có role hoặc route Giảng viên.
+`frontend/proxy.ts` bảo vệ route theo cookie role và điều hướng theo `systemType`. `frontend/constants/constants.ts` khai báo ba role nghiệp vụ `ADMIN`, `COMMANDER`, `STUDENT`; không có role hoặc route Giảng viên.
 
 ## 4. State management
 
@@ -92,18 +92,11 @@ Types theo domain nằm trong `frontend/types`; validation dùng chung nằm t�
 
 Các page/component tồn tại trong source chưa đồng nghĩa đã được kiểm thử runtime đầy đủ.
 
-## 8. Trạng thái so với `QLHV.md`
+## 8. Trạng thái hệ quân sự
 
-Chưa có:
+Sidebar và route được tách theo `systemType`. Route quân sự trong `app` giữ mỏng và render `Main` trong `components/commander/military`, cùng cấu trúc với các domain hệ ngoài. Các `Main` quân sự dùng chung `PageContainer`, `Table`, `ActionButton`, `Input`, `Select`, `Textarea`, `Button` và modal hiện có; chỉ dữ liệu, API và thao tác nghiệp vụ được tách theo hệ. Học viên quân sự xem hồ sơ cá nhân, lịch chung của lớp, điểm, trạng thái đề xuất và thành tích. Hệ quân sự không hiển thị học phí hoặc cắt cơm.
 
-- `system_type` trong auth type/store/proxy.
-- Giao diện Chỉ huy tách theo ba hệ.
-- UI quản lý lớp, môn và học kỳ theo hệ dành cho Chỉ huy.
-- UI Chỉ huy nhập điểm trực tiếp cho đúng hệ và duyệt đề xuất điểm quân sự.
-- UI Học viên quân sự nhập bảng điểm, gửi và theo dõi đề xuất.
-- Khung hệ dân sự.
-
-Luồng đề xuất điểm hệ ngoài cũ cần được ngừng nhưng phải bảo toàn dữ liệu lịch sử. Luồng đề xuất mới chỉ áp dụng cho hệ quân sự.
+Hệ dân sự đang hoãn. Các trang quân sự gọi service/endpoint quân sự riêng; không tái sử dụng endpoint nghiệp vụ hệ ngoài để đọc/ghi dữ liệu học tập.
 
 ## 9. Quy tắc khi mở rộng
 

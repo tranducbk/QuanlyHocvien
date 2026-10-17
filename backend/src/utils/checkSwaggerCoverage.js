@@ -14,6 +14,9 @@ const routeMounts = {
   'organization.route.js': '/organizations',
   'educationLevel.route.js': '/education-levels',
   'class.route.js': '/classes',
+  'militaryClass.route.js': '/military/classes',
+  'militaryAcademic.route.js': '/military/academic',
+  'militaryRecords.route.js': '/military/records',
   'yearlyResult.route.js': '/yearly-results',
   'semesterResult.route.js': '/semester-results',
   'subjectResult.route.js': '/subject-results',
@@ -43,11 +46,11 @@ const readRouteMethods = () => {
   for (const [fileName, mountPath] of Object.entries(routeMounts)) {
     const filePath = path.join(routeDir, fileName);
     const source = fs.readFileSync(filePath, 'utf8');
-    const routePattern = /router\.(get|post|put|delete)\('([^']+)'/g;
+    const routePattern = /router\.(get|post|put|delete)\(\s*(['"])([^'"]+)\2/g;
 
     for (const match of source.matchAll(routePattern)) {
       const method = match[1].toUpperCase();
-      const routePath = normalizePath(mountPath, match[2]);
+      const routePath = normalizePath(mountPath, match[3]);
       routeMethods.push(`${method} ${routePath}`);
     }
   }

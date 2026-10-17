@@ -7,6 +7,7 @@ const { BadTokenError, ForbiddenError } = require('../utils/apiError');
 const User = db.user;
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
+  if (req.user) return next();
   if (process.env.SERVER_JWT === 'false') return next();
 
   const token = JwtService.jwtGetToken(req);
@@ -53,9 +54,17 @@ const requireStudent = asyncHandler(async (req, res, next) => {
 
 const requireAdmin = requireRole('ADMIN');
 
+const requireSystemType = (...systemTypes) => asyncHandler(async (req, res, next) => {
+  if (process.env.SERVER_JWT === 'false') return next();
+  if (req.user?.role === 'ADMIN') return next();
+  if (!req.user || !systemTypes.includes(req.user.systemType)) throw new ForbiddenError();
+  return next();
+});
+
 module.exports = {
   authMiddleware,
   requireRole,
   requireStudent,
   requireAdmin,
+  requireSystemType,
 };

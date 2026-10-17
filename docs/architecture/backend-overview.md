@@ -54,6 +54,7 @@ Router tổng tại `backend/src/routes/index.js`, gồm:
 
 - auth, files, users;
 - universities, organizations, education-levels, classes;
+- military classes and military academic/records routes under `/military/*`;
 - yearly/semester/subject results và grade requests;
 - semesters, time tables, tuition fees;
 - achievements, achievement profiles, yearly achievements;
@@ -80,18 +81,19 @@ Danh sách có thêm `pagination`.
 
 - Xác minh JWT và tải `User` kèm `Profile`.
 - Gắn `req.userId` và `req.user`.
-- Có helper `requireRole`, `requireStudent`, `requireAdmin`.
+- Có helper `requireRole`, `requireStudent`, `requireAdmin`, `requireSystemType`.
 
-Hiện tại phân quyền chủ yếu theo role; chưa có `system_type` hoặc scope theo hệ. Middleware cũng mặc định tải một loại `Profile`. Đây là khoảng trống phải xử lý trước khi mở rộng ba hệ.
+API nghiệp vụ được bảo vệ theo role và `User.systemType` (`EXTERNAL` hoặc `MILITARY`). Các route quân sự dùng prefix `/military`; dữ liệu lớp, môn, học kỳ, lịch theo lớp, kết quả, đề xuất điểm, thành tích và lịch trực có bảng riêng. Hồ sơ cá nhân vẫn dùng `Profile` chung. Hệ thứ hai đang hoãn.
 
 ## 6. Dữ liệu hiện tại
 
 `backend/src/models/index.js` khởi tạo model và khai báo quan hệ tập trung. Nhóm chính:
 
-- Tổ chức/cơ sở: University, Organization, EducationLevel, Class.
+- Tổ chức/cơ sở: University, Organization, EducationLevel, Class; MilitaryClass độc lập với hệ ngoài.
 - Tài khoản/hồ sơ: User, Profile.
-- Học tập: SchoolYear, Semester, YearlyResult, SemesterResult, SubjectResult, TimeTable, TuitionFee.
-- Thành tích/nghiên cứu.
+- Học tập hệ ngoài: SchoolYear, Semester, YearlyResult, SemesterResult, SubjectResult, TimeTable, TuitionFee.
+- Học tập quân sự: MilitarySemester, MilitarySubject, MilitaryTimeTable (theo lớp), MilitarySubjectResult và MilitaryGradeProposal.
+- Thành tích/lịch trực quân sự lưu riêng; achievement/research và duty schedule của hệ ngoài giữ luồng riêng.
 - Cắt cơm, lịch trực, thông báo và grade request.
 
 `Profile` hiện trộn thông tin cá nhân, quân nhân và đào tạo. `SubjectResult` lưu trực tiếp mã/tên môn thay vì liên kết danh mục môn.
@@ -115,15 +117,9 @@ Các script trong `backend/package.json`:
 
 Đã có nền tảng route/controller/service/model, các nghiệp vụ hệ ngoài và giao diện/API nhập kết quả.
 
-Chưa có:
+Đã có scope `systemType`, lớp/môn/học kỳ/lịch quân sự riêng, kết quả điểm riêng và luồng học viên đề xuất/Chỉ huy duyệt. Điểm chính thức được tạo một lần, không có API sửa/xóa. Migration quân sự bổ sung schema theo hướng additive và có thể chạy lại.
 
-- `system_type` và scope theo hệ.
-- Hồ sơ/enrollment tách theo hệ.
-- Danh mục môn riêng cho ba hệ.
-- Bảng điểm quân sự/dân sự riêng.
-- Cơ chế điểm bất biến: Chỉ huy đúng hệ tạo trực tiếp; riêng hệ quân sự còn tạo từ đề xuất Học viên được Chỉ huy duyệt.
-- Audit log nghiệp vụ đầy đủ.
-- Migration có phiên bản cho đợt mở rộng.
+Còn thiếu: dashboard/báo cáo tổng hợp quân sự, import/export Excel cho các nghiệp vụ quân sự và audit log đầy đủ.
 
 ## 10. Nguyên tắc mở rộng
 
