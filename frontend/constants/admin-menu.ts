@@ -27,4 +27,9 @@ export const ADMIN_MENU = [
     path: "/admin/training-programs",
     icon: HiOutlineAcademicCap,
   },
+  {
+    title: "Lớp đào tạo",
+    path: "/admin/training-classes",
+    icon: HiOutlineAcademicCap,
+  },
 ] as const satisfies readonly MenuItem[];

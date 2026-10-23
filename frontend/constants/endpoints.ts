@@ -36,6 +36,11 @@ export const ENDPOINTS = {
     SYSTEMS: "/api/training-programs/systems",
     VERSIONS: (id: string) => `/api/training-programs/${id}/versions`,
   },
+  TRAINING_CLASSES: {
+    BASE: "/api/training-classes",
+    OPTIONS: "/api/training-classes/options",
+    COMMANDER: (id: string) => `/api/training-classes/${id}/commander`,
+  },
   UNIVERSITIES: {
     BASE: "/api/universities",
   },

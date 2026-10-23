@@ -11,6 +11,7 @@ const routeMounts = {
   'commanderReport.route.js': '/commanders',
   'user.route.js': '/users',
   'trainingProgram.route.js': '/training-programs',
+  'trainingClass.route.js': '/training-classes',
   'university.route.js': '/universities',
   'organization.route.js': '/organizations',
   'educationLevel.route.js': '/education-levels',

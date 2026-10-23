@@ -56,6 +56,7 @@ db.user = require('./user.js')(sequelize, DataTypes);
 db.trainingSystem = require('./TrainingSystem.js')(sequelize, DataTypes);
 db.trainingProgram = require('./TrainingProgram.js')(sequelize, DataTypes);
 db.curriculumVersion = require('./CurriculumVersion.js')(sequelize, DataTypes);
+db.trainingClass = require('./TrainingClass.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
 db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
@@ -91,6 +92,16 @@ db.trainingSystem.hasMany(db.trainingProgram, { foreignKey: 'trainingSystemId', 
 db.trainingProgram.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
 db.trainingProgram.hasMany(db.curriculumVersion, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
 db.curriculumVersion.belongsTo(db.trainingProgram, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.trainingSystem.hasMany(db.trainingClass, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.university.hasMany(db.trainingClass, { foreignKey: 'educationProviderId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.university, { foreignKey: 'educationProviderId', onDelete: 'RESTRICT' });
+db.trainingProgram.hasMany(db.trainingClass, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.trainingProgram, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.curriculumVersion.hasMany(db.trainingClass, { foreignKey: 'curriculumVersionId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.curriculumVersion, { foreignKey: 'curriculumVersionId', onDelete: 'RESTRICT' });
+db.user.hasMany(db.trainingClass, { as: 'assignedTrainingClasses', foreignKey: 'commanderId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.user, { as: 'commander', foreignKey: 'commanderId', onDelete: 'RESTRICT' });
 
 // --- Nhóm Quản lý Tổ chức & Cơ sở ---
 
