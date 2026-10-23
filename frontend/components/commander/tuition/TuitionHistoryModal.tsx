@@ -2,16 +2,20 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { HiOutlineUser, HiOutlineClock } from "react-icons/hi";
-import { tuitionFeeService } from "@/services/tuition-fees";
+import {
+  tuitionFeeService,
+  type TuitionHistory,
+} from "@/services/tuition-fees";
 import { formatDateTime } from "@/utils/fn-common";
 import Badge from "@/library/Badge";
-import Typography from "@/library/Typography";
 
 interface TuitionHistoryModalProps {
   tuitionFeeId: string;
 }
 
-export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModalProps) {
+export default function TuitionHistoryModal({
+  tuitionFeeId,
+}: TuitionHistoryModalProps) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["tuition-fee-histories", tuitionFeeId],
     queryFn: () => tuitionFeeService.getHistories(tuitionFeeId),
@@ -22,7 +26,9 @@ export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModa
   }
 
   if (isError || !data?.data) {
-    return <div className="p-4 text-center text-error-500">Lỗi khi tải lịch sử</div>;
+    return (
+      <div className="p-4 text-center text-error-500">Lỗi khi tải lịch sử</div>
+    );
   }
 
   const histories = data.data;
@@ -34,10 +40,10 @@ export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModa
   return (
     <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
       <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-4 space-y-6">
-        {histories.map((history: any) => {
+        {histories.map((history: TuitionHistory) => {
           const isPaid = history.newStatus === "PAID";
           const oldIsPaid = history.oldStatus === "PAID";
-          
+
           return (
             <div key={history.id} className="relative pl-6">
               <div className="absolute -left-2 top-1 size-4 rounded-full border-2 border-white bg-primary-500 dark:border-neutral-900" />
@@ -57,16 +63,18 @@ export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModa
                     {formatDateTime(history.createdAt)}
                   </div>
                 </div>
-                
+
                 <div className="mb-2 text-sm text-neutral-700 dark:text-neutral-300">
                   <span className="font-semibold">Ghi chú: </span>
                   {history.note || "Cập nhật trạng thái học phí"}
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
                   <HiOutlineUser size={14} />
-                  {history.changer?.profile?.fullName || "Hệ thống"} 
-                  {history.changer?.profile?.code ? ` (${history.changer.profile.code})` : ""}
+                  {history.changer?.profile?.fullName || "Hệ thống"}
+                  {history.changer?.profile?.code
+                    ? ` (${history.changer.profile.code})`
+                    : ""}
                 </div>
               </div>
             </div>

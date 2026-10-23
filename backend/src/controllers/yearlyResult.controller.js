@@ -5,18 +5,18 @@ const s = require('../validations/yearlyResult.validation');
 
 const getAll = asyncHandler(async (req, res) => {
   await validateOrThrow(s.listQuery, req.query);
-  const result = await service.getAll(req.query);
+  const result = await service.getAll(req.query, req.user);
   return paginated(res, result.rows, result.pagination);
 });
 
 const getDetail = asyncHandler(async (req, res) => {
-  const result = await service.getDetail(req.params.id);
+  const result = await service.getDetail(req.params.id, req.user);
   return success(res, result);
 });
 
 const exportYearlyResults = asyncHandler(async (req, res) => {
   await validateOrThrow(s.listQuery, req.query);
-  const buffer = await service.exportYearlyResults(req.query);
+  const buffer = await service.exportYearlyResults(req.query, req.user);
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=thong-ke-nam-hoc.xlsx');
   res.send(buffer);

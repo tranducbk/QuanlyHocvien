@@ -8,7 +8,7 @@ const University = db.university;
 const Class = db.class;
 const SemesterResult = db.semesterResult;
 
-const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
+const buildQueryParts = (query = {}, requester, { includeSemesters = false } = {}) => {
   const where = {};
   const profileWhere = {};
 
@@ -38,6 +38,8 @@ const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
     profileWhere.unit = { [db.Sequelize.Op.iLike]: `%${query.unit}%` };
   }
 
+  profileWhere.commanderId = requester.id;
+
   if (query.isPartyMember === 'true') {
     profileWhere[db.Sequelize.Op.or] = [
       { probationaryPartyMember: { [db.Sequelize.Op.ne]: null } },
@@ -65,7 +67,7 @@ const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
   const include = [{
     model: User,
     attributes: ['id'],
-    where: { role: 'STUDENT' },
+    where: { role: 'STUDENT', systemType: requester.systemType },
     include: [profileInclude],
     required: true,
   }];
@@ -87,17 +89,18 @@ const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
   return { where, include };
 };
 
-const getAll = async (query) => {
-  const { where, include } = buildQueryParts(query);
+const getAll = async (query, requester) => {
+  const { where, include } = buildQueryParts(query, requester);
   return paginateQuery(YearlyResult, query, { where, include });
 };
 
-const getDetail = async (id) => {
-  const { include } = buildQueryParts({}, { includeSemesters: true });
-  const record = await YearlyResult.findByPk(id, {
+const getDetail = async (id, requester) => {
+  const { include } = buildQueryParts({}, requester, { includeSemesters: true });
+  const record = await YearlyResult.findOne({
+    where: { id },
     include,
   });
-  if (!record) throw new NotFoundError('Không tìm thấy kết quả năm học');
+  if (!record) throw new NotFoundError('Không tìm thấy kết quả năm học trong phạm vi quản lý');
   return record;
 };
 
@@ -135,8 +138,8 @@ const resolveField = (obj, path) => {
   return current !== null && current !== undefined ? current : '';
 };
 
-const exportYearlyResults = async (query) => {
-  const { where, include } = buildQueryParts(query);
+const exportYearlyResults = async (query, requester) => {
+  const { where, include } = buildQueryParts(query, requester);
 
   const sortBy = query.sortBy || 'schoolYear';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';

@@ -13,6 +13,7 @@
     "migrate:military-system": "node src/utils/migrateMilitarySystem.js",
     "swagger:check": "node src/utils/checkSwaggerCoverage.js",
     "test:api": "node src/utils/apiTest.js",
+    "test:task004": "node src/utils/task004ApiTest.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

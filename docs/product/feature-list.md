@@ -76,7 +76,7 @@ Chỉ huy nhập điểm; Học viên xem điểm chính thức.
 
 ### Trạng thái
 
-**Cần thay đổi**: source còn create/update/delete kết quả và luồng đề xuất/phê duyệt.
+**Đã khóa API công khai theo bất biến điểm**: API quản lý kết quả môn, học kỳ và năm chỉ cho Chỉ huy; không còn API sửa/xóa kết quả môn hoặc học kỳ. Luồng đề xuất hệ ngoài chỉ cho bổ sung kết quả của môn chưa có điểm. Cần tiếp tục kiểm thử runtime và chuyển scope `EXTERNAL/MILITARY` sang đủ năm hệ.
 
 ## F06 - Lịch học và lịch cắt cơm
 
@@ -216,7 +216,7 @@ Chỉ huy nhập điểm trực tiếp; Học viên gửi đề xuất khi quy t
 
 ### Trạng thái
 
-Hỗ trợ nhập kết quả và các luồng đề xuất/duyệt theo quy định của từng hệ; điểm chính thức bất biến.
+Hỗ trợ Chỉ huy nhập kết quả mới. Với hệ ngoài hiện hành, Học viên chỉ được đề xuất bổ sung kết quả cho môn chưa có điểm; đề xuất sửa/xóa lịch sử không thể được duyệt để thay đổi điểm. Điểm chính thức không có API sửa/xóa công khai. Cần chuẩn hóa quy trình này theo đủ năm hệ trong task phân hệ tiếp theo.
 
 ## F16 - Nghiệp vụ riêng của Hệ 5
 

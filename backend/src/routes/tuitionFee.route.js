@@ -208,6 +208,16 @@ const { uploadExcel } = require('../middlewares/upload.middleware');
  *       }
  *     }
  *   },
+ *   "/tuition-fees/{id}/histories": {
+ *     "get": {
+ *       "tags": ["Tuition Fees"],
+ *       "summary": "Chỉ huy: Lịch sử thay đổi trạng thái học phí",
+ *       "parameters": [
+ *         { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+ *       ],
+ *       "responses": { "200": { "description": "Danh sách lịch sử thay đổi" } }
+ *     }
+ *   },
  *   "/tuition-fees/{id}": {
  *     "get": {
  *       "tags": [

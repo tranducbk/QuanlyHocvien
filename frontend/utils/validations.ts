@@ -283,7 +283,6 @@ export type CreateClassFormValues = z.infer<typeof createClassSchema>;
  */
 export const updateClassSchema = z.object({
   className: z.string().min(1, "Tên lớp là bắt buộc"),
-  studentCount: z.number().min(0, "Số lượng học viên không được âm"),
 });
 
 export type UpdateClassFormValues = z.infer<typeof updateClassSchema>;
@@ -429,10 +428,7 @@ export type UpdateCutRiceFormValues = z.infer<typeof updateCutRiceSchema>;
 
 export const createGradeRequestSchema = z.object({
   subjectResultId: z.string().min(1, "Vui lòng chọn môn học"),
-  requestType: z.enum(
-    ["ADD", "UPDATE", "DELETE"],
-    "Vui lòng chọn loại đề xuất"
-  ),
+  requestType: z.literal("ADD"),
   proposedGradePoint10: z
     .number()
     .min(0, "Điểm đề xuất phải lớn hơn hoặc bằng 0")

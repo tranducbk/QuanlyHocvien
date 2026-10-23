@@ -13,7 +13,6 @@ import { gradeRequestService } from "@/services/grade-requests";
 import { useModalStore } from "@/store/useModalStore";
 import {
   CreateGradeRequestRequest,
-  requestTypeMap,
   SubjectResult,
 } from "@/types/student-academic";
 import {
@@ -36,7 +35,13 @@ export default function CreateGradeRequestForm({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const subjectOptions = subjects.map((subject) => ({
+  const eligibleSubjects = subjects.filter(
+    (subject) =>
+      !subject.letterGrade &&
+      subject.gradePoint4 == null &&
+      subject.gradePoint10 == null
+  );
+  const subjectOptions = eligibleSubjects.map((subject) => ({
     value: subject.id,
     label: `${subject.subjectCode || "---"} - ${subject.subjectName || "Môn học"}`,
   }));
@@ -57,7 +62,7 @@ export default function CreateGradeRequestForm({
   });
 
   const selectedSubjectId = useWatch({ control, name: "subjectResultId" });
-  const selectedSubject = subjects.find(
+  const selectedSubject = eligibleSubjects.find(
     (subject) => String(subject.id) === String(selectedSubjectId)
   );
 
@@ -80,9 +85,13 @@ export default function CreateGradeRequestForm({
         if (res.data?.url) {
           attachmentUrl = res.data.url;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         setIsUploading(false);
-        addToast({ message: err.message || "Lỗi khi tải minh chứng lên", variant: "error" });
+        addToast({
+          message:
+            err instanceof Error ? err.message : "Lỗi khi tải minh chứng lên",
+          variant: "error",
+        });
         return;
       }
       setIsUploading(false);
@@ -127,29 +136,20 @@ export default function CreateGradeRequestForm({
               filter={{
                 enabled: true,
                 mode: "client",
-                placeholder: "Tìm môn học cần đề xuất chỉnh sửa",
+                placeholder: "Tìm môn học cần đề xuất bổ sung điểm",
               }}
             />
           )}
         />
 
-        <Controller
-          control={control}
-          name="requestType"
-          render={({ field }) => (
-            <Select
-              label="Loại đề xuất"
-              value={field.value}
-              onChange={field.onChange}
-              options={Object.entries(requestTypeMap).map(([value, label]) => ({
-                value,
-                label,
-              }))}
-              error={errors.requestType?.message}
-              required
-            />
-          )}
-        />
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+          <Typography variant="label" color="gray">
+            Loại đề xuất
+          </Typography>
+          <Typography variant="body" weight="semibold" className="mt-1">
+            Bổ sung kết quả chưa có điểm
+          </Typography>
+        </div>
 
         <Input
           label="Điểm hệ 10"
@@ -187,7 +187,9 @@ export default function CreateGradeRequestForm({
           type="submit"
           variant="primary"
           isLoading={mutation.isPending || isUploading}
-          disabled={subjects.length === 0 || !isDirty && !selectedFile}
+          disabled={
+            eligibleSubjects.length === 0 || (!isDirty && !selectedFile)
+          }
         >
           Gửi đề xuất
         </Button>

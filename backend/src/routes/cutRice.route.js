@@ -104,6 +104,33 @@ const { uploadExcel } = require('../middlewares/upload.middleware');
  *       }
  *     }
  *   },
+ *   "/cut-rice/requests": {
+ *     "get": {
+ *       "tags": ["Cut Rice"],
+ *       "summary": "Chỉ huy: Danh sách yêu cầu điều chỉnh cắt cơm",
+ *       "responses": { "200": { "description": "Danh sách yêu cầu" } }
+ *     }
+ *   },
+ *   "/cut-rice/requests/{id}/approve": {
+ *     "post": {
+ *       "tags": ["Cut Rice"],
+ *       "summary": "Chỉ huy: Duyệt yêu cầu điều chỉnh cắt cơm",
+ *       "parameters": [
+ *         { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+ *       ],
+ *       "responses": { "200": { "description": "Yêu cầu đã được duyệt" } }
+ *     }
+ *   },
+ *   "/cut-rice/requests/{id}/reject": {
+ *     "post": {
+ *       "tags": ["Cut Rice"],
+ *       "summary": "Chỉ huy: Từ chối yêu cầu điều chỉnh cắt cơm",
+ *       "parameters": [
+ *         { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+ *       ],
+ *       "responses": { "200": { "description": "Yêu cầu đã bị từ chối" } }
+ *     }
+ *   },
  *   "/cut-rice/{id}": {
  *     "get": {
  *       "tags": [
