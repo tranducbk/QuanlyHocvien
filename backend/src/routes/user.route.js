@@ -564,31 +564,6 @@ const { uploadExcel, uploadImage } = require('../middlewares/upload.middleware')
  *           "description": "OK"
  *         }
  *       }
- *     },
- *     "delete": {
- *       "tags": [
- *         "Profiles"
- *       ],
- *       "summary": "ADMIN: Xóa hồ sơ",
- *       "description": "**Admin only.**",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "string"
- *           }
- *         }
- *       ],
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         },
- *         "403": {
- *           "$ref": "#/components/responses/403"
- *         }
- *       }
  *     }
  *   },
  *   "/users/cut-rice/generate/{userId}": {
@@ -1479,6 +1454,22 @@ router.delete('/time-table/:id', requireStudent, requireSystemType('EXTERNAL'), 
 // ===================== Student: Cắt cơm =====================
 router.get('/cut-rice', requireStudent, requireSystemType('EXTERNAL'), controller.getMyCutRice);
 router.put('/cut-rice', requireStudent, requireSystemType('EXTERNAL'), controller.updateMyCutRice);
+/**
+ * @swagger
+ * /users/cut-rice/requests:
+ *   get:
+ *     tags: [Cut Rice]
+ *     summary: Học viên xem yêu cầu cắt cơm của mình
+ *     responses:
+ *       200:
+ *         description: Danh sách yêu cầu
+ *   post:
+ *     tags: [Cut Rice]
+ *     summary: Học viên gửi yêu cầu cắt cơm
+ *     responses:
+ *       200:
+ *         description: Yêu cầu đã được gửi
+ */
 router.get('/cut-rice/requests', requireStudent, requireSystemType('EXTERNAL'), controller.getMyCutRiceRequests);
 router.post('/cut-rice/requests', requireStudent, requireSystemType('EXTERNAL'), controller.createMyCutRiceRequest);
 
@@ -1494,26 +1485,25 @@ router.post('/avatar', requireRole('STUDENT', 'COMMANDER'), uploadImage('avatar'
 // ===================== Admin/Commander: Quản lý hồ sơ =====================
 router.use(requireRole('ADMIN', 'COMMANDER'));
 
-router.get('/profiles/export', controller.exportProfiles);
-router.post('/profiles/graduation/batch', controller.graduateBatchProfiles);
+router.get('/profiles/export', requireRole('COMMANDER'), controller.exportProfiles);
+router.post('/profiles/graduation/batch', requireRole('COMMANDER'), controller.graduateBatchProfiles);
 router.get('/profiles', controller.getAllProfiles);
 router.get('/profiles/:id', controller.getProfileDetail);
-router.put('/profiles/:id', controller.updateProfile);
-router.delete('/profiles/:id', requireAdmin, controller.deleteProfile);
+router.put('/profiles/:id', requireRole('COMMANDER'), controller.updateProfile);
 
 // ===================== Commander: Cắt cơm hàng loạt =====================
-router.post('/cut-rice/generate/:userId', controller.generateCutRice);
-router.post('/cut-rice/generate-all', controller.generateAllCutRice);
+router.post('/cut-rice/generate/:userId', requireRole('COMMANDER'), requireSystemType('EXTERNAL'), controller.generateCutRice);
+router.post('/cut-rice/generate-all', requireRole('COMMANDER'), requireSystemType('EXTERNAL'), controller.generateAllCutRice);
 
 // ===================== Commander: Báo cáo =====================
-router.get('/reports/academic', controller.getAcademicReport);
-router.get('/reports/party-training', controller.getPartyTrainingReport);
-router.get('/reports/achievements', controller.getAchievementReport);
-router.get('/reports/tuition', controller.getTuitionReport);
+router.get('/reports/academic', requireRole('COMMANDER'), controller.getAcademicReport);
+router.get('/reports/party-training', requireRole('COMMANDER'), controller.getPartyTrainingReport);
+router.get('/reports/achievements', requireRole('COMMANDER'), controller.getAchievementReport);
+router.get('/reports/tuition', requireRole('COMMANDER'), controller.getTuitionReport);
 
 // ===================== Admin/Commander: User CRUD (read + update) =====================
 router.get('/batch-profiles/template', controller.downloadBatchProfilesTemplate);
-router.put('/batch-profiles', uploadExcel('file'), controller.updateBatchProfiles);
+router.put('/batch-profiles', requireRole('COMMANDER'), uploadExcel('file'), controller.updateBatchProfiles);
 router.get('/import-template', requireAdmin, controller.downloadImportTemplate);
 router.post('/import', requireAdmin, uploadExcel('file'), controller.importUsers);
 router.get('/export', requireAdmin, controller.exportUsers);

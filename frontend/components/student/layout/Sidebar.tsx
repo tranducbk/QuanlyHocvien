@@ -10,36 +10,10 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const systemType = useAuthStore((state) => state.user?.systemType);
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   const items =
-    systemType === "MILITARY"
-      ? [
-          ...STUDENT_MENU.filter(
-            (item) =>
-              ![
-                "/student/meal-schedules",
-                "/student/tuition",
-                "/student/time-table",
-                "/student/results",
-                "/student/achievements",
-              ].includes(item.path)
-          ),
-          {
-            title: "Lịch học theo lớp",
-            path: "/student/military/time-table",
-            icon: STUDENT_MENU[3].icon,
-          },
-          {
-            title: "Kết quả học tập",
-            path: "/student/military/results",
-            icon: STUDENT_MENU[2].icon,
-          },
-          {
-            title: "Thành tích",
-            path: "/student/military/achievements",
-            icon: STUDENT_MENU[5].icon,
-          },
-        ]
+    trainingSystemCode && trainingSystemCode !== "HE_5"
+      ? [{ title: "Phân hệ quân sự", path: "/student/military/unavailable", icon: STUDENT_MENU[2].icon }]
       : STUDENT_MENU;
 
   return (

@@ -3,7 +3,6 @@
 import { useCallback, useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
-  HiOutlineCheckCircle,
   HiOutlineExternalLink,
   HiOutlineEye,
   HiOutlineXCircle,
@@ -29,11 +28,8 @@ import {
   textOrDash,
   formatSemesterYear,
 } from "@/utils/fn-common";
-import ApprovalGradeRequestForm from "./ApprovalGradeRequestForm";
 import GradeRequestDetail from "./GradeRequestDetail";
 import RejectGradeRequestForm from "./RejectGradeRequestForm";
-
-type ReviewAction = "approve" | "reject";
 
 const getSemesterLabel = (request: GradeRequest) => {
   const semester = request.subjectResult?.semesterResult;
@@ -60,22 +56,14 @@ export default function Main() {
   });
 
   const openReviewModal = useCallback(
-    (request: GradeRequest, action: ReviewAction) => {
+    (request: GradeRequest) => {
       openModal({
-        title: action === "approve" ? "Phê duyệt đề xuất" : "Từ chối đề xuất",
+        title: "Từ chối đề xuất",
         size: "lg",
         config: {
-          mutationKey:
-            action === "approve"
-              ? MUTATION_KEYS.APPROVE_GRADE_REQUEST
-              : MUTATION_KEYS.REJECT_GRADE_REQUEST,
+          mutationKey: MUTATION_KEYS.REJECT_GRADE_REQUEST,
         },
-        content:
-          action === "approve" ? (
-            <ApprovalGradeRequestForm request={request} />
-          ) : (
-            <RejectGradeRequestForm request={request} />
-          ),
+        content: <RejectGradeRequestForm request={request} />,
       });
     },
     [openModal]
@@ -187,18 +175,11 @@ export default function Main() {
               {isPending && (
                 <>
                   <ActionButton
-                    tooltipText="Phê duyệt"
-                    icon={HiOutlineCheckCircle}
-                    color="green"
-                    disabled={!isPending}
-                    onClick={() => openReviewModal(request, "approve")}
-                  />
-                  <ActionButton
                     tooltipText="Từ chối"
                     icon={HiOutlineXCircle}
                     color="red"
                     disabled={!isPending}
-                    onClick={() => openReviewModal(request, "reject")}
+                    onClick={() => openReviewModal(request)}
                   />
                 </>
               )}

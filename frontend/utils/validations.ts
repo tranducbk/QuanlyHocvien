@@ -203,18 +203,6 @@ export const studentProfileSchema = z.object({
   positionParty: z.string().nullable().or(z.literal("")).optional(),
   dateOfEnlistment: z.string().nullable().or(z.literal("")).optional(),
   enrollment: z.number().nullable().optional(),
-  currentCpa4: z
-    .number()
-    .min(0, "CPA hệ 4 không được âm")
-    .max(4, "CPA hệ 4 tối đa là 4")
-    .nullable()
-    .optional(),
-  currentCpa10: z
-    .number()
-    .min(0, "CPA hệ 10 không được âm")
-    .max(10, "CPA hệ 10 tối đa là 10")
-    .nullable()
-    .optional(),
   graduationDate: z.string().nullable().or(z.literal("")).optional(),
   partyMemberCardNumber: z.string().nullable().or(z.literal("")).optional(),
   probationaryPartyMember: z.string().nullable().or(z.literal("")).optional(),

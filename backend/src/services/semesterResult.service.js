@@ -1,15 +1,25 @@
 const db = require('../models');
 const User = db.user;
-const { NotFoundError } = require('../utils/apiError');
+const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
+const { getManagedStudentIds, assertManagedStudent } = require('./legacyAcademicScope.service');
 
 const SemesterResult = db.semesterResult;
 const Student = db.profile;
 const YearlyResult = db.yearlyResult;
 const SubjectResult = db.subjectResult;
 
-const create = async (data) => SemesterResult.create(data);
-const getAll = async (query) => {
+const create = async (data, requester) => {
+  await assertManagedStudent(requester, data.userId);
+  const yearlyResult = await YearlyResult.findOne({ where: { id: data.yearlyResultId, userId: data.userId } });
+  if (!yearlyResult) throw new BadRequestError('Kết quả năm không thuộc học viên này');
+  if (yearlyResult.schoolYear !== data.schoolYear) throw new BadRequestError('Năm học không khớp kết quả năm');
+  const duplicate = await SemesterResult.findOne({ where: { userId: data.userId, schoolYear: data.schoolYear, semester: data.semester } });
+  if (duplicate) throw new BadRequestError('Học kỳ này đã có kết quả');
+  return SemesterResult.create(data);
+};
+const getAll = async (query, requester) => {
+  const studentIds = await getManagedStudentIds(requester);
   const where = {};
   const studentWhere = {};
   const include = [
@@ -24,7 +34,7 @@ const getAll = async (query) => {
 
   if (query.semester) where.semester = query.semester;
   if (query.schoolYear) where.schoolYear = query.schoolYear;
-  if (query.userId) where.userId = query.userId;
+  where.userId = { [db.Sequelize.Op.in]: query.userId ? studentIds.filter((id) => id === query.userId) : studentIds };
 
   if (query.gpaFrom !== undefined || query.gpaTo !== undefined) {
     where.averageGrade4 = {};
@@ -75,8 +85,10 @@ const getAll = async (query) => {
   return paginateQuery(SemesterResult, query, { where, include });
 };
 
-const getDetail = async (id) => {
-  const record = await SemesterResult.findByPk(id, {
+const getDetail = async (id, requester) => {
+  const studentIds = await getManagedStudentIds(requester);
+  const record = await SemesterResult.findOne({
+    where: { id, userId: { [db.Sequelize.Op.in]: studentIds } },
     include: [
       { 
         model: User, 

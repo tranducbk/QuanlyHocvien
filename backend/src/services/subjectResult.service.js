@@ -2,31 +2,42 @@ const db = require('../models');
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
 const ExcelJS = require('exceljs');
+const { getManagedSemesterResultIds, assertManagedStudent } = require('./legacyAcademicScope.service');
 
 const SubjectResult = db.subjectResult;
 const SemesterResult = db.semesterResult;
 const User = db.user;
 
-const ensureSemesterResult = async (semesterResultId) => {
+const ensureSemesterResult = async (semesterResultId, requester) => {
   const semesterResult = await SemesterResult.findByPk(semesterResultId);
   if (!semesterResult) throw new BadRequestError('Không tìm thấy kết quả học kỳ');
   const user = await User.findByPk(semesterResult.userId);
   if (!user || user.role !== 'STUDENT') {
     throw new BadRequestError('Chỉ được nhập môn học cho học viên');
   }
+  await assertManagedStudent(requester, user.id);
 };
 
-const create = async (data) => {
-  await ensureSemesterResult(data.semesterResultId);
+const create = async (data, requester) => {
+  await ensureSemesterResult(data.semesterResultId, requester);
+  const duplicate = await SubjectResult.findOne({ where: { semesterResultId: data.semesterResultId, subjectCode: data.subjectCode } });
+  if (duplicate) throw new BadRequestError('Môn học này đã có điểm');
   return SubjectResult.create(data);
 };
-const getAll = async (query) => paginateQuery(SubjectResult, query, {
-  filterFields: ['semesterResultId', 'subjectCode', 'subjectName', 'letterGrade'],
-  include: [{ model: SemesterResult }],
-});
+const getAll = async (query, requester) => {
+  const semesterIds = await getManagedSemesterResultIds(requester);
+  const allowedIds = query.semesterResultId ? semesterIds.filter((id) => id === query.semesterResultId) : semesterIds;
+  return paginateQuery(SubjectResult, query, {
+    where: { semesterResultId: { [db.Sequelize.Op.in]: allowedIds } },
+    filterFields: ['subjectCode', 'subjectName', 'letterGrade'],
+    include: [{ model: SemesterResult }],
+  });
+};
 
-const getDetail = async (id) => {
-  const record = await SubjectResult.findByPk(id, {
+const getDetail = async (id, requester) => {
+  const semesterIds = await getManagedSemesterResultIds(requester);
+  const record = await SubjectResult.findOne({
+    where: { id, semesterResultId: { [db.Sequelize.Op.in]: semesterIds } },
     include: [{ model: SemesterResult }],
   });
   if (!record) throw new NotFoundError('Không tìm thấy kết quả môn học');
@@ -70,8 +81,8 @@ const downloadTemplate = async () => {
   return workbook.xlsx.writeBuffer();
 };
 
-const importExcel = async (fileBuffer, semesterResultId) => {
-  await ensureSemesterResult(semesterResultId);
+const importExcel = async (fileBuffer, semesterResultId, requester) => {
+  await ensureSemesterResult(semesterResultId, requester);
 
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(fileBuffer);
@@ -106,8 +117,15 @@ const importExcel = async (fileBuffer, semesterResultId) => {
   });
 
   if (rows.length === 0) throw new BadRequestError('File Excel không có dữ liệu');
+  const codes = rows.map((row) => row.subjectCode);
+  if (new Set(codes).size !== codes.length) throw new BadRequestError('File Excel có mã môn học trùng nhau');
 
   return db.sequelize.transaction(async (t) => {
+    const existing = await SubjectResult.findOne({
+      where: { semesterResultId, subjectCode: { [db.Sequelize.Op.in]: codes } },
+      transaction: t,
+    });
+    if (existing) throw new BadRequestError('Môn học đã có điểm');
     return SubjectResult.bulkCreate(rows, { transaction: t });
   });
 };

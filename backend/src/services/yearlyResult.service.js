@@ -2,18 +2,19 @@ const db = require('../models');
 const User = db.user;
 const { NotFoundError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
+const { getManagedStudentIds } = require('./legacyAcademicScope.service');
 
 const YearlyResult = db.yearlyResult;
 const University = db.university;
 const Class = db.class;
 const SemesterResult = db.semesterResult;
 
-const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
+const buildQueryParts = (query = {}, { studentIds = [] } = {}) => {
   const where = {};
   const profileWhere = {};
 
   if (query.schoolYear) where.schoolYear = query.schoolYear;
-  if (query.userId) where.userId = query.userId;
+  where.userId = { [db.Sequelize.Op.in]: query.userId ? studentIds.filter((id) => id === query.userId) : studentIds };
   if (query.academicStatus) where.academicStatus = query.academicStatus;
   if (query.partyRating) where.partyRating = query.partyRating;
   if (query.trainingRating) where.trainingRating = query.trainingRating;
@@ -70,35 +71,34 @@ const buildQueryParts = (query = {}, { includeSemesters = false } = {}) => {
     required: true,
   }];
 
-  if (includeSemesters) {
-    include.push({
-      model: SemesterResult,
-      attributes: [
-        'id', 'userId', 'yearlyResultId', 'semester', 'schoolYear',
-        'totalCredits', 'averageGrade4', 'averageGrade10',
-        'cumulativeCredits', 'cumulativeGrade4', 'cumulativeGrade10',
-        'debtCredits', 'failedSubjects',
-      ],
-      separate: true,
-      order: [['semester', 'ASC']],
-    });
-  }
-
   return { where, include };
 };
 
-const getAll = async (query) => {
-  const { where, include } = buildQueryParts(query);
+const getAll = async (query, requester) => {
+  const studentIds = await getManagedStudentIds(requester);
+  const { where, include } = buildQueryParts(query, { studentIds });
   return paginateQuery(YearlyResult, query, { where, include });
 };
 
-const getDetail = async (id) => {
-  const { include } = buildQueryParts({}, { includeSemesters: true });
-  const record = await YearlyResult.findByPk(id, {
+const getDetail = async (id, requester) => {
+  const studentIds = await getManagedStudentIds(requester);
+  const { include } = buildQueryParts({}, { studentIds });
+  const record = await YearlyResult.findOne({
+    where: { id, userId: { [db.Sequelize.Op.in]: studentIds } },
     include,
   });
   if (!record) throw new NotFoundError('Không tìm thấy kết quả năm học');
-  return record;
+  const semesters = await SemesterResult.findAll({
+    where: { yearlyResultId: record.id, userId: record.userId },
+    attributes: [
+      'id', 'userId', 'yearlyResultId', 'semester', 'schoolYear',
+      'totalCredits', 'averageGrade4', 'averageGrade10',
+      'cumulativeCredits', 'cumulativeGrade4', 'cumulativeGrade10',
+      'debtCredits', 'failedSubjects',
+    ],
+    order: [['semester', 'ASC']],
+  });
+  return { ...record.get({ plain: true }), SemesterResults: semesters.map((semester) => semester.get({ plain: true })) };
 };
 
 // ===================== Export Excel =====================
@@ -135,8 +135,9 @@ const resolveField = (obj, path) => {
   return current !== null && current !== undefined ? current : '';
 };
 
-const exportYearlyResults = async (query) => {
-  const { where, include } = buildQueryParts(query);
+const exportYearlyResults = async (query, requester) => {
+  const studentIds = await getManagedStudentIds(requester);
+  const { where, include } = buildQueryParts(query, { studentIds });
 
   const sortBy = query.sortBy || 'schoolYear';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';

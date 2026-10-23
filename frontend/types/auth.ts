@@ -14,6 +14,8 @@ export interface User {
   isActive: boolean;
   role: "ADMIN" | "COMMANDER" | "STUDENT";
   systemType: "EXTERNAL" | "MILITARY" | null;
+  trainingSystemId: string | null;
+  trainingSystemCode: "HE_1" | "HE_3" | "HE_4" | "HE_5" | "HE_7" | null;
   refreshToken: string;
   studentId: string | null;
   commanderId: string | null;

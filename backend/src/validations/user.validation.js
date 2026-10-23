@@ -44,12 +44,14 @@ const create = yup.object({
   isAdmin: yup.boolean().nullable(),
   role: yup.string().max(50).oneOf(['STUDENT', 'COMMANDER', 'ADMIN'], 'Vai trò không hợp lệ').nullable(),
   systemType: yup.string().oneOf(['EXTERNAL', 'MILITARY']).nullable(),
+  trainingSystemCode: yup.string().oneOf(['HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7']).nullable(),
   refreshToken: yup.string().nullable(),
   deleteAt: yup.date().nullable(),
   ...profileFields,
 });
 
 const update = yup.object({
+  trainingSystemCode: yup.string().oneOf(['HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7']).nullable(),
   username: yup.string().max(50).nullable(),
   password: yup.string().max(255).nullable(),
   isAdmin: yup.boolean().nullable(),
@@ -92,6 +94,7 @@ const update = yup.object({
 });
 
 const batch = yup.object({
+  trainingSystemCode: yup.string().oneOf(['HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7']).nullable(),
   username: yup.string().max(50).required('Trường này là bắt buộc'),
   password: yup.string().max(255).nullable(),
   isAdmin: yup.boolean().nullable(),

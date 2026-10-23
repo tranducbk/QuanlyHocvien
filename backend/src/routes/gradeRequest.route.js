@@ -6,60 +6,6 @@ const ctrl = require('../controllers/gradeRequest.controller');
  * @swagger
  * {
  *   "/students/grade-requests": {
- *     "post": {
- *       "tags": [
- *         "Grade Requests"
- *       ],
- *       "summary": "HV-04: Tạo đề xuất",
- *       "requestBody": {
- *         "required": true,
- *         "content": {
- *           "application/json": {
- *             "schema": {
- *               "type": "object",
- *               "required": [
- *                 "subjectResultId",
- *                 "requestType",
- *                 "reason"
- *               ],
- *               "properties": {
- *                 "subjectResultId": {
- *                   "type": "string"
- *                 },
- *                 "requestType": {
- *                   "type": "string",
- *                   "enum": [
- *                     "ADD",
- *                     "UPDATE",
- *                     "DELETE"
- *                   ]
- *                 },
- *                 "reason": {
- *                   "type": "string"
- *                 },
- *                 "proposedLetterGrade": {
- *                   "type": "string"
- *                 },
- *                 "proposedGradePoint4": {
- *                   "type": "number"
- *                 },
- *                 "proposedGradePoint10": {
- *                   "type": "number"
- *                 },
- *                 "attachmentUrl": {
- *                   "type": "string"
- *                 }
- *               }
- *             }
- *           }
- *         }
- *       },
- *       "responses": {
- *         "201": {
- *           "description": "Created"
- *         }
- *       }
- *     },
  *     "get": {
  *       "tags": [
  *         "Grade Requests"
@@ -187,43 +133,6 @@ const ctrl = require('../controllers/gradeRequest.controller');
  *       }
  *     }
  *   },
- *   "/commanders/grade-requests/{id}/approve": {
- *     "post": {
- *       "tags": [
- *         "Grade Requests"
- *       ],
- *       "summary": "CH-04: Phê duyệt",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "string"
- *           }
- *         }
- *       ],
- *       "requestBody": {
- *         "content": {
- *           "application/json": {
- *             "schema": {
- *               "type": "object",
- *               "properties": {
- *                 "reviewNote": {
- *                   "type": "string"
- *                 }
- *               }
- *             }
- *           }
- *         }
- *       },
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
- *     }
- *   },
  *   "/commanders/grade-requests/{id}/reject": {
  *     "post": {
  *       "tags": [
@@ -269,16 +178,12 @@ const ctrl = require('../controllers/gradeRequest.controller');
  */
 
 // ===================== Student (chỉ STUDENT) =====================
-const { uploadEvidence } = require('../middlewares/upload.middleware');
-router.post('/students/grade-requests', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), ctrl.create);
-router.post('/students/grade-requests/evidence', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), uploadEvidence('file'), ctrl.uploadEvidence);
 router.get('/students/grade-requests', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), ctrl.getMyRequests);
 router.get('/students/grade-requests/:id', authMiddleware, requireStudent, requireSystemType('EXTERNAL'), ctrl.getMyRequestDetail);
 
-// ===================== Commander/Admin =====================
-router.get('/commanders/grade-requests', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.getAll);
-router.get('/commanders/grade-requests/:id', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.getDetail);
-router.post('/commanders/grade-requests/:id/approve', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.approve);
-router.post('/commanders/grade-requests/:id/reject', authMiddleware, requireRole('ADMIN', 'COMMANDER'), requireSystemType('EXTERNAL'), ctrl.reject);
+// ===================== Commander =====================
+router.get('/commanders/grade-requests', authMiddleware, requireRole('COMMANDER'), requireSystemType('EXTERNAL'), ctrl.getAll);
+router.get('/commanders/grade-requests/:id', authMiddleware, requireRole('COMMANDER'), requireSystemType('EXTERNAL'), ctrl.getDetail);
+router.post('/commanders/grade-requests/:id/reject', authMiddleware, requireRole('COMMANDER'), requireSystemType('EXTERNAL'), ctrl.reject);
 
 module.exports = router;

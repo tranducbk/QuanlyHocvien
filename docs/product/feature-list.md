@@ -76,7 +76,7 @@ Chỉ huy nhập điểm; Học viên xem điểm chính thức.
 
 ### Trạng thái
 
-**Cần thay đổi**: source còn create/update/delete kết quả và luồng đề xuất/phê duyệt.
+**Cần thay đổi**: API kết quả môn/học kỳ hiện chỉ còn tạo/nhập/đọc cho Chỉ huy; API sửa/xóa điểm và duyệt đề nghị chỉnh điểm cũ đã được gỡ theo bất biến hiện hành. Service legacy còn hàm sửa/xóa chưa được dọn. Truy vấn kết quả môn/học kỳ/năm và báo cáo Hệ 5 đã được kiểm tra với dữ liệu trên PostgreSQL test: chỉ Chỉ huy được giao đọc được. Route kết quả quân sự legacy tạm trả 403 cho đến khi dữ liệu được phân tách theo hệ trong Phase 005B/005C.
 
 ## F06 - Lịch học và lịch cắt cơm
 
@@ -175,6 +175,8 @@ Quản lý năm hệ độc lập và giới hạn dữ liệu theo hệ của t
 ### Trạng thái
 
 **Cần triển khai** phân loại và phân quyền theo Hệ 1, 3, 4, 5 và 7 trên toàn bộ API nghiệp vụ.
+
+Nền dữ liệu `TrainingProgram` và `CurriculumVersion` đã có trong source. Admin có màn hình nhập chương trình và phiên bản nháp theo Hệ; chưa gán chương trình cho lớp, chưa nhập môn trong phiên bản và chưa kích hoạt phiên bản.
 
 ## F13 - Danh mục môn học
 

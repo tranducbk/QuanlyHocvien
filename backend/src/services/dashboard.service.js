@@ -1,4 +1,6 @@
 const db = require('../models');
+const { getManagedStudentIds } = require('./legacyAcademicScope.service');
+const { Op } = db.Sequelize;
 
 const User = db.user;
 const Profile = db.profile;
@@ -52,7 +54,7 @@ const getStudentsByUnit = async (requester) => {
       [db.Sequelize.fn('COUNT', db.Sequelize.col('Profile.id')), 'value'],
     ],
     where: getManagedProfileWhere(requester),
-    include: [{ model: User, attributes: [], where: { role: 'STUDENT' }, required: true }],
+    include: [{ model: User, attributes: [], where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId }, required: true }],
     group: [db.Sequelize.fn('COALESCE', db.Sequelize.col('unit'), 'Chưa phân đơn vị')],
     order: [[db.Sequelize.literal('value'), 'DESC']],
     limit: 6,
@@ -70,7 +72,7 @@ const getTuitionStatus = async (requester) => {
     ],
     group: [db.Sequelize.fn('COALESCE', db.Sequelize.col('status'), 'UNKNOWN')],
     include: requester?.role === 'COMMANDER'
-      ? [{ model: User, attributes: [], required: true, include: [getManagedUserInclude(requester)] }]
+      ? [{ model: User, attributes: [], where: { trainingSystemId: requester.trainingSystemId }, required: true, include: [getManagedUserInclude(requester)] }]
       : [],
     raw: true,
   });
@@ -88,7 +90,7 @@ const getAchievementsByYear = async (requester) => {
     ],
     group: [db.Sequelize.fn('COALESCE', db.Sequelize.cast(db.Sequelize.col('year'), 'text'), 'Chưa xác định')],
     include: requester?.role === 'COMMANDER'
-      ? [{ model: User, attributes: [], required: true, include: [getManagedUserInclude(requester)] }]
+      ? [{ model: User, attributes: [], where: { trainingSystemId: requester.trainingSystemId }, required: true, include: [getManagedUserInclude(requester)] }]
       : [],
     order: [[db.Sequelize.literal('label'), 'ASC']],
     raw: true,
@@ -98,7 +100,7 @@ const getAchievementsByYear = async (requester) => {
 
 const getRecentStudents = async (requester) => {
   const users = await User.findAll({
-    where: { role: 'STUDENT' },
+    where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId },
     include: [getManagedUserInclude(requester, [{ model: Class }])],
     order: [['updatedAt', 'DESC']],
     limit: 5,
@@ -121,7 +123,7 @@ const getPendingRequests = async (requester) => {
   const requests = await GradeRequest.findAll({
     where: { status: 'PENDING' },
     include: [
-      { model: User, required: requester?.role === 'COMMANDER', include: [getManagedUserInclude(requester)] },
+      { model: User, where: { trainingSystemId: requester.trainingSystemId }, required: true, include: [getManagedUserInclude(requester)] },
       { model: SubjectResult },
     ],
     order: [['createdAt', 'DESC']],
@@ -144,7 +146,7 @@ const getUnpaidTuition = async (requester) => {
   const records = await TuitionFee.findAll({
     where: { status: 'UNPAID' },
     include: [
-      { model: User, required: requester?.role === 'COMMANDER', include: [getManagedUserInclude(requester)] },
+      { model: User, where: { trainingSystemId: requester.trainingSystemId }, required: true, include: [getManagedUserInclude(requester)] },
       { model: db.semester, as: 'semesterInfo', include: [{ model: db.schoolYear, as: 'schoolYearInfo' }] },
     ],
     order: [['updatedAt', 'DESC']],
@@ -166,7 +168,7 @@ const getUnpaidTuition = async (requester) => {
 
 const getRiskStudents = async (requester) => {
   const users = await User.findAll({
-    where: { role: 'STUDENT' },
+    where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId },
     include: [
       getManagedUserInclude(requester),
       { model: YearlyResult, required: false },
@@ -275,7 +277,15 @@ const getMilitaryStudentDashboard = async (userId) => {
 };
 
 const getCommanderDashboard = async (query, requester) => {
-  if (requester?.systemType === 'MILITARY') return getMilitaryCommanderDashboard(requester);
+  if (requester?.trainingSystemCode !== 'HE_5') return getMilitaryCommanderDashboard(requester);
+  const studentIds = await getManagedStudentIds(requester);
+  const studentWhere = { userId: { [Op.in]: studentIds } };
+  const managedProfiles = await Profile.findAll({
+    attributes: ['classId'],
+    where: { commanderId: requester.id },
+    include: [{ model: User, attributes: [], where: { id: { [Op.in]: studentIds } }, required: true }],
+  });
+  const classIds = [...new Set(managedProfiles.map((profile) => profile.classId).filter(Boolean))];
   const [
     totalStudents,
     totalClasses,
@@ -292,20 +302,20 @@ const getCommanderDashboard = async (query, requester) => {
     unpaidTuition,
     riskStudents,
   ] = await Promise.all([
-    User.count({ where: { role: 'STUDENT' } }),
-    Class.count(),
-    Achievement.count(),
-    GradeRequest.count({ where: { status: 'PENDING' } }),
-    TuitionFee.count({ where: { status: 'UNPAID' } }),
-    groupCount(YearlyResult, 'academic_status'),
-    groupCount(GradeRequest, 'status'),
-    getTuitionStatus(),
-    getStudentsByUnit(),
-    getAchievementsByYear(),
-    getRecentStudents(),
-    getPendingRequests(),
-    getUnpaidTuition(),
-    getRiskStudents(),
+    User.count({ where: { id: { [Op.in]: studentIds } } }),
+    Class.count({ where: { id: { [Op.in]: classIds } } }),
+    Achievement.count({ where: studentWhere }),
+    GradeRequest.count({ where: { ...studentWhere, status: 'PENDING' } }),
+    TuitionFee.count({ where: { ...studentWhere, status: 'UNPAID' } }),
+    groupCount(YearlyResult, 'academic_status', { where: studentWhere }),
+    groupCount(GradeRequest, 'status', { where: studentWhere }),
+    getTuitionStatus(requester),
+    getStudentsByUnit(requester),
+    getAchievementsByYear(requester),
+    getRecentStudents(requester),
+    getPendingRequests(requester),
+    getUnpaidTuition(requester),
+    getRiskStudents(requester),
   ]);
 
   return {
@@ -347,7 +357,6 @@ const getAdminDashboard = async () => {
     totalOrganizations,
     totalClasses,
     totalNotifications,
-    pendingGradeRequests,
     usersWithoutProfile,
     recentUsers,
   ] = await Promise.all([
@@ -361,7 +370,6 @@ const getAdminDashboard = async () => {
     db.organization.count(),
     Class.count(),
     Notification.count(),
-    GradeRequest.count({ where: { status: 'PENDING' } }),
     User.count({ where: { role: ['STUDENT', 'COMMANDER'], profileId: null } }),
     User.findAll({
       include: [{ model: Profile }],
@@ -383,7 +391,6 @@ const getAdminDashboard = async () => {
       totalOrganizations,
       totalClasses,
       totalNotifications,
-      pendingGradeRequests,
       usersWithoutProfile,
     },
     charts: {
@@ -401,15 +408,9 @@ const getAdminDashboard = async () => {
         { label: 'Đơn vị/Khoa', value: totalOrganizations },
         { label: 'Lớp', value: totalClasses },
       ],
-      recordsByModule: [
-        { label: 'Kết quả năm', value: await YearlyResult.count() },
-        { label: 'Học phí', value: await TuitionFee.count() },
-        { label: 'Thành tích', value: await Achievement.count() },
-        { label: 'Thông báo', value: totalNotifications },
-      ],
+      recordsByModule: [],
     },
     alerts: {
-      pendingGradeRequests,
       inactiveUsers,
       usersWithoutProfile,
     },
@@ -441,7 +442,7 @@ const getCutMealCount = (record) => {
 };
 
 const getStudentDashboard = async (userId, requester) => {
-  if (requester?.systemType === 'MILITARY') return getMilitaryStudentDashboard(userId);
+  if (requester?.trainingSystemCode !== 'HE_5') return getMilitaryStudentDashboard(userId);
   const [
     user,
     yearlyResults,

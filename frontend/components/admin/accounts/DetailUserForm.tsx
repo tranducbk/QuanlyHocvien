@@ -22,7 +22,6 @@ import {
   HiOutlinePhone,
   HiOutlineCake,
   HiOutlineLibrary,
-  HiOutlineChartBar,
   HiOutlineSparkles,
   HiOutlineUserGroup,
 } from "react-icons/hi";
@@ -69,6 +68,7 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
   }
 
   const roleInfo = ROLES[user.role as keyof typeof ROLES];
+  const trainingSystemCode = user.trainingSystem?.code || user.TrainingSystem?.code;
 
   return (
     <div className="space-y-6 pb-8">
@@ -89,6 +89,9 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
               {user.isActive ? "Đang hoạt động" : "Đã khóa"}
             </Badge>
             <Badge variant="primary">{roleInfo?.NAME || user.role}</Badge>
+            <Badge variant="secondary">
+              {user.role === "ADMIN" ? "Toàn hệ thống" : trainingSystemCode ? trainingSystemCode.replace("HE_", "Hệ ") : "Chưa gán hệ"}
+            </Badge>
             {user.profile && (
               <Badge variant="neutral">{user.profile.code}</Badge>
             )}
@@ -313,20 +316,6 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
                   )}
                 </div>
 
-                {user.role === "STUDENT" && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <DetailItem
-                      icon={<HiOutlineChartBar />}
-                      label="CPA (Hệ 4)"
-                      value={user.profile.currentCpa4}
-                    />
-                    <DetailItem
-                      icon={<HiOutlineChartBar />}
-                      label="CPA (Hệ 10)"
-                      value={user.profile.currentCpa10}
-                    />
-                  </div>
-                )}
               </div>
             </section>
 

@@ -8,16 +8,21 @@ const ROLE_PATH_MAP: Record<string, string> = {
   [ROLES.STUDENT.ROLE]: ROLES.STUDENT.PATH,
 };
 
+const TRAINING_SYSTEM_CODES = ["HE_1", "HE_3", "HE_4", "HE_5", "HE_7"];
+
 export default function proxy(request: NextRequest) {
   const refreshToken = request.cookies.get("refreshToken")?.value;
   const role = request.cookies.get("role")?.value;
-  const systemType = request.cookies.get("systemType")?.value;
+  const trainingSystemCode = request.cookies.get("trainingSystemCode")?.value;
+  const hasAssignedSystem = Boolean(trainingSystemCode && TRAINING_SYSTEM_CODES.includes(trainingSystemCode));
+  const isHe5 = trainingSystemCode === "HE_5";
+  const isCohort = Boolean(trainingSystemCode && ["HE_1", "HE_3", "HE_4", "HE_7"].includes(trainingSystemCode));
   const { pathname } = request.nextUrl;
 
   // 1. Nếu người dùng cố gắng vào trang bảo vệ mà KHÔNG có refreshToken hoặc role hợp lệ
   if (
     PROTECTED_ROUTES.some((route) => pathname.startsWith(route)) &&
-    (!refreshToken || !role || !(role in ROLE_PATH_MAP))
+    (!refreshToken || !role || !(role in ROLE_PATH_MAP) || (role !== ROLES.ADMIN.ROLE && !hasAssignedSystem))
   ) {
     const url = new URL("/login", request.url);
     // Lưu lại trang đang định vào để sau khi login xong có thể quay lại (optional)
@@ -32,7 +37,7 @@ export default function proxy(request: NextRequest) {
     AUTH_ROUTES.some((route) => pathname.startsWith(route)) &&
     refreshToken &&
     role &&
-    rolePath
+    rolePath && (role === ROLES.ADMIN.ROLE || hasAssignedSystem)
   ) {
     return NextResponse.redirect(new URL(rolePath, request.url));
   }
@@ -44,6 +49,12 @@ export default function proxy(request: NextRequest) {
     rolePath
   ) {
     return NextResponse.redirect(new URL(rolePath, request.url));
+  }
+  if (
+    role === ROLES.ADMIN.ROLE &&
+    ["/admin/universities", "/admin/classes", "/admin/military"].some((path) => pathname.startsWith(path))
+  ) {
+    return NextResponse.redirect(new URL("/admin/accounts", request.url));
   }
   if (
     pathname.startsWith(ROLES.COMMANDER.PATH) &&
@@ -62,40 +73,38 @@ export default function proxy(request: NextRequest) {
 
   if (
     role === ROLES.COMMANDER.ROLE &&
-    systemType === "MILITARY" &&
-    pathname.startsWith("/commander/") &&
-    !pathname.startsWith("/commander/military/")
+    isCohort &&
+    pathname.startsWith("/commander/")
   ) {
     return NextResponse.redirect(
-      new URL("/commander/military/classes", request.url)
+      new URL("/commander", request.url)
     );
   }
   if (
     role === ROLES.COMMANDER.ROLE &&
-    systemType === "MILITARY" &&
-    pathname === "/commander"
-  ) {
-    return NextResponse.redirect(
-      new URL("/commander/military/classes", request.url)
-    );
-  }
-  if (
-    role === ROLES.COMMANDER.ROLE &&
-    systemType === "EXTERNAL" &&
+    isHe5 &&
     pathname.startsWith("/commander/military/")
   ) {
     return NextResponse.redirect(new URL("/commander/classes", request.url));
   }
   if (
     role === ROLES.STUDENT.ROLE &&
-    systemType === "EXTERNAL" &&
+    isHe5 &&
     pathname.startsWith("/student/military/")
   ) {
     return NextResponse.redirect(new URL("/student/results", request.url));
   }
   if (
     role === ROLES.STUDENT.ROLE &&
-    systemType === "MILITARY" &&
+    isCohort &&
+    pathname.startsWith("/student/military/") &&
+    pathname !== "/student/military/unavailable"
+  ) {
+    return NextResponse.redirect(new URL("/student/military/unavailable", request.url));
+  }
+  if (
+    role === ROLES.STUDENT.ROLE &&
+    isCohort &&
     [
       "/student/time-table",
       "/student/meal-schedules",
@@ -104,15 +113,15 @@ export default function proxy(request: NextRequest) {
       "/student/achievements",
     ].some((path) => pathname.startsWith(path))
   ) {
-    return NextResponse.redirect(new URL("/student", request.url));
+    return NextResponse.redirect(new URL("/student/military/unavailable", request.url));
   }
   if (
     role === ROLES.STUDENT.ROLE &&
-    systemType === "MILITARY" &&
+    isCohort &&
     pathname === "/student"
   ) {
     return NextResponse.redirect(
-      new URL("/student/military/time-table", request.url)
+      new URL("/student/military/unavailable", request.url)
     );
   }
 

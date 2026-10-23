@@ -189,6 +189,19 @@ export default function Main() {
         },
       },
       {
+        id: "trainingSystem",
+        header: "Hệ đào tạo",
+        cell: (info) => {
+          const user = info.row.original;
+          const code = user.trainingSystem?.code || user.TrainingSystem?.code;
+          return (
+            <Badge variant="neutral">
+              {user.role === "ADMIN" ? "Toàn hệ thống" : code ? code.replace("HE_", "Hệ ") : "Chưa gán"}
+            </Badge>
+          );
+        },
+      },
+      {
         id: "commander",
         header: "Chỉ huy quản lý",
         cell: (info) => {

@@ -101,6 +101,6 @@ const { authMiddleware, requireRole } = require('../middlewares/auth.middleware'
  */
 
 router.get('/dashboard', authMiddleware, requireRole('COMMANDER'), dashboardController.getCommanderDashboard);
-router.get('/reports/tuition', authMiddleware, requireRole('ADMIN', 'COMMANDER'), controller.exportTuitionReport);
+router.get('/reports/tuition', authMiddleware, requireRole('COMMANDER'), controller.exportTuitionReport);
 
 module.exports = router;

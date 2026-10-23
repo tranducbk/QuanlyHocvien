@@ -80,7 +80,6 @@ export interface AdminDashboard {
     totalOrganizations: number;
     totalClasses: number;
     totalNotifications: number;
-    pendingGradeRequests: number;
     usersWithoutProfile: number;
   };
   charts: {
@@ -90,7 +89,6 @@ export interface AdminDashboard {
     recordsByModule: DashboardChartItem[];
   };
   alerts: {
-    pendingGradeRequests: number;
     inactiveUsers: number;
     usersWithoutProfile: number;
   };

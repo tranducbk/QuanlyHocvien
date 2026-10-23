@@ -34,7 +34,7 @@ export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModa
   return (
     <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
       <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-4 space-y-6">
-        {histories.map((history: any) => {
+        {histories.map((history) => {
           const isPaid = history.newStatus === "PAID";
           const oldIsPaid = history.oldStatus === "PAID";
           

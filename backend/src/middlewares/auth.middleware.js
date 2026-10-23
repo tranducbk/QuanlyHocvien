@@ -15,10 +15,14 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 
   const decoded = JwtService.jwtVerify(token);
   const user = await User.findByPk(decoded.userId, {
-    include: [{ model: db.profile }],
+    include: [{ model: db.profile }, { model: db.trainingSystem }],
   });
   if (!user) {
     throw new BadTokenError('Tài khoản không tồn tại');
+  }
+
+  if (user.role !== 'ADMIN' && (!user.trainingSystemId || !user.TrainingSystem?.isActive)) {
+    throw new ForbiddenError('Tài khoản chưa được gán hệ đào tạo đang hoạt động');
   }
 
   const plainUser = serialize(user);
@@ -27,6 +31,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     ...plainUser,
     profileId: plainUser.profileId || null,
     organizationId: plainUser.Profile ? plainUser.Profile.organizationId : null,
+    trainingSystemCode: plainUser.trainingSystem?.code || null,
   };
   return next();
 });
@@ -57,7 +62,16 @@ const requireAdmin = requireRole('ADMIN');
 const requireSystemType = (...systemTypes) => asyncHandler(async (req, res, next) => {
   if (process.env.SERVER_JWT === 'false') return next();
   if (req.user?.role === 'ADMIN') return next();
-  if (!req.user || !systemTypes.includes(req.user.systemType)) throw new ForbiddenError();
+  const code = req.user?.trainingSystemCode;
+  const isExternal = code === 'HE_5' && systemTypes.includes('EXTERNAL');
+  const isMilitary = ['HE_1', 'HE_3', 'HE_4', 'HE_7'].includes(code) && systemTypes.includes('MILITARY');
+  if (!isExternal && !isMilitary) throw new ForbiddenError();
+  return next();
+});
+
+const requireTrainingSystem = (...codes) => asyncHandler(async (req, res, next) => {
+  if (process.env.SERVER_JWT === 'false') return next();
+  if (!req.user || !codes.includes(req.user.trainingSystemCode)) throw new ForbiddenError();
   return next();
 });
 
@@ -67,4 +81,5 @@ module.exports = {
   requireStudent,
   requireAdmin,
   requireSystemType,
+  requireTrainingSystem,
 };

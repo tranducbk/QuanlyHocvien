@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { HiOutlineTrash } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Table from "@/library/Table";
@@ -167,7 +167,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
       ...(!readOnly ? [{
         id: "actions",
         header: "Thao tác",
-        cell: (info: any) => {
+        cell: (info: CellContext<Student, unknown>) => {
           const student = info.row.original;
           const userId = student.user?.id;
 

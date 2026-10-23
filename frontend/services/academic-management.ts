@@ -58,25 +58,9 @@ export const academicManagementService = {
     return apiClient.post(ENDPOINTS.SEMESTER_RESULTS.BASE, data);
   },
 
-  updateSemesterResult: async (id: string, data: Partial<SemesterResult>): Promise<ApiResponse<SemesterResult>> => {
-    return apiClient.put(ENDPOINTS.SEMESTER_RESULTS.DETAIL(id), data);
-  },
-
-  deleteSemesterResult: async (id: string): Promise<ApiResponse<void>> => {
-    return apiClient.delete(ENDPOINTS.SEMESTER_RESULTS.DETAIL(id));
-  },
-
   // Subject Results
   createSubjectResult: async (data: Partial<SubjectResult>): Promise<ApiResponse<SubjectResult>> => {
     return apiClient.post(ENDPOINTS.SUBJECT_RESULTS.BASE, data);
-  },
-
-  updateSubjectResult: async (id: string, data: Partial<SubjectResult>): Promise<ApiResponse<SubjectResult>> => {
-    return apiClient.put(ENDPOINTS.SUBJECT_RESULTS.DETAIL(id), data);
-  },
-
-  deleteSubjectResult: async (id: string): Promise<ApiResponse<void>> => {
-    return apiClient.delete(ENDPOINTS.SUBJECT_RESULTS.DETAIL(id));
   },
 
   importSubjectResults: async (semesterResultId: string, file: File): Promise<ApiResponse<SubjectResult[]>> => {

@@ -3,6 +3,8 @@
  */
 export const QUERY_KEYS = {
   USERS: "users",
+  TRAINING_PROGRAMS: "trainingPrograms",
+  TRAINING_SYSTEMS: "trainingSystems",
   PROFILE: "profile",
   STUDENT_PROFILES: "studentProfiles",
   UNIVERSITY_HIERARCHY: "university_hierarchy",
@@ -47,6 +49,8 @@ export const MUTATION_KEYS = {
   UPDATE_PROFILE: [QUERY_KEYS.PROFILE, "update"],
   UPDATE_AVATAR: [QUERY_KEYS.PROFILE, "avatar"],
   CREATE_USER: [QUERY_KEYS.USERS, "create"],
+  CREATE_TRAINING_PROGRAM: [QUERY_KEYS.TRAINING_PROGRAMS, "create"],
+  CREATE_CURRICULUM_VERSION: [QUERY_KEYS.TRAINING_PROGRAMS, "create-version"],
   IMPORT_USERS: [QUERY_KEYS.USERS, "import"],
   UPDATE_USER: [QUERY_KEYS.USERS, "update"],
   CREATE_BATCH_USERS: [QUERY_KEYS.USERS, "create-batch"],

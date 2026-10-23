@@ -1,6 +1,7 @@
 const db = require('../models');
 const { NotFoundError, BadRequestError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
+const { getManagedStudentIds } = require('./legacyAcademicScope.service');
 
 const GradeRequest = db.gradeRequest;
 const SubjectResult = db.subjectResult;
@@ -80,6 +81,7 @@ const getMyRequestDetail = async (userId, id) => {
 // ===================== Commander =====================
 
 const getAll = async (query = {}, requester = {}) => {
+  const managedStudentIds = await getManagedStudentIds(requester);
   const where = {};
   const studentWhere = {};
   const semesterWhere = {};
@@ -112,7 +114,7 @@ const getAll = async (query = {}, requester = {}) => {
   ];
 
   if (query.status) where.status = query.status;
-  if (query.userId) where.userId = query.userId;
+  where.userId = { [Op.in]: query.userId ? managedStudentIds.filter((id) => id === query.userId) : managedStudentIds };
   if (query.requestType) where.requestType = query.requestType;
 
   if (query.code) {
@@ -158,8 +160,10 @@ const getAll = async (query = {}, requester = {}) => {
   return { ...result, rows: result.rows.map(withRequesterFullName), summary };
 };
 
-const getDetail = async (id) => {
-  const req = await GradeRequest.findByPk(id, {
+const getDetail = async (id, requester) => {
+  const managedStudentIds = await getManagedStudentIds(requester);
+  const req = await GradeRequest.findOne({
+    where: { id, userId: { [Op.in]: managedStudentIds } },
     include: [
       { model: SubjectResult, include: [{ model: SemesterResult }] },
       {
@@ -281,8 +285,8 @@ const approve = async (id, reviewerId, reviewNote) => {
   });
 };
 
-const reject = async (id, reviewerId, reviewNote) => {
-  const req = await getDetail(id);
+const reject = async (id, reviewerId, reviewNote, requester) => {
+  const req = await getDetail(id, requester);
   if (req.status !== 'PENDING') throw new BadRequestError('Chỉ đề xuất đang chờ mới được từ chối');
 
   await req.update({

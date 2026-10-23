@@ -30,7 +30,7 @@ const applyCommanderScope = (where, requester) => {
 };
 
 const assertCommanderCanAccessProfile = (profile, requester) => {
-  if (isCommander(requester) && (profile?.commanderId !== requester.id || profile?.User?.systemType !== requester.systemType)) {
+  if (isCommander(requester) && (profile?.commanderId !== requester.id || profile?.User?.trainingSystemId !== requester.trainingSystemId)) {
     throw new NotFoundError('Khong tim thay hoc vien');
   }
 };
@@ -155,13 +155,14 @@ const getAll = async (query, requester) => {
   const opts = {
     where,
     include: [
-      ...(isCommander(requester) ? [{ model: User, attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true }] : []),
+      ...(isCommander(requester) ? [{ model: User, attributes: ['id', 'role', 'trainingSystemId'], where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId }, required: true }] : []),
       { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel },
-      ...(requester?.systemType === 'MILITARY' ? [{ model: db.militaryClass }] : []),
+      ...(requester?.trainingSystemCode !== 'HE_5' ? [{ model: db.militaryClass }] : []),
       { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
     ],
   };
 
+  if (query.schoolYear && requester?.role === 'ADMIN') throw new ForbiddenError('Admin không được xem điểm học tập');
   if (query.schoolYear) {
     opts.include.push({
       model: YearlyResult,
@@ -170,25 +171,35 @@ const getAll = async (query, requester) => {
     });
   }
 
+  if (requester?.role === 'ADMIN') opts.attributes = { exclude: ['currentCpa4', 'currentCpa10'] };
   return paginateQuery(Student, query, opts);
 };
 
 const getDetail = async (id, requester) => {
   const record = await Student.findByPk(id, {
     include: [
-      { model: User, ...(isCommander(requester) ? { attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true } : {}) },
+      { model: User, ...(isCommander(requester) ? { attributes: ['id', 'role', 'trainingSystemId'], where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId }, required: true } : {}) },
       { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel },
-      ...(requester?.systemType === 'MILITARY' ? [{ model: db.militaryClass }] : []),
+      ...(requester?.trainingSystemCode !== 'HE_5' ? [{ model: db.militaryClass }] : []),
       { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
     ],
   });
   if (!record) throw new NotFoundError('Không tìm thấy học viên');
   assertCommanderCanAccessProfile(record, requester);
+  if (requester?.role === 'ADMIN') {
+    const plain = record.get({ plain: true });
+    delete plain.currentCpa4;
+    delete plain.currentCpa10;
+    return plain;
+  }
   return record;
 };
 
 const update = async (id, data, requester) => {
-  if (requester?.systemType === 'MILITARY' && ['classId', 'organizationId', 'universityId', 'educationLevelId'].some(field => data[field] !== undefined)) {
+  if (data.currentCpa4 !== undefined || data.currentCpa10 !== undefined) {
+    throw new ForbiddenError('Điểm đã nhập không được chỉnh sửa');
+  }
+  if (requester?.trainingSystemCode !== 'HE_5' && ['classId', 'organizationId', 'universityId', 'educationLevelId'].some(field => data[field] !== undefined)) {
     throw new BadRequestError('Hồ sơ quân sự không sử dụng dữ liệu cơ sở đào tạo hoặc lớp hệ ngoài');
   }
   if (isCommander(requester) && data.commanderId !== undefined) {
@@ -209,7 +220,7 @@ const deleteRecord = async (id, requester) => {
 const exportStudents = async (query, requester) => {
   const where = {};
   const include = [
-    ...(isCommander(requester) ? [{ model: User, attributes: ['id', 'role', 'systemType'], where: { role: 'STUDENT', systemType: requester.systemType }, required: true }] : []),
+    ...(isCommander(requester) ? [{ model: User, attributes: ['id', 'role', 'trainingSystemId'], where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId }, required: true }] : []),
     { model: Class }, { model: Organization }, { model: University }, { model: EducationLevel }, { model: User, as: 'commander', attributes: ['id', 'username', 'role', 'isActive'] },
   ];
 

@@ -24,8 +24,12 @@ const me = asyncHandler(async (req, res) => {
       include: [{ model: db.class }, { model: db.organization }, { model: db.university }, { model: db.educationLevel }],
     });
   }
-  const user = await db.user.findByPk(req.userId, { include });
-  return success(res, user);
+  include.push({ model: db.trainingSystem });
+  const user = await db.user.findByPk(req.userId, {
+    include,
+    attributes: { exclude: ['password', 'refreshToken'] },
+  });
+  return success(res, { ...user.get({ plain: true }), trainingSystemCode: req.user.trainingSystemCode });
 });
 
 const updateProfile = asyncHandler(async (req, res) => {

@@ -1,12 +1,10 @@
 "use client";
 
-import { useMemo, useCallback, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlinePencilAlt, HiOutlineTrash, HiPlus, HiOutlineUpload, HiOutlineDownload } from "react-icons/hi";
-import { useConfirmStore } from "@/store/useConfirmStore";
+import { HiPlus, HiOutlineUpload, HiOutlineDownload } from "react-icons/hi";
 import { useToastStore } from "@/store/useToastStore";
-import ActionButton from "@/library/ActionButton";
 import Table from "@/library/Table";
 import Typography from "@/library/Typography";
 import Button from "@/library/Button";
@@ -25,7 +23,6 @@ export default function Main({
   semesterResultId,
 }: SemesterDetailMainProps) {
   const { openModal, closeModal } = useModalStore();
-  const { openConfirm } = useConfirmStore();
   const { addToast } = useToastStore();
 
   const { data: detailData, isLoading, isError, refetch } = useQuery({
@@ -51,7 +48,7 @@ export default function Main({
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (error: any) {
+    } catch {
       addToast({ variant: "error", message: "Tải file mẫu thất bại" });
     } finally {
       setIsDownloading(false);
@@ -67,8 +64,8 @@ export default function Main({
       const res = await academicManagementService.importSubjectResults(semesterResultId, file);
       addToast({ variant: "success", message: res.message || "Nhập điểm thành công" });
       refetch();
-    } catch (error: any) {
-      addToast({ variant: "error", message: error.message || "Lỗi khi nhập điểm" });
+    } catch (error: unknown) {
+      addToast({ variant: "error", message: error instanceof Error ? error.message : "Lỗi khi nhập điểm" });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -77,47 +74,21 @@ export default function Main({
     }
   };
 
-  const handleOpenForm = useCallback(
-    (subjectResult?: SubjectResult) => {
-      openModal({
-        title: subjectResult ? "Cập nhật điểm môn học" : "Thêm điểm môn học",
-        content: (
-          <SubjectResultForm
-            semesterResultId={semesterResultId}
-            initialData={subjectResult}
-            onSuccess={() => {
-              refetch();
-              closeModal();
-            }}
-            onCancel={closeModal}
-          />
-        ),
-      });
-    },
-    [semesterResultId, openModal, closeModal, refetch]
-  );
-
-  const handleDelete = useCallback(
-    (id: string) => {
-      openConfirm({
-        title: "Xóa điểm môn học",
-        message: "Bạn có chắc chắn muốn xóa điểm môn học này không? Hành động này không thể hoàn tác.",
-        confirmText: "Xóa ngay",
-        variant: "danger",
-        mutationKey: ["DELETE_SUBJECT_RESULT", id],
-        onConfirm: async () => {
-          try {
-            await academicManagementService.deleteSubjectResult(id);
-            addToast({ variant: "success", message: "Xóa điểm môn học thành công" });
+  const handleOpenForm = () => {
+    openModal({
+      title: "Thêm điểm môn học",
+      content: (
+        <SubjectResultForm
+          semesterResultId={semesterResultId}
+          onSuccess={() => {
             refetch();
-          } catch (error: any) {
-            addToast({ variant: "error", message: error.message || "Xóa thất bại" });
-          }
-        },
-      });
-    },
-    [openConfirm, refetch, addToast]
-  );
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      ),
+    });
+  };
 
   const columns = useMemo<ColumnDef<SubjectResult>[]>(
     () => [
@@ -161,31 +132,8 @@ export default function Main({
           </Typography>
         ),
       },
-      {
-        id: "actions",
-        header: "Hành động",
-        cell: (info) => {
-          const record = info.row.original;
-          return (
-            <div className="flex gap-2">
-              <ActionButton
-                tooltipText="Cập nhật"
-                icon={HiOutlinePencilAlt}
-                onClick={() => handleOpenForm(record)}
-                color="secondary"
-              />
-              <ActionButton
-                tooltipText="Xóa"
-                icon={HiOutlineTrash}
-                onClick={() => handleDelete(record.id)}
-                color="red"
-              />
-            </div>
-          );
-        },
-      },
     ],
-    [handleOpenForm, handleDelete]
+    []
   );
 
   const pageTitle = detailData ? `Chi tiết điểm học kỳ: ${detailData.semester} - ${detailData.schoolYear}` : "Chi tiết điểm học kỳ";
@@ -206,7 +154,7 @@ export default function Main({
         <div className="flex justify-between items-center mb-6">
           <div>
             <Typography variant="body" weight="semibold" className="text-neutral-600 dark:text-neutral-400 text-lg">
-              Học viên: {(detailData as any)?.user?.profile?.fullName} ({(detailData as any)?.user?.profile?.code})
+              Học viên: {detailData?.user?.profile?.fullName} ({detailData?.user?.profile?.code})
             </Typography>
           </div>
           <div className="flex gap-2">
@@ -228,7 +176,7 @@ export default function Main({
             >
               Nhập từ Excel
             </Button>
-            <Button onClick={() => handleOpenForm()} icon={HiPlus}>
+            <Button onClick={handleOpenForm} icon={HiPlus}>
               Thêm môn học
             </Button>
           </div>

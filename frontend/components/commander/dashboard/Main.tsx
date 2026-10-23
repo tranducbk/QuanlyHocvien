@@ -53,7 +53,7 @@ const toneStyles: Record<Tone, string> = {
 const formatNumber = (value?: number) => (value ?? 0).toLocaleString("vi-VN");
 
 export default function Main() {
-  const systemType = useAuthStore((state) => state.user?.systemType);
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   const dashboardQuery = useQuery({
     queryKey: [QUERY_KEYS.COMMANDER_DASHBOARD],
     queryFn: dashboardService.getCommanderDashboard,
@@ -61,7 +61,7 @@ export default function Main() {
 
   const dashboard = dashboardQuery.data?.data;
 
-  if (systemType === "MILITARY") {
+  if (trainingSystemCode && trainingSystemCode !== "HE_5") {
     const militaryStats = [
       { label: "Học viên", value: dashboard?.overview.totalStudents || 0, href: "/commander/military/students" },
       { label: "Lớp được giao", value: dashboard?.overview.totalClasses || 0, href: "/commander/military/classes" },
@@ -342,9 +342,9 @@ const RiskStudentItem = ({ student }: { student: DashboardRiskStudent }) => (
 );
 
 const PendingRequestItem = ({ request, href }: { request: DashboardGradeRequestAlert; href?: string }) => {
-  const systemType = useAuthStore((state) => state.user?.systemType);
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   return <Link
-    href={href || (systemType === "MILITARY" ? "/commander/military/approvals" : "/commander/approvals")}
+    href={href || (trainingSystemCode && trainingSystemCode !== "HE_5" ? "/commander/military/approvals" : "/commander/approvals")}
     className="flex items-center justify-between gap-4 rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 transition-colors hover:border-primary-200 hover:bg-primary-50/50 dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:border-primary-800 dark:hover:bg-primary-950/20"
   >
     <div className="min-w-0">

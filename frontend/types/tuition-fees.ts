@@ -2,6 +2,22 @@ import { Semester } from "./semesters";
 
 export type TuitionFeeStatus = "PAID" | "UNPAID";
 
+export interface TuitionHistory {
+  id: string;
+  tuitionFeeId: string;
+  oldStatus: string | null;
+  newStatus: string;
+  note: string | null;
+  createdAt: string;
+  changer?: {
+    id: string;
+    profile?: {
+      fullName?: string | null;
+      code?: string | null;
+    } | null;
+  } | null;
+}
+
 export interface TuitionFee {
   id: string;
   userId?: string;

@@ -75,60 +75,16 @@ const { authMiddleware, requireRole } = require('../middlewares/auth.middleware'
  *           "description": "OK"
  *         }
  *       }
- *     },
- *     "put": {
- *       "tags": [
- *         "Academic Results"
- *       ],
- *       "summary": "Cập nhật KQ học kỳ",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "string"
- *           }
- *         }
- *       ],
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
- *     },
- *     "delete": {
- *       "tags": [
- *         "Academic Results"
- *       ],
- *       "summary": "Xóa KQ học kỳ",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "string"
- *           }
- *         }
- *       ],
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
  *     }
  *   }
  * }
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
 
 router.post('/', controller.create);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
 
 module.exports = router;

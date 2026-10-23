@@ -1,6 +1,8 @@
 const db = require('../models');
 const { NotFoundError, ForbiddenError } = require('../utils/apiError');
 const { paginateQuery } = require('../utils/response');
+const { getManagedStudentIds } = require('./legacyAcademicScope.service');
+const { Op } = db.Sequelize;
 
 const Commander = db.profile;
 const User = db.user;
@@ -18,7 +20,7 @@ const isCommander = (requester) => requester?.role === 'COMMANDER';
 const ensureCommanderCanManageUser = async (userId, requester) => {
   if (!isCommander(requester)) return;
   const user = await User.findByPk(userId, { include: [{ model: Student }] });
-  if (!user || user.Profile?.commanderId !== requester.id) {
+  if (!user || user.trainingSystemId !== requester.trainingSystemId || user.Profile?.commanderId !== requester.id) {
     throw new ForbiddenError('Chi huy chi duoc thao tac voi hoc vien minh quan ly');
   }
 };
@@ -151,7 +153,11 @@ const generateAllCutRice = async (requester) => {
   const include = isCommander(requester)
     ? [{ model: Student, where: { commanderId: requester.id }, required: true }]
     : [];
-  const students = await User.findAll({ where: { role: 'STUDENT' }, include, attributes: ['id'] });
+  const students = await User.findAll({
+    where: { role: 'STUDENT', ...(isCommander(requester) ? { trainingSystemId: requester.trainingSystemId } : {}) },
+    include,
+    attributes: ['id'],
+  });
   let success = 0, skipped = 0;
 
   for (const s of students) {
@@ -193,8 +199,8 @@ const generateAllCutRice = async (requester) => {
 
 // ===================== CH-09: Báo cáo thống kê =====================
 
-const getAcademicReport = async (query = {}) => {
-  const where = {};
+const getAcademicReport = async (query = {}, requester) => {
+  const where = { userId: { [Op.in]: await getManagedStudentIds(requester) } };
   if (query.schoolYear) where.schoolYear = query.schoolYear;
 
   const results = await YearlyResult.findAll({
@@ -223,8 +229,8 @@ const getAcademicReport = async (query = {}) => {
   return { detail: results, summary };
 };
 
-const getPartyTrainingReport = async (query = {}) => {
-  const where = {};
+const getPartyTrainingReport = async (query = {}, requester) => {
+  const where = { userId: { [Op.in]: await getManagedStudentIds(requester) } };
   if (query.schoolYear) where.schoolYear = query.schoolYear;
 
   const results = await YearlyResult.findAll({
@@ -245,13 +251,16 @@ const getPartyTrainingReport = async (query = {}) => {
   return { detail: results, partySummary, trainingSummary };
 };
 
-const getAchievementReport = async () => {
+const getAchievementReport = async (requester) => {
+  const where = { userId: { [Op.in]: await getManagedStudentIds(requester) } };
   const achievements = await Achievement.findAll({
+    where,
     include: [{ model: User, include: [{ model: db.profile }] }],
     order: [['year', 'DESC']],
   });
 
   const yearlyAchievements = await YearlyAchievement.findAll({
+    where,
     include: [{ model: User, include: [{ model: db.profile }] }],
     order: [['year', 'DESC']],
   });
@@ -272,8 +281,8 @@ const getAchievementReport = async () => {
   return { achievements, yearlyAchievements, summary };
 };
 
-const getTuitionReport = async (query = {}) => {
-  const where = {};
+const getTuitionReport = async (query = {}, requester) => {
+  const where = { userId: { [Op.in]: await getManagedStudentIds(requester) } };
   const semesterWhere = {};
   const schoolYearWhere = {};
   if (query.semesterId) where.semesterId = query.semesterId;
@@ -326,9 +335,9 @@ const getTuitionSchoolYearValue = (fee) => {
   return plain.semesterInfo?.schoolYearInfo?.schoolYear || plain.schoolYear || '';
 };
 
-const exportTuitionReport = async (query = {}) => {
+const exportTuitionReport = async (query = {}, requester) => {
   const ExcelJS = require('exceljs');
-  const { detail, summary } = await getTuitionReport(query);
+  const { detail, summary } = await getTuitionReport(query, requester);
 
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Bao cao hoc phi');

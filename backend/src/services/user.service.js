@@ -19,6 +19,28 @@ const PROFILE_FIELDS = [
   'universityId', 'educationLevelId', 'commanderId',
 ];
 const EXTERNAL_TRAINING_FIELDS = ['classId', 'organizationId', 'universityId', 'educationLevelId'];
+const BATCH_PROFILE_FORBIDDEN_FIELDS = [
+  'currentCpa4', 'currentCpa10', 'commanderId',
+  'classId', 'organizationId', 'universityId', 'educationLevelId',
+];
+const TRAINING_SYSTEM_CODES = ['HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7'];
+
+const assignTrainingSystem = async (data) => {
+  if (data.role === 'ADMIN') {
+    data.trainingSystemId = null;
+    data.systemType = null;
+    delete data.trainingSystemCode;
+    return;
+  }
+  if (!TRAINING_SYSTEM_CODES.includes(data.trainingSystemCode)) {
+    throw new BadRequestError('Phải chọn hệ đào tạo hợp lệ');
+  }
+  const system = await db.trainingSystem.findOne({ where: { code: data.trainingSystemCode, isActive: true } });
+  if (!system) throw new BadRequestError('Hệ đào tạo không hoạt động');
+  data.trainingSystemId = system.id;
+  data.systemType = system.code === 'HE_5' ? 'EXTERNAL' : 'MILITARY';
+  delete data.trainingSystemCode;
+};
 
 const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
@@ -95,7 +117,7 @@ const _checkCommanderAssignmentPermission = (requester, data) => {
   }
 };
 
-const _resolveCommanderId = async (value, systemType) => {
+const _resolveCommanderId = async (value, trainingSystemId) => {
   const commanderRef = toText(value);
   if (!commanderRef) return null;
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(commanderRef);
@@ -103,7 +125,7 @@ const _resolveCommanderId = async (value, systemType) => {
   const byUser = await User.findOne({
     where: {
       role: 'COMMANDER',
-      systemType,
+      trainingSystemId,
       [db.Sequelize.Op.or]: [
         ...(isUuid ? [{ id: commanderRef }] : []),
         { username: commanderRef },
@@ -114,7 +136,7 @@ const _resolveCommanderId = async (value, systemType) => {
 
   const byProfile = await Profile.findOne({
     where: { code: commanderRef },
-    include: [{ model: User, where: { role: 'COMMANDER', systemType }, required: true }],
+    include: [{ model: User, where: { role: 'COMMANDER', trainingSystemId }, required: true }],
   });
   if (byProfile?.User) return byProfile.User.id;
 
@@ -123,7 +145,7 @@ const _resolveCommanderId = async (value, systemType) => {
 
 const _assertCommanderCanManageUserRecord = (requester, record) => {
   if (requester?.role !== 'COMMANDER') return;
-  if (record.role !== 'STUDENT' || record.systemType !== requester.systemType || record.Profile?.commanderId !== requester.id) {
+  if (record.role !== 'STUDENT' || record.trainingSystemId !== requester.trainingSystemId || record.Profile?.commanderId !== requester.id) {
     throw new ForbiddenError('Chi huy chi duoc quan ly hoc vien minh phu trach');
   }
 };
@@ -131,7 +153,7 @@ const _assertCommanderCanManageUserRecord = (requester, record) => {
 const _createProfile = async (data, requester) => {
   _checkCommanderAssignmentPermission(requester, data);
   if (data.commanderId !== undefined) {
-    data.commanderId = await _resolveCommanderId(data.commanderId, data.systemType);
+    data.commanderId = await _resolveCommanderId(data.commanderId, data.trainingSystemId);
   }
   if (data.role === 'ADMIN' && requester && requester.role !== 'ADMIN') {
     throw new ForbiddenError('Chỉ admin mới có thể tạo tài khoản admin');
@@ -169,7 +191,8 @@ const _createProfile = async (data, requester) => {
 };
 
 const create = async (data, requester) => {
-  data.systemType = data.role === 'ADMIN' ? null : (data.systemType || 'EXTERNAL');
+  data.role = data.role || 'STUDENT';
+  await assignTrainingSystem(data);
   await _createProfile(data, requester);
 
   if (data.password) {
@@ -198,15 +221,18 @@ const getAll = async (query, requester) => {
   if (query.fullName) profileWhere.fullName = { [db.Sequelize.Op.iLike]: `%${query.fullName}%` };
   if (requester?.role === 'COMMANDER') {
     where.role = 'STUDENT';
-    where.systemType = requester.systemType;
+    where.trainingSystemId = requester.trainingSystemId;
     profileWhere.commanderId = requester.id;
   }
 
   return paginateQuery(User, query, {
     where,
+    attributes: { exclude: ['password', 'refreshToken'] },
     include: [
+      { model: db.trainingSystem, attributes: ['code'] },
       {
         model: Profile,
+        ...(requester?.role === 'ADMIN' ? { attributes: { exclude: ['currentCpa4', 'currentCpa10'] } } : {}),
         ...(Object.keys(profileWhere).length > 0 ? { where: profileWhere, required: true } : {}),
         include: [
           { model: db.university },
@@ -250,8 +276,10 @@ const exportUsers = async (query = {}) => {
   const users = await User.findAll({
     where,
     include: [
+      { model: db.trainingSystem, attributes: ['code'] },
       {
         model: Profile,
+        attributes: { exclude: ['currentCpa4', 'currentCpa10'] },
         ...(Object.keys(profileWhere).length > 0 ? { where: profileWhere, required: true } : {}),
         include: [
           { model: db.university },
@@ -277,6 +305,7 @@ const exportUsers = async (query = {}) => {
   worksheet.columns = [
     { header: 'Tên đăng nhập', key: 'username', width: 22 },
     { header: 'Vai trò', key: 'role', width: 16 },
+    { header: 'Hệ đào tạo', key: 'trainingSystemCode', width: 16 },
     { header: 'Trạng thái', key: 'isActive', width: 18 },
     { header: 'Mã', key: 'code', width: 16 },
     { header: 'Họ và tên', key: 'fullName', width: 28 },
@@ -298,6 +327,7 @@ const exportUsers = async (query = {}) => {
     worksheet.addRow({
       username: plain.username,
       role: plain.role,
+      trainingSystemCode: plain.TrainingSystem?.code || '',
       isActive: plain.isActive ? 'Đang hoạt động' : 'Đã khóa',
       code: profile.code || '',
       fullName: profile.fullName || '',
@@ -327,9 +357,12 @@ const exportUsers = async (query = {}) => {
 
 const getDetail = async (id, requester) => {
   const record = await User.findByPk(id, {
+    attributes: { exclude: ['password', 'refreshToken'] },
     include: [
+      { model: db.trainingSystem, attributes: ['code'] },
       {
         model: Profile,
+        ...(requester?.role === 'ADMIN' ? { attributes: { exclude: ['currentCpa4', 'currentCpa10'] } } : {}),
         include: [
           { model: db.university },
           { model: db.class },
@@ -352,18 +385,51 @@ const getDetail = async (id, requester) => {
 
 const update = async (id, data, requester) => {
   const record = await getDetail(id, requester);
+  const adminFields = ['username', 'password', 'role', 'isActive', 'trainingSystemCode', 'commanderId'];
+  const commanderFields = PROFILE_FIELDS.filter((field) => !['currentCpa4', 'currentCpa10', 'commanderId'].includes(field));
+  const allowedFields = requester?.role === 'ADMIN' ? adminFields : commanderFields;
+  if (Object.keys(data).some((field) => !allowedFields.includes(field))) {
+    throw new ForbiddenError('Trường cập nhật không thuộc quyền của tài khoản');
+  }
+  if (data.currentCpa4 !== undefined || data.currentCpa10 !== undefined) {
+    throw new ForbiddenError('Điểm đã nhập không được chỉnh sửa');
+  }
+  if (data.trainingSystemId !== undefined || data.systemType !== undefined) {
+    throw new BadRequestError('Chọn hệ bằng trainingSystemCode');
+  }
+  if (requester?.role === 'ADMIN' && PROFILE_FIELDS.some((field) => data[field] !== undefined && field !== 'commanderId')) {
+    throw new ForbiddenError('Admin chỉ được cập nhật tài khoản và phân công Chỉ huy');
+  }
+  if (requester?.role === 'COMMANDER' && (data.role !== undefined || data.trainingSystemCode !== undefined || data.trainingSystemId !== undefined || data.systemType !== undefined)) {
+    throw new ForbiddenError('Chỉ Admin được thay đổi vai trò hoặc hệ đào tạo');
+  }
   if (record.systemType === 'MILITARY' && EXTERNAL_TRAINING_FIELDS.some(field => data[field] !== undefined)) {
     throw new BadRequestError('Học viên quân sự không sử dụng dữ liệu cơ sở đào tạo hoặc lớp hệ ngoài');
   }
   _checkRoleHierarchy(requester, record.role);
   _checkCommanderAssignmentPermission(requester, data);
-  if (data.commanderId !== undefined) {
-    data.commanderId = await _resolveCommanderId(data.commanderId, record.systemType);
-  }
   if (data.role) {
     _checkRoleHierarchy(requester, data.role);
-    if (data.role === 'ADMIN') data.systemType = null;
-    else if (record.role === 'ADMIN') data.systemType = 'EXTERNAL';
+    if (data.role === 'ADMIN') {
+      data.systemType = null;
+      data.trainingSystemId = null;
+      delete data.trainingSystemCode;
+    } else if (record.role === 'ADMIN' && data.trainingSystemCode === undefined) {
+      throw new BadRequestError('Phải chọn hệ đào tạo khi chuyển tài khoản Admin sang nghiệp vụ');
+    }
+  }
+  if (data.trainingSystemCode !== undefined) {
+    if (!TRAINING_SYSTEM_CODES.includes(data.trainingSystemCode)) throw new BadRequestError('Hệ đào tạo không hợp lệ');
+    const selectedSystem = await db.trainingSystem.findOne({ where: { code: data.trainingSystemCode, isActive: true } });
+    if (!selectedSystem) throw new BadRequestError('Hệ đào tạo không hợp lệ');
+    data.trainingSystemId = selectedSystem.id;
+    data.systemType = selectedSystem.code === 'HE_5' ? 'EXTERNAL' : 'MILITARY';
+    delete data.trainingSystemCode;
+  }
+  if (data.commanderId !== undefined) {
+    data.commanderId = await _resolveCommanderId(data.commanderId, data.trainingSystemId || record.trainingSystemId);
+  } else if (data.trainingSystemId && data.trainingSystemId !== record.trainingSystemId && record.Profile?.commanderId) {
+    throw new BadRequestError('Phải gán lại Chỉ huy hoặc bỏ phân công khi chuyển hệ');
   }
   if (data.password) {
     data.password = await bcrypt.hash(data.password, 10);
@@ -381,7 +447,11 @@ const update = async (id, data, requester) => {
     await record.Profile.update(profileUpdate);
   }
 
-  return record.update(data);
+  const updated = await record.update(data);
+  const plain = updated.get({ plain: true });
+  delete plain.password;
+  delete plain.refreshToken;
+  return plain;
 };
 
 const deleteRecord = async (id, requester) => {
@@ -394,7 +464,7 @@ const deleteRecord = async (id, requester) => {
 const createBatchUsers = async (users, requester) => {
   const results = [];
   for (const u of users) {
-    u.systemType = u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL');
+    u.role = u.role || 'STUDENT';
     const exist = await User.findOne({ where: { username: u.username } });
     if (exist) {
       results.push({ username: u.username, status: 'SKIPPED', message: 'Tên đăng nhập đã tồn tại' });
@@ -402,6 +472,7 @@ const createBatchUsers = async (users, requester) => {
     }
 
     try {
+      await assignTrainingSystem(u);
       await _createProfile(u, requester);
 
       const hashedPassword = await _hashPassword(u.password);
@@ -409,7 +480,8 @@ const createBatchUsers = async (users, requester) => {
         username: u.username,
         password: hashedPassword,
         role: u.role || 'STUDENT',
-        systemType: u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL'),
+        systemType: u.systemType,
+        trainingSystemId: u.trainingSystemId,
         isAdmin: u.role === 'ADMIN',
         profileId: u.profileId || null,
       });
@@ -452,6 +524,7 @@ const updateMyProfile = async (userId, data) => {
   if (!user || !user.Profile) throw new NotFoundError('Không tìm thấy hồ sơ');
   const updateData = {};
   for (const field of PROFILE_FIELDS) {
+    if (['currentCpa4', 'currentCpa10', 'commanderId', 'classId', 'organizationId', 'universityId', 'educationLevelId'].includes(field)) continue;
     if (data[field] !== undefined) updateData[field] = data[field];
   }
   await user.Profile.update(updateData);
@@ -473,20 +546,22 @@ const uploadAvatarFile = async (userId, file) => {
 const createBatchUsersProfiles = async (users, requester) => {
   const results = [];
   for (const u of users) {
-    u.systemType = u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL');
+    u.role = u.role || 'STUDENT';
     const exist = await User.findOne({ where: { username: u.username } });
     if (exist) {
       results.push({ username: u.username, status: 'SKIPPED', message: 'Tên đăng nhập đã tồn tại' });
       continue;
     }
     try {
+      await assignTrainingSystem(u);
       await _createProfile(u, requester);
       const hashedPassword = await _hashPassword(u.password || '123456');
       const user = await User.create({
         username: u.username,
         password: hashedPassword,
         role: u.role || 'STUDENT',
-        systemType: u.role === 'ADMIN' ? null : (u.systemType || 'EXTERNAL'),
+        systemType: u.systemType,
+        trainingSystemId: u.trainingSystemId,
         isAdmin: u.role === 'ADMIN',
         profileId: u.profileId || null,
       });
@@ -507,6 +582,7 @@ const createImportTemplate = async () => {
     { header: 'Tên đăng nhập', key: 'username', width: 18 },
     { header: 'Mật khẩu', key: 'password', width: 16 },
     { header: 'Vai trò', key: 'role', width: 16 },
+    { header: 'Hệ đào tạo', key: 'trainingSystemCode', width: 16 },
     { header: 'Mã', key: 'code', width: 14 },
     { header: 'Họ và tên', key: 'fullName', width: 26 },
     { header: 'Email', key: 'email', width: 28 },
@@ -524,6 +600,7 @@ const createImportTemplate = async () => {
       username: 'hv011',
       password: 'hocvien123',
       role: 'STUDENT',
+      trainingSystemCode: 'HE_5',
       code: 'HV011',
       fullName: 'Nguyễn Văn A',
       email: 'vana@example.com',
@@ -540,6 +617,7 @@ const createImportTemplate = async () => {
       username: 'chihuy03',
       password: 'chihuy123',
       role: 'COMMANDER',
+      trainingSystemCode: 'HE_5',
       code: 'CH003',
       fullName: 'Trần Văn B',
       email: 'vanb@example.com',
@@ -584,10 +662,7 @@ const createBatchProfileUpdateTemplate = async () => {
     { header: 'Địa chỉ hiện tại', key: 'currentAddress', width: 28 },
     { header: 'Ngày nhập ngũ', key: 'dateOfEnlistment', width: 16 },
     { header: 'Khóa học', key: 'enrollment', width: 12 },
-    { header: 'CPA 4.0', key: 'currentCpa4', width: 12 },
-    { header: 'CPA 10.0', key: 'currentCpa10', width: 12 },
     { header: 'Ngày tốt nghiệp', key: 'graduationDate', width: 16 },
-    { header: 'Chỉ huy quản lý', key: 'commanderId', width: 18 },
     { header: 'Số thẻ Đảng', key: 'partyMemberCardNumber', width: 18 },
     { header: 'Đảng viên dự bị', key: 'probationaryPartyMember', width: 18 },
     { header: 'Đảng viên chính thức', key: 'fullPartyMember', width: 20 },
@@ -613,10 +688,7 @@ const createBatchProfileUpdateTemplate = async () => {
       currentAddress: 'Ký túc xá Khu A',
       dateOfEnlistment: '2025-02-15',
       enrollment: 2025,
-      currentCpa4: 3.2,
-      currentCpa10: 8.0,
       graduationDate: '',
-      commanderId: 'chihuy01',
       partyMemberCardNumber: '',
       probationaryPartyMember: '',
       fullPartyMember: '',
@@ -658,6 +730,7 @@ const parseExcelImport = async (file) => {
       username,
       password: toText(getCellValue(row, headerMap, ['Mật khẩu', 'password'])),
       role: normalizeRole(getCellValue(row, headerMap, ['Vai trò', 'role'])),
+      trainingSystemCode: toText(getCellValue(row, headerMap, ['Hệ đào tạo', 'trainingSystemCode'])),
       code: toText(getCellValue(row, headerMap, ['Mã', 'code'])),
       fullName: toText(getCellValue(row, headerMap, ['Họ và tên', 'fullName'])),
       email: toText(getCellValue(row, headerMap, ['Email', 'email'])),
@@ -731,18 +804,36 @@ const parseBatchProfileUpdateExcelImport = async (file) => {
   return profiles;
 };
 
-const updateBatchProfiles = async (profiles) => {
+const assertManagedStudentProfile = async (code, requester) => {
+  if (requester?.role !== 'COMMANDER' || !requester.trainingSystemId) {
+    throw new ForbiddenError('Chỉ Chỉ huy được cập nhật hồ sơ học viên được giao');
+  }
+  const profile = await Profile.findOne({
+    where: { code: String(code || '').trim(), commanderId: requester.id },
+    include: [{
+      model: User,
+      where: { role: 'STUDENT', trainingSystemId: requester.trainingSystemId },
+      required: true,
+    }],
+  });
+  if (!profile) throw new NotFoundError('Không tìm thấy học viên trong phạm vi quản lý');
+  return profile;
+};
+
+const updateBatchProfiles = async (profiles, requester) => {
+  if (requester?.role !== 'COMMANDER' || !requester.trainingSystemId) {
+    throw new ForbiddenError('Chỉ Chỉ huy được cập nhật hồ sơ học viên được giao');
+  }
   const results = [];
   for (const p of profiles) {
     try {
-      const profile = await Profile.findOne({ where: { code: p.code } });
-      if (!profile) {
-        results.push({ code: p.code, status: 'ERROR', message: 'Không tìm thấy hồ sơ' });
-        continue;
+      const profile = await assertManagedStudentProfile(p.code, requester);
+      if (BATCH_PROFILE_FORBIDDEN_FIELDS.some((field) => p[field] !== undefined)) {
+        throw new ForbiddenError('Không được cập nhật điểm, phân công Chỉ huy hoặc lớp qua file hồ sơ');
       }
       const updateData = {};
-      for (const field of PROFILE_FIELDS) {
-        if (p[field] !== undefined) updateData[field] = p[field];
+        for (const field of PROFILE_FIELDS) {
+          if (field !== 'code' && p[field] !== undefined) updateData[field] = p[field];
       }
       await profile.update(updateData);
       results.push({ code: p.code, status: 'UPDATED' });
@@ -753,7 +844,10 @@ const updateBatchProfiles = async (profiles) => {
   return results;
 };
 
-const graduateBatchProfiles = async (data) => {
+const graduateBatchProfiles = async (data, requester) => {
+  if (requester?.role !== 'COMMANDER' || !requester.trainingSystemId) {
+    throw new ForbiddenError('Chỉ Chỉ huy được xác nhận ra trường cho học viên được giao');
+  }
   const graduationDate = data.graduationDate;
   const students = data.students || data.studentCodes.map((code) => ({ code, graduationDate }));
   const results = [];
@@ -761,7 +855,7 @@ const graduateBatchProfiles = async (data) => {
   for (const item of students) {
     const code = item.code || item.studentCode;
     try {
-      const { profile } = await findStudentUserByCode(code);
+      const profile = await assertManagedStudentProfile(code, requester);
       await profile.update({ graduationDate: item.graduationDate || graduationDate });
       results.push({ code, status: 'UPDATED' });
     } catch (err) {

@@ -66,8 +66,6 @@ export default function UpdateStudentProfileForm({
       positionParty: student.positionParty,
       dateOfEnlistment: student.dateOfEnlistment,
       enrollment: student.enrollment,
-      currentCpa4: student.currentCpa4,
-      currentCpa10: student.currentCpa10,
       graduationDate: student.graduationDate,
       partyMemberCardNumber: student.partyMemberCardNumber,
       probationaryPartyMember: student.probationaryPartyMember,
@@ -289,24 +287,6 @@ export default function UpdateStudentProfileForm({
                   error={errors.graduationDate?.message}
                 />
               )}
-            />
-            <Input
-              label="CPA hệ 4"
-              type="number"
-              step="0.01"
-              placeholder="Ví dụ: 3.2"
-              error={errors.currentCpa4?.message}
-              isLoading={mutation.isPending}
-              {...register("currentCpa4", { setValueAs: parseNumber })}
-            />
-            <Input
-              label="CPA hệ 10"
-              type="number"
-              step="0.01"
-              placeholder="Ví dụ: 8.0"
-              error={errors.currentCpa10?.message}
-              isLoading={mutation.isPending}
-              {...register("currentCpa10", { setValueAs: parseNumber })}
             />
           </div>
         </section>

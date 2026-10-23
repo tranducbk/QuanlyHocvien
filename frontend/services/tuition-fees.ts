@@ -3,6 +3,7 @@ import { ENDPOINTS } from "@/constants/endpoints";
 import {
   CreateTuitionFeeRequest,
   TuitionFee,
+  TuitionHistory,
   TuitionFeeQueryRequest,
   UpdateTuitionFeeRequest,
 } from "@/types/tuition-fees";
@@ -129,7 +130,9 @@ export const tuitionFeeService = {
     });
   },
 
-  getHistories: async (id: string): Promise<ApiResponse<any[]>> => {
-    return apiClient.get(`${ENDPOINTS.TUITION_FEES.BASE}/${id}/histories`);
+  getHistories: async (id: string): Promise<ApiResponse<TuitionHistory[]>> => {
+    return apiClient.get<ApiResponse<TuitionHistory[]>, ApiResponse<TuitionHistory[]>>(
+      `${ENDPOINTS.TUITION_FEES.BASE}/${id}/histories`
+    );
   },
 };

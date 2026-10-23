@@ -112,7 +112,7 @@ export default function CreateUniversityForm() {
           
           {fields.length === 0 ? (
             <div className="text-sm text-neutral-500 italic p-4 bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-dashed border-neutral-200 dark:border-neutral-800 text-center">
-              Chưa có khoa/ngành nào. Bấm "Thêm Khoa" để tạo kèm khoa.
+              Chưa có khoa/ngành nào. Bấm &quot;Thêm Khoa&quot; để tạo kèm khoa.
             </div>
           ) : (
             <div className="space-y-3">

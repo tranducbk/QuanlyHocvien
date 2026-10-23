@@ -31,6 +31,11 @@ export const ENDPOINTS = {
     IMPORT_TEMPLATE: "/api/users/import-template",
     EXPORT: "/api/users/export",
   },
+  TRAINING_PROGRAMS: {
+    BASE: "/api/training-programs",
+    SYSTEMS: "/api/training-programs/systems",
+    VERSIONS: (id: string) => `/api/training-programs/${id}/versions`,
+  },
   UNIVERSITIES: {
     BASE: "/api/universities",
   },
@@ -162,8 +167,6 @@ export const ENDPOINTS = {
     COMMANDER_BASE: "/api/commanders/grade-requests",
     COMMANDER_DETAIL: (id: string | number) =>
       `/api/commanders/grade-requests/${id}`,
-    APPROVE: (id: string | number) =>
-      `/api/commanders/grade-requests/${id}/approve`,
     REJECT: (id: string | number) =>
       `/api/commanders/grade-requests/${id}/reject`,
   },

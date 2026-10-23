@@ -9,39 +9,12 @@ import Image from "next/image";
 import { useAuthStore } from "@/store/useAuthStore";
 import { HiOutlineAcademicCap } from "react-icons/hi";
 
-const MILITARY_PATHS: Record<string, string> = {
-  "/commander": "/commander",
-  "/commander/classes": "/commander/military/classes",
-  "/commander/profiles": "/commander/military/students",
-  "/commander/approvals": "/commander/military/approvals",
-  "/commander/achievements": "/commander/military/achievements",
-  "/commander/time-tables": "/commander/military/time-table",
-  "/commander/academic-results": "/commander/military/academic-results",
-  "/commander/semesters": "/commander/military/semesters",
-  "/commander/duty-schedules": "/commander/military/duty-schedules",
-};
-
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const systemType = useAuthStore((state) => state.user?.systemType);
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   const items: MenuItem[] =
-    systemType === "MILITARY"
-      ? [
-          ...COMMANDER_MENU.filter(
-            (item) => item.path in MILITARY_PATHS
-          ).flatMap((item) => [
-            { ...item, path: MILITARY_PATHS[item.path] },
-            ...(item.path === "/commander/semesters"
-              ? [
-                  {
-                    title: "Môn học",
-                    path: "/commander/military/subjects",
-                    icon: HiOutlineAcademicCap,
-                  },
-                ]
-              : []),
-          ]),
-        ]
+    trainingSystemCode && trainingSystemCode !== "HE_5"
+      ? [{ title: "Phân hệ quân sự", path: "/commander", icon: HiOutlineAcademicCap }]
       : [...COMMANDER_MENU];
 
   return (

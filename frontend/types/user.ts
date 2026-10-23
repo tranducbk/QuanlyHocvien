@@ -34,6 +34,7 @@ export interface StudentProfileQueryRequest extends QueryRequest {
 
 export interface UpdateProfileRequest {
   username?: string;
+  trainingSystemCode?: string;
   code?: string;
   fullName?: string;
   email?: string | null;
@@ -202,6 +203,9 @@ export interface Commander {
 }
 
 export interface UserDetailResponse extends User {
+  trainingSystemId?: string | null;
+  trainingSystem?: { code: string } | null;
+  TrainingSystem?: { code: string } | null;
   profile: (Student & Commander) | null;
   Profile?: (Student & Commander) | null;
 }

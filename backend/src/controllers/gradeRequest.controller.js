@@ -29,7 +29,7 @@ const getAll = asyncHandler(async (req, res) => {
 });
 
 const getDetail = asyncHandler(async (req, res) => {
-  const r = await service.getDetail(req.params.id);
+  const r = await service.getDetail(req.params.id, req.user);
   return success(res, r);
 });
 
@@ -41,7 +41,7 @@ const approve = asyncHandler(async (req, res) => {
 
 const reject = asyncHandler(async (req, res) => {
   await validateOrThrow(s.reject, req.body);
-  const r = await service.reject(req.params.id, req.userId, req.body.reviewNote);
+  const r = await service.reject(req.params.id, req.userId, req.body.reviewNote, req.user);
   return success(res, r, 'Đề xuất đã bị từ chối');
 });
 

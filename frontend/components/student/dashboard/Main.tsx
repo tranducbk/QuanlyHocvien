@@ -42,7 +42,7 @@ const toneStyles: Record<Tone, string> = {
 const formatNumber = (value?: number) => (value ?? 0).toLocaleString("vi-VN");
 
 export default function Main() {
-  const systemType = useAuthStore((state) => state.user?.systemType);
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   const dashboardQuery = useQuery({
     queryKey: [QUERY_KEYS.STUDENT_DASHBOARD],
     queryFn: dashboardService.getStudentDashboard,
@@ -52,7 +52,7 @@ export default function Main() {
   const profile = dashboard?.profile;
   const overview = dashboard?.overview;
 
-  if (systemType === "MILITARY") {
+  if (trainingSystemCode && trainingSystemCode !== "HE_5") {
     return (
       <PageContainer breadcrumb={[{ label: "Tổng quan" }]} title={profile?.fullName || profile?.username || "Học viên"} subtitle={`${profile?.className || "Chưa xếp lớp"} · Theo dõi kết quả học tập, lịch học chung của lớp và lịch trực.`} isLoading={dashboardQuery.isLoading} skeleton={<DashboardSkeleton />} isError={dashboardQuery.isError} onRetry={dashboardQuery.refetch} className="space-y-8">
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

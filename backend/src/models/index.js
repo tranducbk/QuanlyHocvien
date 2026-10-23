@@ -27,11 +27,6 @@ const sequelize = dbConfig.URL
       pool: dbConfig.pool
     });
 
-sequelize
-  .authenticate()
-  .then(() => console.log('PostgreSQL connection has been established successfully.'))
-  .catch(err => console.error('Unable to connect to the database:', err));
-
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
@@ -59,6 +54,8 @@ db.militaryDutySchedule = require('./militaryDutySchedule.js')(sequelize, DataTy
 db.profile = require('./profile.js')(sequelize, DataTypes);
 db.user = require('./user.js')(sequelize, DataTypes);
 db.trainingSystem = require('./TrainingSystem.js')(sequelize, DataTypes);
+db.trainingProgram = require('./TrainingProgram.js')(sequelize, DataTypes);
+db.curriculumVersion = require('./CurriculumVersion.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
 db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
@@ -90,6 +87,10 @@ db.gradeRequest = require('./gradeRequest.js')(sequelize, DataTypes);
 
 db.trainingSystem.hasMany(db.user, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
 db.user.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingSystem.hasMany(db.trainingProgram, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingProgram.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingProgram.hasMany(db.curriculumVersion, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.curriculumVersion.belongsTo(db.trainingProgram, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
 
 // --- Nhóm Quản lý Tổ chức & Cơ sở ---
 

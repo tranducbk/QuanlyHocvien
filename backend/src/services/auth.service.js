@@ -3,25 +3,42 @@ const crypto = require('crypto');
 const db = require('../models');
 const JwtService = require('./jwt.service');
 const { serialize } = require('../utils/serialize');
-const { NotFoundError, UnauthorizedError, BadRequestError } = require('../utils/apiError');
+const { NotFoundError, UnauthorizedError, BadRequestError, ForbiddenError } = require('../utils/apiError');
 
 const User = db.user;
 const Profile = db.profile;
 const TrainingSystem = db.trainingSystem;
+
+const requireAssignedSystem = (user) => {
+  if (user.role === 'ADMIN') return null;
+  const system = user.TrainingSystem;
+  if (!user.trainingSystemId || !system?.isActive) {
+    throw new ForbiddenError('Tài khoản chưa được gán hệ đào tạo đang hoạt động');
+  }
+  return system.code;
+};
+
+const authUserResponse = (user) => ({
+  ..._excludePassword(user),
+  trainingSystemCode: requireAssignedSystem(user),
+});
 
 const SELF_PROFILE_FIELDS = [
   'fullName', 'email', 'gender', 'birthday', 'hometown', 'ethnicity',
   'religion', 'currentAddress', 'placeOfBirth', 'phoneNumber', 'cccd',
   'partyMemberCardNumber', 'unit', 'rank', 'positionGovernment', 'positionParty',
   'fullPartyMember', 'probationaryPartyMember', 'dateOfEnlistment',
-  'enrollment', 'graduationDate', 'currentCpa4', 'currentCpa10', 'familyMember',
-  'foreignRelations', 'startWork', 'organization', 'classId', 'organizationId',
-  'universityId', 'educationLevelId',
+  'enrollment', 'graduationDate', 'familyMember',
+  'foreignRelations', 'startWork', 'organization',
 ];
 
 const _generateCode = (prefix) => `${prefix}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
-const _excludePassword = (user) => serialize(user);
+const _excludePassword = (user) => {
+  const plain = serialize(user);
+  delete plain.refreshToken;
+  return plain;
+};
 
 const _generateTokens = (userId) => {
   const issuedAt = Math.floor(Date.now() / 1000);
@@ -31,7 +48,10 @@ const _generateTokens = (userId) => {
 };
 
 const login = async (username, password) => {
-  const user = await User.findOne({ where: { username } });
+  const user = await User.findOne({
+    where: { username },
+    include: [{ model: TrainingSystem }],
+  });
   if (!user) {
     throw new BadRequestError('Người dùng không tồn tại');
   }
@@ -40,12 +60,13 @@ const login = async (username, password) => {
   if (!isPasswordValid) {
     throw new UnauthorizedError('Mật khẩu không chính xác');
   }
+  requireAssignedSystem(user);
 
   user.refreshToken = _generateTokens(user.id).refreshToken;
   await user.save();
 
   const { accessToken, refreshToken } = _generateTokens(user.id);
-  return { accessToken, refreshToken, user: _excludePassword(user) };
+  return { accessToken, refreshToken, user: authUserResponse(user) };
 };
 
 const register = async (data) => {
@@ -108,13 +129,16 @@ const refreshToken = async (token) => {
     throw new UnauthorizedError('Token không hợp lệ');
   }
 
-  const user = await User.findByPk(decoded.userId);
+  const user = await User.findByPk(decoded.userId, {
+    include: [{ model: TrainingSystem }],
+  });
   if (!user) {
     throw new UnauthorizedError('Tài khoản không tồn tại');
   }
+  requireAssignedSystem(user);
 
   const { accessToken, refreshToken } = _generateTokens(user.id);
-  return { accessToken, refreshToken, user: _excludePassword(user) };
+  return { accessToken, refreshToken, user: authUserResponse(user) };
 };
 
 const changePassword = async (userId, oldPassword, newPassword) => {

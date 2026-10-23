@@ -180,6 +180,42 @@ router.get('/', controller.getAll);
 router.post('/import', uploadExcel('file'), controller.importExcel);
 router.get('/template', controller.downloadTemplate);
 router.get('/export', controller.exportCutRice);
+/**
+ * @swagger
+ * /cut-rice/requests:
+ *   get:
+ *     tags: [Cut Rice]
+ *     summary: Danh sách yêu cầu cắt cơm của học viên
+ *     responses:
+ *       200:
+ *         description: Danh sách yêu cầu
+ * /cut-rice/requests/{id}/approve:
+ *   post:
+ *     tags: [Cut Rice]
+ *     summary: Duyệt yêu cầu cắt cơm
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Đã duyệt
+ * /cut-rice/requests/{id}/reject:
+ *   post:
+ *     tags: [Cut Rice]
+ *     summary: Từ chối yêu cầu cắt cơm
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Đã từ chối
+ */
 router.get('/requests', controller.getRequests);
 router.post('/requests/:id/approve', controller.approveRequest);
 router.post('/requests/:id/reject', controller.rejectRequest);
