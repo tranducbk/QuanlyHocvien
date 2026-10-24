@@ -3,18 +3,17 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { COMMANDER_MENU, MenuItem } from "@/constants/commander-menu";
+import { COHORT_COMMANDER_MENU, COMMANDER_MENU, MenuItem } from "@/constants/commander-menu";
 import Typography from "@/library/Typography";
 import Image from "next/image";
 import { useAuthStore } from "@/store/useAuthStore";
-import { HiOutlineAcademicCap } from "react-icons/hi";
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   const items: MenuItem[] =
     trainingSystemCode && trainingSystemCode !== "HE_5"
-      ? [{ title: "Phân hệ quân sự", path: "/commander", icon: HiOutlineAcademicCap }]
+      ? COHORT_COMMANDER_MENU
       : [...COMMANDER_MENU];
 
   return (
@@ -47,6 +46,17 @@ const Sidebar: React.FC = () => {
       <nav className="relative flex-1 overflow-y-auto py-4 px-4 no-scrollbar">
         <ul className="space-y-1.5">
           {items.map((item: MenuItem) => {
+            if (item.disabled) {
+              return (
+                <li key={item.title}>
+                  <div className="flex items-center gap-3.5 p-3.5 rounded-2xl text-neutral-400 dark:text-neutral-600 cursor-not-allowed" title="Chức năng đang được chuyển sang mô hình năm Hệ">
+                    <item.icon size={20} className="shrink-0" />
+                    <span className="text-sm font-semibold">{item.title}</span>
+                    <span className="ml-auto text-xs">Sắp có</span>
+                  </div>
+                </li>
+              );
+            }
             const isActive =
               pathname === item.path ||
               (item.path !== "/commander" && pathname.startsWith(item.path));

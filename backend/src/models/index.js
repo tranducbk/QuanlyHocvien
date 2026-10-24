@@ -57,6 +57,11 @@ db.trainingSystem = require('./TrainingSystem.js')(sequelize, DataTypes);
 db.trainingProgram = require('./TrainingProgram.js')(sequelize, DataTypes);
 db.curriculumVersion = require('./CurriculumVersion.js')(sequelize, DataTypes);
 db.trainingClass = require('./TrainingClass.js')(sequelize, DataTypes);
+db.trainingClassSemester = require('./trainingClassSemester.js')(sequelize, DataTypes);
+db.trainingClassSubject = require('./trainingClassSubject.js')(sequelize, DataTypes);
+db.trainingClassTimeTable = require('./trainingClassTimeTable.js')(sequelize, DataTypes);
+db.trainingClassAchievement = require('./trainingClassAchievement.js')(sequelize, DataTypes);
+db.trainingClassDutySchedule = require('./trainingClassDutySchedule.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
 db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
@@ -102,6 +107,22 @@ db.curriculumVersion.hasMany(db.trainingClass, { foreignKey: 'curriculumVersionI
 db.trainingClass.belongsTo(db.curriculumVersion, { foreignKey: 'curriculumVersionId', onDelete: 'RESTRICT' });
 db.user.hasMany(db.trainingClass, { as: 'assignedTrainingClasses', foreignKey: 'commanderId', onDelete: 'RESTRICT' });
 db.trainingClass.belongsTo(db.user, { as: 'commander', foreignKey: 'commanderId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.trainingClassSemester, { as: 'semesters', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSemester.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.trainingClassSubject, { as: 'subjects', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSubject.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSemester.hasMany(db.trainingClassSubject, { as: 'subjects', foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+db.trainingClassSubject.belongsTo(db.trainingClassSemester, { foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.trainingClassTimeTable, { as: 'timeTables', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassTimeTable.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSemester.hasOne(db.trainingClassTimeTable, { as: 'timeTable', foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+db.trainingClassTimeTable.belongsTo(db.trainingClassSemester, { foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+for (const recordModel of [db.trainingClassAchievement, db.trainingClassDutySchedule]) {
+  recordModel.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+  recordModel.belongsTo(db.user, { as: 'student', foreignKey: 'studentUserId', onDelete: 'RESTRICT' });
+}
+db.trainingClass.hasMany(db.profile, { as: 'students', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.profile.belongsTo(db.trainingClass, { as: 'trainingClass', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
 
 // --- Nhóm Quản lý Tổ chức & Cơ sở ---
 

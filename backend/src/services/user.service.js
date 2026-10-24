@@ -431,6 +431,13 @@ const update = async (id, data, requester) => {
   } else if (data.trainingSystemId && data.trainingSystemId !== record.trainingSystemId && record.Profile?.commanderId) {
     throw new BadRequestError('Phải gán lại Chỉ huy hoặc bỏ phân công khi chuyển hệ');
   }
+  if (record.Profile?.trainingClassId && (
+    (data.trainingSystemId !== undefined && data.trainingSystemId !== record.trainingSystemId) ||
+    (data.commanderId !== undefined && data.commanderId !== record.Profile.commanderId) ||
+    (data.role !== undefined && data.role !== record.role)
+  )) {
+    throw new BadRequestError('Học viên đã được xếp lớp; chưa hỗ trợ chuyển Hệ, Chỉ huy hoặc vai trò');
+  }
   if (data.password) {
     data.password = await bcrypt.hash(data.password, 10);
   }

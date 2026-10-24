@@ -39,6 +39,15 @@ export const ENDPOINTS = {
   TRAINING_CLASSES: {
     BASE: "/api/training-classes",
     OPTIONS: "/api/training-classes/options",
+    MINE: "/api/training-classes/mine",
+    STUDENTS: (id: string) => `/api/training-classes/${id}/students`,
+    SEMESTERS: (id: string) => `/api/training-classes/${id}/semesters`,
+    SUBJECTS: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/subjects`,
+    TIME_TABLE: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/time-table`,
+    ACHIEVEMENTS: (id: string) => `/api/training-classes/${id}/achievements`,
+    ACHIEVEMENT: (id: string, recordId: string) => `/api/training-classes/${id}/achievements/${recordId}`,
+    DUTY_SCHEDULES: (id: string) => `/api/training-classes/${id}/duty-schedules`,
+    DUTY_SCHEDULE: (id: string, recordId: string) => `/api/training-classes/${id}/duty-schedules/${recordId}`,
     COMMANDER: (id: string) => `/api/training-classes/${id}/commander`,
   },
   UNIVERSITIES: {

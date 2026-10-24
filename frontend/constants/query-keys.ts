@@ -5,6 +5,7 @@ export const QUERY_KEYS = {
   USERS: "users",
   TRAINING_PROGRAMS: "trainingPrograms",
   TRAINING_CLASSES: "trainingClasses",
+  COMMANDER_TRAINING_CLASSES: "commanderTrainingClasses",
   TRAINING_CLASS_OPTIONS: "trainingClassOptions",
   TRAINING_SYSTEMS: "trainingSystems",
   PROFILE: "profile",

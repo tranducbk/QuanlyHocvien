@@ -25,9 +25,9 @@ const listOptions = async () => {
   };
 };
 
-const list = async () => {
+const list = async (where) => {
   const [classes, systems, programs, versions, commanders, providers] = await Promise.all([
-    db.trainingClass.findAll({ order: [['createdAt', 'DESC']] }),
+    db.trainingClass.findAll({ where, order: [['createdAt', 'DESC']] }),
     db.trainingSystem.findAll({ attributes: ['id', 'code', 'name'] }),
     db.trainingProgram.findAll({ attributes: ['id', 'name'] }),
     db.curriculumVersion.findAll({ attributes: ['id', 'name', 'versionCode'] }),
@@ -51,6 +51,144 @@ const list = async () => {
     commanderName: commanderById.get(item.commanderId)?.Profile?.fullName || commanderById.get(item.commanderId)?.username || null,
     educationProviderName: providerById.get(item.educationProviderId)?.universityName || null,
   }));
+};
+
+const listMine = (user) => list({ commanderId: user.id, trainingSystemId: user.trainingSystemId });
+
+const getOwnedClass = async (id, commander) => {
+  const trainingClass = await db.trainingClass.findOne({
+    where: { id, trainingSystemId: commander.trainingSystemId, commanderId: commander.id },
+  });
+  if (!trainingClass) throw new NotFoundError('Không tìm thấy lớp được giao trong Hệ của bạn');
+  return trainingClass;
+};
+
+const listStudents = async (id, commander) => {
+  await getOwnedClass(id, commander);
+  const profiles = await db.profile.findAll({
+    where: { trainingClassId: id },
+    attributes: ['id', 'code', 'fullName', 'trainingClassId'],
+    include: [{ model: db.user, attributes: ['id', 'trainingSystemId', 'role'] }],
+    order: [['fullName', 'ASC']],
+  });
+  return profiles
+    .filter((profile) => profile.User?.role === 'STUDENT' && profile.User.trainingSystemId === commander.trainingSystemId)
+    .map((profile) => ({ id: profile.id, userId: profile.User.id, code: profile.code, fullName: profile.fullName }));
+};
+
+const assignStudent = async (id, studentCode, commander) => db.sequelize.transaction(async (transaction) => {
+  const trainingClass = await db.trainingClass.findOne({
+    where: { id, trainingSystemId: commander.trainingSystemId, commanderId: commander.id },
+    transaction,
+  });
+  if (!trainingClass) throw new NotFoundError('Không tìm thấy lớp được giao trong Hệ của bạn');
+  const student = await db.user.findOne({
+    where: { role: 'STUDENT', trainingSystemId: commander.trainingSystemId, isActive: true },
+    include: [{ model: db.profile, where: { code: studentCode }, required: true }],
+    transaction,
+  });
+  if (!student?.Profile || student.Profile.commanderId !== commander.id) {
+    throw new BadRequestError('Học viên phải thuộc cùng Hệ và do Chỉ huy này quản lý');
+  }
+  const profile = await db.profile.findByPk(student.Profile.id, { transaction, lock: transaction.LOCK.UPDATE });
+  if (profile.trainingClassId && profile.trainingClassId !== id) {
+    throw new BadRequestError('Học viên đã thuộc lớp khác; chưa hỗ trợ chuyển lớp');
+  }
+  if (!profile.trainingClassId) await profile.update({ trainingClassId: id }, { transaction });
+  return { id: profile.id, code: profile.code, fullName: profile.fullName, trainingClassId: id };
+});
+
+const listSemesters = async (id, commander) => {
+  await getOwnedClass(id, commander);
+  return db.trainingClassSemester.findAll({
+    where: { trainingClassId: id },
+    order: [['schoolYear', 'DESC'], ['code', 'ASC']],
+  });
+};
+
+const createSemester = async (id, data, commander) => {
+  await getOwnedClass(id, commander);
+  const schoolYear = data.schoolYear.trim();
+  if (await db.trainingClassSemester.findOne({ where: { trainingClassId: id, schoolYear, code: data.code } })) {
+    throw new BadRequestError('Học kỳ đã tồn tại trong lớp');
+  }
+  try {
+    return await db.trainingClassSemester.create({ trainingClassId: id, schoolYear, code: data.code });
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') throw new BadRequestError('Học kỳ đã tồn tại trong lớp');
+    throw error;
+  }
+};
+
+const getOwnedSemester = async (classId, semesterId, commander) => {
+  await getOwnedClass(classId, commander);
+  const semester = await db.trainingClassSemester.findOne({ where: { id: semesterId, trainingClassId: classId } });
+  if (!semester) throw new NotFoundError('Không tìm thấy học kỳ trong lớp được giao');
+  return semester;
+};
+
+const listSubjects = async (classId, semesterId, commander) => {
+  await getOwnedSemester(classId, semesterId, commander);
+  return db.trainingClassSubject.findAll({
+    where: { trainingClassId: classId, semesterId },
+    order: [['subjectCode', 'ASC']],
+  });
+};
+
+const createSubject = async (classId, semesterId, data, commander) => {
+  await getOwnedSemester(classId, semesterId, commander);
+  const subjectCode = data.subjectCode.trim();
+  const subjectName = data.subjectName.trim();
+  if (await db.trainingClassSubject.findOne({ where: { trainingClassId: classId, semesterId, subjectCode } })) {
+    throw new BadRequestError('Mã môn đã tồn tại trong học kỳ của lớp');
+  }
+  try {
+    return await db.trainingClassSubject.create({ trainingClassId: classId, semesterId, subjectCode, subjectName, credits: data.credits });
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') throw new BadRequestError('Mã môn đã tồn tại trong học kỳ của lớp');
+    throw error;
+  }
+};
+
+const getTimeTable = async (classId, semesterId, commander) => {
+  await getOwnedSemester(classId, semesterId, commander);
+  const record = await db.trainingClassTimeTable.findOne({ where: { trainingClassId: classId, semesterId } });
+  return record || { trainingClassId: classId, semesterId, schedules: [] };
+};
+
+const saveTimeTable = async (classId, semesterId, schedules, commander) => {
+  await getOwnedSemester(classId, semesterId, commander);
+  const normalized = schedules.map((item) => ({
+    subjectId: item.subjectId,
+    day: Number(item.day),
+    startTime: item.startTime,
+    endTime: item.endTime,
+    room: typeof item.room === 'string' ? item.room.trim() || null : null,
+    week: [...new Set((item.week || []).map(Number))].sort((a, b) => a - b),
+  }));
+  const subjectIds = [...new Set(normalized.map((item) => item.subjectId))];
+  const subjects = await db.trainingClassSubject.findAll({
+    where: { id: { [db.Sequelize.Op.in]: subjectIds }, trainingClassId: classId, semesterId },
+    attributes: ['id'],
+  });
+  if (subjects.length !== subjectIds.length) throw new BadRequestError('Môn học không thuộc học kỳ của lớp này');
+  for (let left = 0; left < normalized.length; left += 1) {
+    const first = normalized[left];
+    if (first.startTime >= first.endTime) throw new BadRequestError('Giờ bắt đầu phải trước giờ kết thúc');
+    for (let right = left + 1; right < normalized.length; right += 1) {
+      const second = normalized[right];
+      const sameWeek = !first.week?.length || !second.week?.length || first.week.some((week) => second.week.includes(week));
+      const overlap = first.startTime < second.endTime && second.startTime < first.endTime;
+      if (first.day === second.day && sameWeek && overlap) throw new BadRequestError('Trùng lịch học trong cùng ngày và tuần');
+    }
+  }
+  const where = { trainingClassId: classId, semesterId };
+  return db.sequelize.transaction(async (transaction) => {
+    const record = await db.trainingClassTimeTable.findOne({ where, transaction, lock: transaction.LOCK.UPDATE });
+    return record
+      ? record.update({ schedules: normalized }, { transaction })
+      : db.trainingClassTimeTable.create({ ...where, schedules: normalized }, { transaction });
+  });
 };
 
 const checkCommander = async (commanderId, trainingSystemId) => {
@@ -118,8 +256,11 @@ const assignCommander = async (id, commanderId) => {
   const trainingClass = await db.trainingClass.findByPk(id);
   if (!trainingClass) throw new NotFoundError('Không tìm thấy lớp đào tạo');
   await checkCommander(commanderId, trainingClass.trainingSystemId);
+  if (trainingClass.commanderId !== (commanderId || null) && await db.profile.count({ where: { trainingClassId: id } })) {
+    throw new BadRequestError('Lớp đã có học viên; chưa hỗ trợ đổi Chỉ huy của lớp');
+  }
   await trainingClass.update({ commanderId: commanderId || null });
   return trainingClass;
 };
 
-module.exports = { listOptions, list, create, assignCommander };
+module.exports = { listOptions, list, listMine, listStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };

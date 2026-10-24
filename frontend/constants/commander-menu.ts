@@ -17,7 +17,21 @@ export type MenuItem = {
   title: string;
   path: string;
   icon: React.ElementType;
+  disabled?: boolean;
 };
+
+export const COHORT_COMMANDER_MENU: MenuItem[] = [
+  { title: "Tổng quan", path: "/commander", icon: HiOutlineHome },
+  { title: "Quản lý lớp học", path: "/commander/training-classes", icon: HiOutlineViewGrid },
+  { title: "Hồ sơ học viên", path: "/commander/profiles", icon: HiOutlineIdentification },
+  { title: "Phê duyệt đề xuất", path: "/commander/military/approvals", icon: HiOutlineCheckCircle, disabled: true },
+  { title: "Quản lý thành tích", path: "/commander/achievements", icon: HiOutlineStop },
+  { title: "Lịch học", path: "/commander/time-tables", icon: HiOutlineCalendar },
+  { title: "Quản lý học tập", path: "/commander/military/academic-results", icon: HiOutlineAcademicCap, disabled: true },
+  { title: "Quản lý học kỳ", path: "/commander/semesters", icon: HiOutlineAcademicCap },
+  { title: "Môn học", path: "/commander/subjects", icon: HiOutlineAcademicCap },
+  { title: "Phân công lịch trực", path: "/commander/duty-schedules", icon: HiOutlineClipboardList },
+];
 
 export const COMMANDER_MENU = [
   {

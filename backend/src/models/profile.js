@@ -104,6 +104,10 @@ module.exports = (sequelize, DataTypes) => {
     militaryClassId: {
       type: DataTypes.UUID,
     },
+    trainingClassId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
     organizationId: {
       type: DataTypes.UUID,
     },

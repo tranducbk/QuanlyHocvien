@@ -74,11 +74,25 @@ export default function proxy(request: NextRequest) {
   if (
     role === ROLES.COMMANDER.ROLE &&
     isCohort &&
-    pathname.startsWith("/commander/")
+    pathname.startsWith("/commander/") &&
+    pathname !== "/commander/training-classes" &&
+    pathname !== "/commander/profiles" &&
+    pathname !== "/commander/semesters" &&
+    pathname !== "/commander/subjects" &&
+    pathname !== "/commander/time-tables" &&
+    pathname !== "/commander/achievements" &&
+    pathname !== "/commander/duty-schedules"
   ) {
     return NextResponse.redirect(
       new URL("/commander", request.url)
     );
+  }
+  if (
+    role === ROLES.COMMANDER.ROLE &&
+    isHe5 &&
+    pathname === "/commander/training-classes"
+  ) {
+    return NextResponse.redirect(new URL("/commander", request.url));
   }
   if (
     role === ROLES.COMMANDER.ROLE &&
