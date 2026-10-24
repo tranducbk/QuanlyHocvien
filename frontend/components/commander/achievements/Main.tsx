@@ -3,10 +3,8 @@
 import { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  HiOutlineDocumentDownload,
   HiOutlinePencil,
   HiOutlineTrash,
-  HiOutlineUpload,
 } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
@@ -25,7 +23,7 @@ import { downloadBlob, formatDateTime, textOrDash, formatSemesterYear } from "@/
 import AchievementForm from "./AchievementForm";
 import AchievementSkeleton from "./AchievementSkeleton";
 import ImportAchievementsForm from "./ImportAchievementsForm";
-import Button from "@/library/Button";
+import AchievementToolbarActions from "./AchievementToolbarActions";
 
 export default function Main() {
   const { openConfirm } = useConfirmStore();
@@ -302,27 +300,7 @@ export default function Main() {
             emptyText="Không tìm thấy thành tích phù hợp"
             onAdd={handleAdd}
             addLabel="Thêm thành tích"
-            actions={
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={handleImport}
-                  icon={HiOutlineUpload}
-                  className="flex h-auto items-center gap-2 rounded-xl border border-primary-600 bg-primary-600 px-4 py-2 text-[11px]! font-black! uppercase tracking-wider text-white shadow-lg shadow-primary-500/20 transition-all hover:border-primary-700 hover:bg-primary-700 active:scale-95"
-                >
-                  Nhập Excel
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => exportMutation.mutate()}
-                  isLoading={exportMutation.isPending}
-                  icon={HiOutlineDocumentDownload}
-                  className="flex h-auto items-center gap-2 rounded-xl border border-secondary-500 bg-secondary-500 px-4 py-2 text-[11px]! font-black! uppercase tracking-wider text-white shadow-lg shadow-secondary-500/20 transition-all hover:border-secondary-600 hover:bg-secondary-600 active:scale-95"
-                >
-                  Xuất báo cáo
-                </Button>
-              </div>
-            }
+            actions={<AchievementToolbarActions onImport={handleImport} onExport={() => exportMutation.mutate()} exporting={exportMutation.isPending} />}
           />
         </div>
       </div>

@@ -1,53 +1,78 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
+import Button from "@/library/Button";
+import Input from "@/library/Input";
 import PageContainer from "@/library/PageContainer";
+import Select from "@/library/Select";
+import Table from "@/library/Table";
+import type { FilterField } from "@/library/table/TableFilter";
+import useAssignedClassCollection from "@/hooks/useAssignedClassCollection";
+import useClientTableData from "@/hooks/useClientTableData";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { trainingClassService } from "@/services/training-classes";
-import { useAuthStore } from "@/store/useAuthStore";
+
+type Semester = { id: string; code: number; schoolYear: string };
+type Subject = { id: string; subjectCode: string; subjectName: string; credits: number };
+type SubjectRow = Subject & { classId: string; className: string; semesterId: string; semesterName: string };
+const normalize = (value: string) => value.normalize("NFD").toLowerCase().replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+const matches = (row: SubjectRow, filters: Record<string, unknown>) =>
+  (!filters.classId || row.classId === filters.classId)
+  && (!filters.semesterName || row.semesterName === filters.semesterName)
+  && (!filters.subject || normalize(`${row.subjectName} ${row.subjectCode}`).includes(normalize(String(filters.subject))));
+const sortValue = (row: SubjectRow, field: string) => row[field as keyof SubjectRow];
 
 export default function Subjects() {
-  const commanderId = useAuthStore((state) => state.user?.id);
+  const semesters = useAssignedClassCollection<Semester>("semesters", trainingClassService.getSemesters);
   const [classId, setClassId] = useState("");
   const [semesterId, setSemesterId] = useState("");
   const [subjectCode, setSubjectCode] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [credits, setCredits] = useState(0);
   const [message, setMessage] = useState("");
-  const queryClient = useQueryClient();
-  const classes = useQuery({ queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId], queryFn: trainingClassService.getMine, enabled: Boolean(commanderId) });
-  const semesters = useQuery({
-    queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, classId, "semesters"],
-    queryFn: () => trainingClassService.getSemesters(classId), enabled: Boolean(commanderId && classId),
-  });
-  const subjects = useQuery({
-    queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, classId, semesterId, "subjects"],
-    queryFn: () => trainingClassService.getSubjects(classId, semesterId), enabled: Boolean(commanderId && classId && semesterId),
-  });
+  const client = useQueryClient();
+  const pairs = semesters.rows.map((semester) => ({ ...semester, semesterName: `${semester.schoolYear} · HK ${semester.code}` }));
+  const subjectQueries = useQueries({ queries: pairs.map((semester) => ({
+    queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, semesters.commanderId, semester.classId, semester.id, "subjects"],
+    queryFn: () => trainingClassService.getSubjects(semester.classId, semester.id),
+  })) });
+  const rows: SubjectRow[] = pairs.flatMap((semester, index) => (subjectQueries[index]?.data?.data ?? []).map((subject) => ({
+    ...subject, classId: semester.classId, className: semester.className, semesterId: semester.id, semesterName: semester.semesterName,
+  })));
+  const table = useClientTableData(rows, matches, sortValue);
   const create = useMutation({
     mutationFn: () => trainingClassService.createSubject(classId, semesterId, { subjectCode: subjectCode.trim(), subjectName: subjectName.trim(), credits }),
     onSuccess: async () => {
       setSubjectCode(""); setSubjectName(""); setCredits(0); setMessage("Đã thêm môn học.");
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, classId, semesterId, "subjects"] });
+      await client.invalidateQueries({ queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, semesters.commanderId, classId, semesterId, "subjects"] });
     },
-    onError: () => setMessage("Không thêm được môn học. Kiểm tra mã môn đã tồn tại hoặc phạm vi lớp."),
+    onError: () => setMessage("Không thêm được môn học. Kiểm tra mã môn hoặc học kỳ."),
   });
+  const columns = useMemo<ColumnDef<SubjectRow>[]>(() => [
+    { id: "className", header: "Lớp", accessorKey: "className" },
+    { id: "semesterName", header: "Học kỳ", accessorKey: "semesterName" },
+    { id: "subjectCode", header: "Mã môn", accessorKey: "subjectCode" },
+    { id: "subjectName", header: "Tên môn", accessorKey: "subjectName" },
+    { id: "credits", header: "Tín chỉ", accessorKey: "credits" },
+  ], []);
+  const filterFields = useMemo<FilterField[]>(() => [
+    { type: "select", id: "classId", label: "Lớp", options: [{ value: "", label: "Tất cả lớp" }, ...semesters.assignedClasses.map((item) => ({ value: item.id, label: item.name }))] },
+    { type: "select", id: "semesterName", label: "Học kỳ", options: [{ value: "", label: "Tất cả học kỳ" }, ...[...new Set(pairs.map((item) => item.semesterName))].map((value) => ({ value, label: value }))] },
+    { type: "text", id: "subject", label: "Môn học", placeholder: "Tên hoặc mã môn..." },
+  ], [semesters.assignedClasses, pairs]);
 
-  return <PageContainer breadcrumb={[{ label: "Tổng quan", href: "/commander" }, { label: "Môn học" }]} title="Môn học" subtitle="Chỉ huy nhập môn của học kỳ trong lớp được giao." isError={classes.isError} onRetry={() => { void classes.refetch(); }}>
-    <div className="flex flex-wrap gap-3">
-      <label>Lớp<select className="mt-1 block rounded-lg border border-neutral-300 p-2 dark:bg-neutral-900" value={classId} onChange={(event) => { setClassId(event.target.value); setSemesterId(""); setMessage(""); }}><option value="">Chọn lớp</option>{(classes.data?.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name} ({item.code})</option>)}</select></label>
-      <label>Học kỳ<select className="mt-1 block rounded-lg border border-neutral-300 p-2 dark:bg-neutral-900" value={semesterId} onChange={(event) => { setSemesterId(event.target.value); setMessage(""); }} disabled={!classId}><option value="">Chọn học kỳ</option>{(semesters.data?.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.schoolYear} · Học kỳ {item.code}</option>)}</select></label>
-    </div>
-    {semesterId && <>
-      <form className="flex flex-wrap items-end gap-3" onSubmit={(event) => { event.preventDefault(); setMessage(""); create.mutate(); }}>
-        <label>Mã môn<input className="mt-1 block rounded-lg border border-neutral-300 p-2 dark:bg-neutral-900" value={subjectCode} onChange={(event) => setSubjectCode(event.target.value)} maxLength={50} required /></label>
-        <label>Tên môn<input className="mt-1 block rounded-lg border border-neutral-300 p-2 dark:bg-neutral-900" value={subjectName} onChange={(event) => setSubjectName(event.target.value)} maxLength={255} required /></label>
-        <label>Tín chỉ<input className="mt-1 block w-24 rounded-lg border border-neutral-300 p-2 dark:bg-neutral-900" type="number" min={0} max={100} value={credits} onChange={(event) => setCredits(Number(event.target.value))} required /></label>
-        <button className="rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white disabled:opacity-50" disabled={create.isPending}>Thêm môn</button>
-      </form>
-      {message && <p role="status">{message}</p>}
-      {subjects.isLoading ? <p>Đang tải môn học...</p> : subjects.isError ? <p className="text-red-600">Không tải được môn học.</p> : <ul className="space-y-2">{(subjects.data?.data ?? []).map((item) => <li key={item.id} className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-800">{item.subjectCode} · {item.subjectName} · {item.credits} tín chỉ</li>)}</ul>}
-    </>}
+  return <PageContainer breadcrumb={[{ label: "Tổng quan", href: "/commander" }, { label: "Môn học" }]} title="Môn học" subtitle="Danh sách môn của tất cả lớp trong phạm vi quản lý." isError={semesters.isError || subjectQueries.some((query) => query.isError)} onRetry={() => { semesters.refetch(); subjectQueries.forEach((query) => { void query.refetch(); }); }}>
+    <form className="grid gap-4 rounded-2xl border border-neutral-100 p-5 shadow-sm dark:border-neutral-800 md:grid-cols-3" onSubmit={(event) => { event.preventDefault(); setMessage(""); create.mutate(); }}>
+      <Select label="Lớp" placeholder="Chọn lớp để thêm môn" required value={classId} onChange={(value) => { setClassId(String(value)); setSemesterId(""); }} options={semesters.assignedClasses.map((item) => ({ value: item.id, label: `${item.name} (${item.code})` }))} />
+      <Select label="Học kỳ" placeholder="Chọn học kỳ" required value={semesterId} onChange={(value) => setSemesterId(String(value))} disabled={!classId} options={pairs.filter((item) => item.classId === classId).map((item) => ({ value: item.id, label: item.semesterName }))} />
+      <Input label="Mã môn" value={subjectCode} onChange={(event) => setSubjectCode(event.target.value)} maxLength={50} required />
+      <Input label="Tên môn" value={subjectName} onChange={(event) => setSubjectName(event.target.value)} maxLength={255} required />
+      <Input label="Tín chỉ" type="number" min={0} max={100} value={credits} onChange={(event) => setCredits(Number(event.target.value))} required />
+      <Button type="submit" isLoading={create.isPending} disabled={!semesterId}>Thêm môn</Button>
+    </form>
+    {message && <p role="status">{message}</p>}
+    {semesters.isLoading || subjectQueries.some((query) => query.isLoading) ? <p>Đang tải môn học...</p> : <div className="px-4"><Table data={table.data} columns={columns} pagination={table.pagination} onPaginationChange={table.setPagination} columnFilters={table.columnFilters} onColumnFiltersChange={table.onColumnFiltersChange} sorting={table.sorting} onSortingChange={table.onSortingChange} filterFields={filterFields} emptyText="Chưa có môn học phù hợp" /></div>}
   </PageContainer>;
 }

@@ -18,6 +18,7 @@ mountExternal('/commanders', require('./commanderReport.route'));
 router.use('/users', require('./user.route'));
 router.use('/training-programs', require('./trainingProgram.route'));
 router.use('/training-classes', require('./trainingClass.route'));
+router.use('/training-class-academic', require('./trainingClassAcademic.route'));
 mountExternal('/universities', require('./university.route'));
 mountExternal('/organizations', require('./organization.route'));
 mountExternal('/education-levels', require('./educationLevel.route'));

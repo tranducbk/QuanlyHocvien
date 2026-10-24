@@ -7,6 +7,7 @@ export const QUERY_KEYS = {
   TRAINING_CLASSES: "trainingClasses",
   COMMANDER_TRAINING_CLASSES: "commanderTrainingClasses",
   TRAINING_CLASS_OPTIONS: "trainingClassOptions",
+  TRAINING_CLASS_ACADEMIC: "trainingClassAcademic",
   TRAINING_SYSTEMS: "trainingSystems",
   PROFILE: "profile",
   STUDENT_PROFILES: "studentProfiles",

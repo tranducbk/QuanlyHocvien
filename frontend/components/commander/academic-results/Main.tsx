@@ -6,11 +6,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { HiOutlineDownload, HiOutlineEye } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import ActionButton from "@/library/ActionButton";
-import Badge, { BadgeVariant } from "@/library/Badge";
+import Badge from "@/library/Badge";
 import Button from "@/library/Button";
-import PageContainer from "@/library/PageContainer";
 import Table from "@/library/Table";
-import Tabs from "@/library/Tabs";
 import Typography from "@/library/Typography";
 import { FilterField } from "@/library/table/TableFilter";
 import useAppMutation from "@/hooks/useAppMutation";
@@ -25,62 +23,10 @@ import {
 } from "@/types/student-academic";
 import { downloadBlob, formatScore, textOrDash } from "@/utils/fn-common";
 import StudentSemestersTable from "./StudentSemestersTable";
+import AcademicResultsLayout from "./AcademicResultsLayout";
+import { getAcademicClassification, getClassificationVariant } from "./classification";
 
 type ResultView = "semester" | "year";
-
-const ACADEMIC_CLASSIFICATIONS = [
-  "XUẤT SẮC",
-  "GIỎI",
-  "KHÁ",
-  "TRUNG BÌNH",
-  "YẾU",
-  "KÉM",
-];
-
-const getAcademicClassification = (result: YearlyResult) => {
-  const storedClassification = result.academicStatus?.trim().toUpperCase();
-  if (
-    storedClassification &&
-    ACADEMIC_CLASSIFICATIONS.includes(storedClassification)
-  ) {
-    return storedClassification;
-  }
-
-  if (
-    result.averageGrade10 === null ||
-    result.averageGrade10 === undefined
-  ) {
-    return null;
-  }
-
-  const gpa10 = Number(result.averageGrade10);
-  if (!Number.isFinite(gpa10)) return null;
-  if (gpa10 >= 9) return "XUẤT SẮC";
-  if (gpa10 >= 8) return "GIỎI";
-  if (gpa10 >= 6.5) return "KHÁ";
-  if (gpa10 >= 5) return "TRUNG BÌNH";
-  return "YẾU";
-};
-
-const getClassificationVariant = (
-  classification: string | null
-): BadgeVariant => {
-  switch (classification) {
-    case "XUẤT SẮC":
-      return "primary";
-    case "GIỎI":
-      return "success";
-    case "KHÁ":
-      return "secondary";
-    case "TRUNG BÌNH":
-      return "warning";
-    case "YẾU":
-    case "KÉM":
-      return "error";
-    default:
-      return "neutral";
-  }
-};
 
 export default function Main() {
   const router = useRouter();
@@ -280,7 +226,7 @@ export default function Main() {
         header: "Xếp loại",
         accessorKey: "academicStatus",
         cell: (info) => {
-          const classification = getAcademicClassification(info.row.original);
+          const classification = getAcademicClassification(info.row.original.averageGrade10, info.row.original.academicStatus);
           return (
             <Badge
               variant={getClassificationVariant(classification)}
@@ -453,27 +399,16 @@ export default function Main() {
   const activeQuery = activeView === "semester" ? semesterQuery : yearlyQuery;
 
   return (
-    <PageContainer
-      breadcrumb={[
-        { label: "Tổng quan", href: "/commander" },
-        { label: "Quản lý học tập" },
+    <AcademicResultsLayout
+      activeTab={activeView}
+      onChange={(id) => setActiveView(id as ResultView)}
+      tabs={[
+        { id: "semester", label: "Theo học kỳ", content: semesterTable },
+        { id: "year", label: "Theo năm học", content: yearlyTable },
       ]}
-      title="Quản lý học tập"
       isLoading={activeQuery.isLoading}
       isError={activeQuery.isError}
       onRetry={activeQuery.refetch}
-    >
-      <div className="bg-white px-4 dark:bg-neutral-950">
-        <Tabs
-          tabs={[
-            { id: "semester", label: "Theo học kỳ", content: semesterTable },
-            { id: "year", label: "Theo năm học", content: yearlyTable },
-          ]}
-          activeTab={activeView}
-          onChange={(id) => setActiveView(id as ResultView)}
-          variant="pills"
-        />
-      </div>
-    </PageContainer>
+    />
   );
 }

@@ -24,6 +24,7 @@ import { achievementService } from "@/services/achievements";
 import { semesterService } from "@/services/semesters";
 import { userService } from "@/services/user";
 import { Achievement } from "@/types/achievements";
+import { trainingClassRecordsService, type AchievementInput, type ClassAchievement } from "@/services/training-class-records";
 import {
   createAchievementSchema,
   CreateAchievementFormValues,
@@ -32,15 +33,23 @@ import {
 
 interface AchievementFormProps {
   achievement?: Achievement;
+  classAchievement?: ClassAchievement;
+  classContext?: {
+    classId: string;
+    commanderId?: string;
+    students: { userId: string; code: string; fullName: string }[];
+    semesters: { id: string; code: number; schoolYear: string }[];
+  };
 }
 
 const parseNumber = (value: string) => (value === "" ? null : Number(value));
 
-export default function AchievementForm({ achievement }: AchievementFormProps) {
+export default function AchievementForm({ achievement, classAchievement, classContext }: AchievementFormProps) {
   const { closeModal } = useModalStore();
   const [studentSearch, setStudentSearch] = useState("");
+  const [category, setCategory] = useState<ClassAchievement["category"]>(classAchievement?.category ?? "AWARD");
   const debouncedSearch = useDebounce(studentSearch);
-  const isUpdate = Boolean(achievement);
+  const isUpdate = Boolean(achievement || classAchievement);
 
   const {
     data: studentsData,
@@ -58,6 +67,7 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
         fullName: debouncedSearch || undefined,
       }),
     initialPageParam: DEFAULT_PAGE.PAGE_INDEX + 1,
+    enabled: !classContext,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.pagination;
       return page < totalPages ? page + 1 : undefined;
@@ -66,6 +76,7 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
   });
 
   const studentOptions = useMemo(() => {
+    if (classContext) return classContext.students.map((student) => ({ value: student.userId, label: `${student.fullName} - ${student.code}` }));
     const options =
       studentsData?.map((student) => ({
         value: student.id,
@@ -87,7 +98,7 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
     }
 
     return options;
-  }, [achievement, studentsData]);
+  }, [achievement, studentsData, classContext]);
 
   const {
     register,
@@ -100,14 +111,14 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
       isUpdate ? updateAchievementSchema : createAchievementSchema
     ),
     defaultValues: {
-      userId: achievement?.userId || "",
-      title: achievement?.title || "",
-      award: achievement?.award || "",
-      semester: achievement?.semester || "",
-      schoolYear: achievement?.schoolYear || "",
-      year: achievement?.year ?? null,
-      content: achievement?.content || "",
-      description: achievement?.description || "",
+      userId: classAchievement?.studentUserId || achievement?.userId || "",
+      title: classAchievement?.title || achievement?.title || "",
+      award: classAchievement?.award || achievement?.award || "",
+      semester: classAchievement?.semester || achievement?.semester || "",
+      schoolYear: classAchievement?.schoolYear || achievement?.schoolYear || "",
+      year: classAchievement?.year ?? achievement?.year ?? null,
+      content: classAchievement?.content || achievement?.content || "",
+      description: classAchievement?.description || achievement?.description || "",
     },
   });
 
@@ -117,6 +128,7 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
     useQuery({
       queryKey: [QUERY_KEYS.SEMESTERS, "school-years"],
       queryFn: () => semesterService.getSchoolYears({ fetchAll: true }),
+      enabled: !classContext,
     });
 
   const { data: semestersResponse, isLoading: isLoadingSemesters } = useQuery({
@@ -126,36 +138,57 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
         fetchAll: true,
         schoolYear: selectedSchoolYear || "",
       }),
-    enabled: Boolean(selectedSchoolYear),
+    enabled: !classContext && Boolean(selectedSchoolYear),
   });
 
-  const schoolYearOptions = useMemo(
-    () =>
-      (schoolYearsResponse?.data || []).map((item) => ({
-        value: item.schoolYear,
-        label: item.schoolYear,
-      })),
-    [schoolYearsResponse]
-  );
+  const schoolYearOptions = useMemo(() => {
+    if (classContext) {
+      return [...new Set(classContext.semesters.map((item) => item.schoolYear))]
+        .map((schoolYear) => ({ value: schoolYear, label: schoolYear }));
+    }
+    return (schoolYearsResponse?.data || []).map((item) => ({
+      value: item.schoolYear,
+      label: item.schoolYear,
+    }));
+  }, [schoolYearsResponse, classContext]);
 
-  const semesterOptions = useMemo(
-    () =>
-      (semestersResponse?.data || []).map((item) => ({
-        value: String(item.code),
-        label: `Học kỳ ${item.code}`,
-      })),
-    [semestersResponse]
-  );
+  const semesterOptions = useMemo(() => {
+    const semesters = classContext
+      ? classContext.semesters.filter((item) => item.schoolYear === selectedSchoolYear)
+      : semestersResponse?.data || [];
+    return semesters.map((item) => ({
+      value: String(item.code),
+      label: `Học kỳ ${item.code}`,
+    }));
+  }, [semestersResponse, classContext, selectedSchoolYear]);
 
-  const mutation = useAppMutation({
+  const mutation = useAppMutation<unknown, CreateAchievementFormValues>({
     mutationKey: isUpdate
       ? MUTATION_KEYS.UPDATE_ACHIEVEMENT
       : MUTATION_KEYS.CREATE_ACHIEVEMENT,
-    mutationFn: (data: CreateAchievementFormValues) =>
-      isUpdate && achievement
+    mutationFn: (data: CreateAchievementFormValues) => {
+      if (classContext) {
+        const input: AchievementInput = {
+          category,
+          title: data.title.trim(),
+          award: data.award || null,
+          schoolYear: data.schoolYear || null,
+          semester: data.semester || null,
+          year: data.year ?? null,
+          content: data.content || null,
+          description: data.description || null,
+        };
+        return classAchievement
+          ? trainingClassRecordsService.updateAchievement(classContext.classId, classAchievement.id, input)
+          : trainingClassRecordsService.createAchievement(classContext.classId, { ...input, studentUserId: data.userId });
+      }
+      return isUpdate && achievement
         ? achievementService.updateAchievement(achievement.id, data)
-        : achievementService.createAchievement(data),
-    invalidateQueryKey: [QUERY_KEYS.ACHIEVEMENTS],
+        : achievementService.createAchievement(data);
+    },
+    invalidateQueryKey: classContext
+      ? [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, classContext.commanderId, classContext.classId, "achievements"]
+      : [QUERY_KEYS.ACHIEVEMENTS],
     successMessage: isUpdate
       ? "Cập nhật thành tích thành công!"
       : "Thêm thành tích thành công!",
@@ -182,22 +215,36 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
               value={value}
               onChange={(selectedValue) => onChange(selectedValue)}
               options={studentOptions}
-              hasNextPage={hasNextStudents}
-              isFetchingNextPage={isFetchingNextStudents}
-              onLoadMore={fetchNextStudents}
-              isLoading={isLoadingStudents}
+              hasNextPage={classContext ? false : hasNextStudents}
+              isFetchingNextPage={classContext ? false : isFetchingNextStudents}
+              onLoadMore={classContext ? undefined : fetchNextStudents}
+              isLoading={classContext ? false : isLoadingStudents}
+              disabled={Boolean(classAchievement)}
               error={errors.userId?.message}
               emptyText="Không tìm thấy học viên"
               required
               filter={{
                 enabled: true,
-                mode: "server",
-                onChange: setStudentSearch,
+                mode: classContext ? "client" : "server",
+                onChange: classContext ? undefined : setStudentSearch,
                 placeholder: "Tìm theo họ tên học viên...",
               }}
             />
           )}
         />
+
+        {classContext && (
+          <Select
+            label="Loại thành tích"
+            value={category}
+            onChange={(value) => setCategory(String(value) as ClassAchievement["category"])}
+            options={[
+              { value: "AWARD", label: "Khen thưởng" },
+              { value: "SCIENTIFIC_TOPIC", label: "Đề tài khoa học" },
+              { value: "SCIENTIFIC_INITIATIVE", label: "Sáng kiến khoa học" },
+            ]}
+          />
+        )}
 
         <Input
           label="Tên thành tích"
@@ -306,7 +353,7 @@ export default function AchievementForm({ achievement }: AchievementFormProps) {
           <Button
             variant="primary"
             type="submit"
-            disabled={isUpdate && !isDirty}
+            disabled={isUpdate && !isDirty && (!classContext || category === classAchievement?.category)}
             isLoading={mutation.isPending}
           >
             {isUpdate ? "Cập nhật" : "Thêm thành tích"}

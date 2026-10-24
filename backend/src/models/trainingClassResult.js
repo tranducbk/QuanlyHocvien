@@ -1,0 +1,21 @@
+module.exports = (sequelize, DataTypes) => sequelize.define('TrainingClassResult', {
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+  trainingClassId: { type: DataTypes.UUID, allowNull: false },
+  semesterId: { type: DataTypes.UUID, allowNull: false },
+  subjectId: { type: DataTypes.UUID, allowNull: false },
+  profileId: { type: DataTypes.UUID, allowNull: false },
+  attemptNo: { type: DataTypes.INTEGER, allowNull: false },
+  midtermScore: { type: DataTypes.DECIMAL(4, 2), allowNull: false },
+  finalScore: { type: DataTypes.DECIMAL(4, 2), allowNull: false },
+  midtermWeight: { type: DataTypes.DECIMAL(3, 2), allowNull: false },
+  finalWeight: { type: DataTypes.DECIMAL(3, 2), allowNull: false },
+  totalScore: { type: DataTypes.DECIMAL(4, 2), allowNull: false },
+  classification: { type: DataTypes.STRING(20), allowNull: false },
+  enteredBy: { type: DataTypes.UUID, allowNull: false },
+}, {
+  tableName: 'training_class_results',
+  timestamps: true,
+  updatedAt: false,
+  underscored: true,
+  indexes: [{ unique: true, fields: ['profile_id', 'subject_id', 'attempt_no'] }],
+});

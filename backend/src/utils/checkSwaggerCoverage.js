@@ -12,6 +12,7 @@ const routeMounts = {
   'user.route.js': '/users',
   'trainingProgram.route.js': '/training-programs',
   'trainingClass.route.js': '/training-classes',
+  'trainingClassAcademic.route.js': '/training-class-academic',
   'university.route.js': '/universities',
   'organization.route.js': '/organizations',
   'educationLevel.route.js': '/education-levels',

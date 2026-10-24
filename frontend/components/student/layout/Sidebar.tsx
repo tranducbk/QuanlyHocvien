@@ -13,7 +13,11 @@ const Sidebar: React.FC = () => {
   const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
   const items =
     trainingSystemCode && trainingSystemCode !== "HE_5"
-      ? [{ title: "Phân hệ quân sự", path: "/student/military/unavailable", icon: STUDENT_MENU[2].icon }]
+      ? [
+          { title: "Tổng quan", path: "/student/military/unavailable", icon: STUDENT_MENU[0].icon },
+          { title: "Thông tin cá nhân", path: "/student/profile", icon: STUDENT_MENU[1].icon },
+          { title: "Kết quả học tập", path: "/student/military/results", icon: STUDENT_MENU[2].icon },
+        ]
       : STUDENT_MENU;
 
   return (

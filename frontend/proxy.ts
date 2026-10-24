@@ -81,7 +81,9 @@ export default function proxy(request: NextRequest) {
     pathname !== "/commander/subjects" &&
     pathname !== "/commander/time-tables" &&
     pathname !== "/commander/achievements" &&
-    pathname !== "/commander/duty-schedules"
+    pathname !== "/commander/duty-schedules" &&
+    pathname !== "/commander/academic-results" &&
+    pathname !== "/commander/approvals"
   ) {
     return NextResponse.redirect(
       new URL("/commander", request.url)
@@ -112,7 +114,8 @@ export default function proxy(request: NextRequest) {
     role === ROLES.STUDENT.ROLE &&
     isCohort &&
     pathname.startsWith("/student/military/") &&
-    pathname !== "/student/military/unavailable"
+    pathname !== "/student/military/unavailable" &&
+    pathname !== "/student/military/results"
   ) {
     return NextResponse.redirect(new URL("/student/military/unavailable", request.url));
   }

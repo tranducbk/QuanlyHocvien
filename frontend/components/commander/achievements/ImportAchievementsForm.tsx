@@ -10,6 +10,7 @@ import Typography from "@/library/Typography";
 import useAppMutation from "@/hooks/useAppMutation";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { achievementService } from "@/services/achievements";
+import { trainingClassRecordsService } from "@/services/training-class-records";
 import { useModalStore } from "@/store/useModalStore";
 import {
   batchExcelFileSchema,
@@ -17,7 +18,7 @@ import {
 } from "@/utils/validations";
 import { downloadBlob } from "@/utils/fn-common";
 
-export default function ImportAchievementsForm() {
+export default function ImportAchievementsForm({ classContext }: { classContext?: { classId: string; commanderId?: string } }) {
   const { closeModal } = useModalStore();
   const {
     control,
@@ -33,17 +34,22 @@ export default function ImportAchievementsForm() {
 
   const templateMutation = useAppMutation({
     mutationKey: [QUERY_KEYS.ACHIEVEMENTS, "template"],
-    mutationFn: achievementService.downloadImportTemplate,
+    mutationFn: () => classContext
+      ? trainingClassRecordsService.downloadAchievementTemplate(classContext.classId)
+      : achievementService.downloadImportTemplate(),
     successMessage: "Tải file mẫu thành công!",
     errorMessage: "Không thể tải file mẫu!",
-    onSuccess: (blob) => downloadBlob(blob, "mau-nhap-thanh-tich.xlsx"),
+    onSuccess: (blob) => downloadBlob(blob, classContext ? "mau-thanh-tich-lop.xlsx" : "mau-nhap-thanh-tich.xlsx"),
   });
 
-  const importMutation = useAppMutation({
+  const importMutation = useAppMutation<unknown, BatchExcelFileValues>({
     mutationKey: [QUERY_KEYS.ACHIEVEMENTS, "import"],
-    mutationFn: (data: BatchExcelFileValues) =>
-      achievementService.importAchievements(data.file),
-    invalidateQueryKey: [QUERY_KEYS.ACHIEVEMENTS],
+    mutationFn: (data: BatchExcelFileValues) => classContext
+      ? trainingClassRecordsService.importAchievements(classContext.classId, data.file)
+      : achievementService.importAchievements(data.file),
+    invalidateQueryKey: classContext
+      ? [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, classContext.commanderId, classContext.classId, "achievements"]
+      : [QUERY_KEYS.ACHIEVEMENTS],
     successMessage: "Nhập thành tích từ Excel thành công!",
     errorMessage: "Nhập thành tích từ Excel thất bại!",
     onSuccess: () => closeModal(),
@@ -87,7 +93,7 @@ export default function ImportAchievementsForm() {
           <FileUpload
             label="File Excel thành tích"
             value={field.value}
-            accept=".xlsx,.xls"
+            accept={classContext ? ".xlsx" : ".xlsx,.xls"}
             maxSizeMB={5}
             placeholder="Chọn file Excel để gửi lên hệ thống"
             error={errors.file?.message}

@@ -62,6 +62,8 @@ db.trainingClassSubject = require('./trainingClassSubject.js')(sequelize, DataTy
 db.trainingClassTimeTable = require('./trainingClassTimeTable.js')(sequelize, DataTypes);
 db.trainingClassAchievement = require('./trainingClassAchievement.js')(sequelize, DataTypes);
 db.trainingClassDutySchedule = require('./trainingClassDutySchedule.js')(sequelize, DataTypes);
+db.trainingClassResult = require('./trainingClassResult.js')(sequelize, DataTypes);
+db.trainingClassGradeProposal = require('./trainingClassGradeProposal.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
 db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
@@ -121,6 +123,14 @@ for (const recordModel of [db.trainingClassAchievement, db.trainingClassDutySche
   recordModel.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
   recordModel.belongsTo(db.user, { as: 'student', foreignKey: 'studentUserId', onDelete: 'RESTRICT' });
 }
+for (const gradeModel of [db.trainingClassResult, db.trainingClassGradeProposal]) {
+  gradeModel.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+  gradeModel.belongsTo(db.trainingClassSemester, { foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+  gradeModel.belongsTo(db.trainingClassSubject, { foreignKey: 'subjectId', onDelete: 'RESTRICT' });
+  gradeModel.belongsTo(db.profile, { foreignKey: 'profileId', onDelete: 'RESTRICT' });
+}
+db.trainingClassGradeProposal.belongsTo(db.user, { as: 'student', foreignKey: 'studentUserId', onDelete: 'RESTRICT' });
+db.trainingClassGradeProposal.belongsTo(db.user, { as: 'reviewer', foreignKey: 'reviewerId', onDelete: 'RESTRICT' });
 db.trainingClass.hasMany(db.profile, { as: 'students', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
 db.profile.belongsTo(db.trainingClass, { as: 'trainingClass', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
 

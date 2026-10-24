@@ -78,6 +78,10 @@ Chỉ huy nhập điểm; Học viên xem điểm chính thức.
 
 **Cần thay đổi**: API kết quả môn/học kỳ hiện chỉ còn tạo/nhập/đọc cho Chỉ huy; API sửa/xóa điểm và duyệt đề nghị chỉnh điểm cũ đã được gỡ theo bất biến hiện hành. Service legacy còn hàm sửa/xóa chưa được dọn. Truy vấn kết quả môn/học kỳ/năm và báo cáo Hệ 5 đã được kiểm tra với dữ liệu trên PostgreSQL test: chỉ Chỉ huy được giao đọc được. Route kết quả quân sự legacy tạm trả 403 cho đến khi dữ liệu được phân tách theo hệ trong Phase 005B/005C.
 
+API và giao diện kết quả/đề xuất mới cho Hệ 1/3/4/7 đã có trong source, gắn với `training_classes` và công thức giữa kỳ 50%, cuối kỳ 50%. Cần chạy `migrateTrainingClassResults.js` và kiểm tra tích hợp trên PostgreSQL trước khi coi là hoàn thành ở runtime; route quân sự legacy vẫn đóng.
+
+Bảng tổng hợp học kỳ/năm cho Hệ 1/3/4/7 tính từ điểm môn chính thức theo trung bình đều các môn và có xuất Excel năm học. Giao diện dùng chung mẫu bảng, bộ lọc và cột hiển thị. Cần kiểm tra runtime trên dữ liệu thật trước khi xác nhận hoàn thành.
+
 ## F06 - Lịch học và lịch cắt cơm
 
 ### Người dùng
@@ -119,6 +123,8 @@ Quản lý thành tích, hồ sơ thành tích, đề tài và sáng kiến.
 ### Trạng thái
 
 **Có trong source**.
+
+Giao diện thành tích Hệ 1/3/4/7 đã bổ sung Năm học, Học kỳ, Nội dung, bộ lọc và nhập/xuất Excel theo lớp được giao. Cần chạy `migrateTrainingClassAchievementDetails.js --apply` trên database đúng và kiểm tra runtime trước khi xác nhận hoàn thành.
 
 ## F09 - Học kỳ
 
