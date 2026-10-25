@@ -1,4 +1,4 @@
-import Main from "@/components/student/tuition/Main";
+import Main from "@/components/tuition-and-meals/student/tuition/Main";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Học phí | Cổng học viên",

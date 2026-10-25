@@ -149,7 +149,7 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
     },
     security: [{ BearerAuth: [] }],
   },
-  apis: [path.join(__dirname, '../routes/*.route.js').replace(/\\/g, '/')],
+  apis: [path.join(__dirname, '../routes/**/*.route.js').replace(/\\/g, '/')],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

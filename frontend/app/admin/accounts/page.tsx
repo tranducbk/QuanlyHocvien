@@ -1,5 +1,5 @@
 import { HydrationBoundary, dehydrate, QueryClient } from "@tanstack/react-query";
-import Main from "@/components/admin/accounts/Main";
+import Main from "@/components/accounts/admin/Main";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { DEFAULT_PAGE } from "@/constants/constants";
 import apiServer from "@/services/axios-server";

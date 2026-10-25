@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import Main from "@/components/commander/approvals/Main";
-import CohortMain from "@/components/commander/training-classes/GradeApprovals";
+import Main from "@/components/academic-results/commander/approvals/Main";
+import CohortMain from "@/components/training-program/commander/training-classes/GradeApprovals";
 import { cookies } from "next/headers";
 
 export const metadata: Metadata = {

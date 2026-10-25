@@ -11,14 +11,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import QueryProvider from "@/components/providers/QueryProvider";
-import ThemeProvider from "@/components/providers/ThemeProvider";
-import MotionProvider from "@/components/providers/MotionProvider";
-import OfflineDetector from "@/components/providers/OfflineDetector";
-import Loading from "@/components/modals/Loading";
-import Toast from "@/components/modals/Toast";
-import Modal from "@/components/modals/Modal";
-import ConfirmModal from "@/components/modals/Confirm";
+import QueryProvider from "@/components/shared/providers/QueryProvider";
+import ThemeProvider from "@/components/shared/providers/ThemeProvider";
+import MotionProvider from "@/components/shared/providers/MotionProvider";
+import OfflineDetector from "@/components/shared/providers/OfflineDetector";
+import Loading from "@/components/shared/modals/Loading";
+import Toast from "@/components/shared/modals/Toast";
+import Modal from "@/components/shared/modals/Modal";
+import ConfirmModal from "@/components/shared/modals/Confirm";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { THEMES } from "@/constants/constants";

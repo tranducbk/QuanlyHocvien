@@ -1,4 +1,4 @@
-import Main from "@/components/commander/academic-results/detail/Main";
+import Main from "@/components/academic-results/commander/detail/Main";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

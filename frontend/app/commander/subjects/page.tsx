@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Subjects from "@/components/commander/training-classes/Subjects";
+import Subjects from "@/components/training-program/commander/training-classes/Subjects";
 
 export default async function CommanderSubjectsPage() {
   const code = (await cookies()).get("trainingSystemCode")?.value;

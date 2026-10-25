@@ -1,5 +1,5 @@
-import Main from "@/components/commander/achievements/Main";
-import CohortMain from "@/components/commander/training-classes/Achievements";
+import Main from "@/components/achievements/commander/Main";
+import CohortMain from "@/components/training-program/commander/training-classes/Achievements";
 import { cookies } from "next/headers";
 
 export default async function CommanderAchievementsPage() {

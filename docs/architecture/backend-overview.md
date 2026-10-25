@@ -40,11 +40,13 @@ route
 → PostgreSQL
 ```
 
-- Routes: `backend/src/routes`.
-- Controllers: `backend/src/controllers`.
-- Services: `backend/src/services`.
-- Models và quan hệ: `backend/src/models`, tập trung tại `models/index.js`.
-- Validations: `backend/src/validations`.
+- Routes: `backend/src/routes`, nhóm theo nghiệp vụ.
+- Controllers: `backend/src/controllers`, nhóm theo nghiệp vụ.
+- Services: `backend/src/services`, nhóm theo nghiệp vụ.
+- Models và quan hệ: `backend/src/models`, nhóm model theo nghiệp vụ; đăng ký model và associations tập trung tại `models/index.js`.
+- Validations: `backend/src/validations`, nhóm theo nghiệp vụ.
+
+Các nhóm chính gồm `authentication`, `accounts`, `profiles`, `training-program`, `academic-results`, `academic-years`, `schedules`, `achievements`, `tuition-and-meals`, `scientific-research`, `notification`, `reports` và `military-legacy`. File dùng chung/hạ tầng như route registry, file upload, middleware và model registry giữ ở cấp thư mục lớp tương ứng.
 - Middleware: `backend/src/middlewares`.
 - Helper response/error: `backend/src/utils/response.js`, `apiError.js`.
 

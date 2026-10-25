@@ -24,7 +24,7 @@ if (
 
 const db = require('../src/models');
 const app = require('../src/app');
-const jwtService = require('../src/services/jwt.service');
+const jwtService = require('../src/services/authentication/jwt.service.js');
 
 const getUser = async (username) => {
   const user = await db.user.findOne({ where: { username } });

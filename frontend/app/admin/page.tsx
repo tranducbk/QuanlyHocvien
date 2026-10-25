@@ -1,4 +1,4 @@
-import Main from "@/components/admin/dashboard/Main";
+import Main from "@/components/reports/admin/Main";
 
 export default function AdminDashboardPage() {
   return <Main />;

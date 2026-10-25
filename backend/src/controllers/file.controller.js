@@ -1,12 +1,12 @@
 const asyncHandler = require('express-async-handler');
-const service = require('../services/fileStorage.service');
+const service = require('../services/fileStorage.service.js');
 
 const getFile = asyncHandler(async (req, res) => {
   const bucket = req.params.bucket;
   const objectName = req.params[0];
 
   if (bucket === 'evidence') {
-    const JwtService = require('../services/jwt.service');
+    const JwtService = require('../services/authentication/jwt.service.js');
     const db = require('../models');
     const { BadTokenError, ForbiddenError } = require('../utils/apiError');
     

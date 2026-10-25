@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import PageContainer from "@/library/PageContainer";
 import { QUERY_KEYS } from "@/constants/query-keys";
-import { militaryAcademicService } from "@/services/military-academic";
+import { militaryAcademicService } from "@/services/military-legacy/military-academic";
 
 const dayLabel = (day: number) => day === 7 ? "Chủ nhật" : `Thứ ${day + 1}`;
 

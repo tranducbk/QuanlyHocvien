@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ENDPOINTS } from "@/constants/endpoints";
-import { LoginResponse } from "@/types/auth";
+import { LoginResponse } from "@/types/authentication/auth";
 import { isTokenExpired } from "@/utils/fn-common";
 import { AUTH_ROUTES } from "@/constants/constants";
 

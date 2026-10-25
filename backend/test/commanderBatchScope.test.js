@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const db = require('../src/models');
-const service = require('../src/services/user.service');
+const service = require('../src/services/accounts/user.service.js');
 
 const commander = { id: 'commander-1', role: 'COMMANDER', trainingSystemId: 'he-5' };
 

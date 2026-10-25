@@ -1,5 +1,5 @@
-import Main from "@/components/commander/duty-schedules/Main";
-import CohortMain from "@/components/commander/training-classes/DutySchedules";
+import Main from "@/components/schedules/commander/duty-schedules/Main";
+import CohortMain from "@/components/training-program/commander/training-classes/DutySchedules";
 import { cookies } from "next/headers";
 import { Metadata } from "next";
 

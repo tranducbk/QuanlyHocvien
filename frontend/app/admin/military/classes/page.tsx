@@ -4,9 +4,9 @@ import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageContainer from "@/library/PageContainer";
 import { QUERY_KEYS } from "@/constants/query-keys";
-import { militaryClassService } from "@/services/military-classes";
+import { militaryClassService } from "@/services/military-legacy/military-classes";
 import { useConfirmStore } from "@/store/useConfirmStore";
-import { MilitaryClass } from "@/types/military-classes";
+import { MilitaryClass } from "@/types/military-legacy/military-classes";
 
 export default function AdminMilitaryClassesPage() {
   const client = useQueryClient();

@@ -1,4 +1,4 @@
-import type { FamilyMember, ForeignRelation } from "@/types/user";
+import type { FamilyMember, ForeignRelation } from "@/types/accounts/user";
 import { z } from "zod";
 
 export const MAX_PROFILE_RELATION_RECORDS = 30;

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageContainer from "@/library/PageContainer";
 import { QUERY_KEYS } from "@/constants/query-keys";
-import { trainingClassAcademicService as api } from "@/services/training-class-academic";
+import { trainingClassAcademicService as api } from "@/services/academic-results/training-class-academic";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const statusLabel = { PENDING: "Đang chờ", APPROVED: "Đã duyệt", REJECTED: "Đã từ chối" };

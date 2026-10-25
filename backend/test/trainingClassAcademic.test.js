@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { calculate, summarize } = require('../src/services/trainingClassAcademic.service');
+const { calculate, summarize } = require('../src/services/training-program/trainingClassAcademic.service.js');
 
 test('giữa kỳ và cuối kỳ mỗi phần chiếm 50%, tổng làm tròn hai chữ số', () => {
   assert.deepEqual(calculate({ midtermScore: 6.5, finalScore: 7.25 }), {

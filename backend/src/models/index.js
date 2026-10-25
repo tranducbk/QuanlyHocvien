@@ -36,58 +36,58 @@ db.sequelize = sequelize;
 // ==========================
 
 // Nhóm Quản lý Tổ chức & Cơ sở
-db.university = require('./university.js')(sequelize, DataTypes);
-db.organization = require('./organization.js')(sequelize, DataTypes);
-db.educationLevel = require('./educationLevel.js')(sequelize, DataTypes);
-db.class = require('./class.js')(sequelize, DataTypes);
-db.militaryClass = require('./militaryClass.js')(sequelize, DataTypes);
-db.militaryClassHistory = require('./militaryClassHistory.js')(sequelize, DataTypes);
-db.militarySemester = require('./militarySemester.js')(sequelize, DataTypes);
-db.militarySubject = require('./militarySubject.js')(sequelize, DataTypes);
-db.militaryTimeTable = require('./militaryTimeTable.js')(sequelize, DataTypes);
-db.militarySubjectResult = require('./militarySubjectResult.js')(sequelize, DataTypes);
-db.militaryGradeProposal = require('./militaryGradeProposal.js')(sequelize, DataTypes);
-db.militaryAchievement = require('./militaryAchievement.js')(sequelize, DataTypes);
-db.militaryDutySchedule = require('./militaryDutySchedule.js')(sequelize, DataTypes);
+db.university = require('./training-program/university.js')(sequelize, DataTypes);
+db.organization = require('./training-program/organization.js')(sequelize, DataTypes);
+db.educationLevel = require('./training-program/educationLevel.js')(sequelize, DataTypes);
+db.class = require('./training-program/class.js')(sequelize, DataTypes);
+db.militaryClass = require('./military-legacy/militaryClass.js')(sequelize, DataTypes);
+db.militaryClassHistory = require('./military-legacy/militaryClassHistory.js')(sequelize, DataTypes);
+db.militarySemester = require('./military-legacy/militarySemester.js')(sequelize, DataTypes);
+db.militarySubject = require('./military-legacy/militarySubject.js')(sequelize, DataTypes);
+db.militaryTimeTable = require('./military-legacy/militaryTimeTable.js')(sequelize, DataTypes);
+db.militarySubjectResult = require('./military-legacy/militarySubjectResult.js')(sequelize, DataTypes);
+db.militaryGradeProposal = require('./military-legacy/militaryGradeProposal.js')(sequelize, DataTypes);
+db.militaryAchievement = require('./military-legacy/militaryAchievement.js')(sequelize, DataTypes);
+db.militaryDutySchedule = require('./military-legacy/militaryDutySchedule.js')(sequelize, DataTypes);
 
 // Nhóm Hồ sơ Sinh viên
-db.profile = require('./profile.js')(sequelize, DataTypes);
-db.user = require('./user.js')(sequelize, DataTypes);
-db.trainingSystem = require('./TrainingSystem.js')(sequelize, DataTypes);
-db.trainingProgram = require('./TrainingProgram.js')(sequelize, DataTypes);
-db.curriculumVersion = require('./CurriculumVersion.js')(sequelize, DataTypes);
-db.trainingClass = require('./TrainingClass.js')(sequelize, DataTypes);
-db.trainingClassSemester = require('./trainingClassSemester.js')(sequelize, DataTypes);
-db.trainingClassSubject = require('./trainingClassSubject.js')(sequelize, DataTypes);
-db.trainingClassTimeTable = require('./trainingClassTimeTable.js')(sequelize, DataTypes);
-db.trainingClassAchievement = require('./trainingClassAchievement.js')(sequelize, DataTypes);
-db.trainingClassDutySchedule = require('./trainingClassDutySchedule.js')(sequelize, DataTypes);
-db.trainingClassResult = require('./trainingClassResult.js')(sequelize, DataTypes);
-db.trainingClassGradeProposal = require('./trainingClassGradeProposal.js')(sequelize, DataTypes);
+db.profile = require('./profiles/profile.js')(sequelize, DataTypes);
+db.user = require('./accounts/user.js')(sequelize, DataTypes);
+db.trainingSystem = require('./training-program/TrainingSystem.js')(sequelize, DataTypes);
+db.trainingProgram = require('./training-program/TrainingProgram.js')(sequelize, DataTypes);
+db.curriculumVersion = require('./training-program/CurriculumVersion.js')(sequelize, DataTypes);
+db.trainingClass = require('./training-program/TrainingClass.js')(sequelize, DataTypes);
+db.trainingClassSemester = require('./training-program/trainingClassSemester.js')(sequelize, DataTypes);
+db.trainingClassSubject = require('./training-program/trainingClassSubject.js')(sequelize, DataTypes);
+db.trainingClassTimeTable = require('./schedules/trainingClassTimeTable.js')(sequelize, DataTypes);
+db.trainingClassAchievement = require('./achievements/trainingClassAchievement.js')(sequelize, DataTypes);
+db.trainingClassDutySchedule = require('./schedules/trainingClassDutySchedule.js')(sequelize, DataTypes);
+db.trainingClassResult = require('./academic-results/trainingClassResult.js')(sequelize, DataTypes);
+db.trainingClassGradeProposal = require('./academic-results/trainingClassGradeProposal.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
-db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
-db.semesterResult = require('./semesterResult.js')(sequelize, DataTypes);
-db.subjectResult = require('./subjectResult.js')(sequelize, DataTypes);
-db.schoolYear = require('./schoolYear.js')(sequelize, DataTypes);
-db.semester = require('./semester.js')(sequelize, DataTypes);
-db.timeTable = require('./timeTable.js')(sequelize, DataTypes);
-db.tuitionFee = require('./tuitionFee.js')(sequelize, DataTypes);
-db.tuitionHistory = require('./tuitionHistory.js')(sequelize, DataTypes);
+db.yearlyResult = require('./academic-results/yearlyResult.js')(sequelize, DataTypes);
+db.semesterResult = require('./academic-results/semesterResult.js')(sequelize, DataTypes);
+db.subjectResult = require('./academic-results/subjectResult.js')(sequelize, DataTypes);
+db.schoolYear = require('./academic-years/schoolYear.js')(sequelize, DataTypes);
+db.semester = require('./academic-years/semester.js')(sequelize, DataTypes);
+db.timeTable = require('./schedules/timeTable.js')(sequelize, DataTypes);
+db.tuitionFee = require('./tuition-and-meals/tuitionFee.js')(sequelize, DataTypes);
+db.tuitionHistory = require('./tuition-and-meals/tuitionHistory.js')(sequelize, DataTypes);
 
 // Nhóm Thi đua & Nghiên cứu
-db.achievement = require('./achievement.js')(sequelize, DataTypes);
-db.achievementProfile = require('./achievementProfile.js')(sequelize, DataTypes);
-db.yearlyAchievement = require('./yearlyAchievement.js')(sequelize, DataTypes);
-db.scientificInitiative = require('./scientificInitiative.js')(sequelize, DataTypes);
-db.scientificTopic = require('./scientificTopic.js')(sequelize, DataTypes);
+db.achievement = require('./achievements/achievement.js')(sequelize, DataTypes);
+db.achievementProfile = require('./achievements/achievementProfile.js')(sequelize, DataTypes);
+db.yearlyAchievement = require('./achievements/yearlyAchievement.js')(sequelize, DataTypes);
+db.scientificInitiative = require('./scientific-research/scientificInitiative.js')(sequelize, DataTypes);
+db.scientificTopic = require('./scientific-research/scientificTopic.js')(sequelize, DataTypes);
 
 // Nhóm Bổ trợ & Lịch trình
-db.commanderDutySchedule = require('./commanderDutySchedule.js')(sequelize, DataTypes);
-db.cutRice = require('./cutRice.js')(sequelize, DataTypes);
-db.cutRiceRequest = require('./cutRiceRequest.js')(sequelize, DataTypes);
-db.notification = require('./notification.js')(sequelize, DataTypes);
-db.gradeRequest = require('./gradeRequest.js')(sequelize, DataTypes);
+db.commanderDutySchedule = require('./schedules/commanderDutySchedule.js')(sequelize, DataTypes);
+db.cutRice = require('./tuition-and-meals/cutRice.js')(sequelize, DataTypes);
+db.cutRiceRequest = require('./tuition-and-meals/cutRiceRequest.js')(sequelize, DataTypes);
+db.notification = require('./notification/notification.js')(sequelize, DataTypes);
+db.gradeRequest = require('./academic-results/gradeRequest.js')(sequelize, DataTypes);
 
 // ==========================
 // Relations

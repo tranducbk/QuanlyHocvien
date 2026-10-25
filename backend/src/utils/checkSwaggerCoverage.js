@@ -3,37 +3,37 @@ const path = require('path');
 const swaggerSpec = require('../config/swagger');
 
 const routeMounts = {
-  'auth.route.js': '/auth',
+  'authentication/auth.route.js': '/auth',
   'file.route.js': '/files',
-  'gradeRequest.route.js': '',
-  'adminDashboard.route.js': '/admins',
-  'studentDashboard.route.js': '/students',
-  'commanderReport.route.js': '/commanders',
-  'user.route.js': '/users',
-  'trainingProgram.route.js': '/training-programs',
-  'trainingClass.route.js': '/training-classes',
-  'trainingClassAcademic.route.js': '/training-class-academic',
-  'university.route.js': '/universities',
-  'organization.route.js': '/organizations',
-  'educationLevel.route.js': '/education-levels',
-  'class.route.js': '/classes',
-  'militaryClass.route.js': '/military/classes',
-  'militaryAcademic.route.js': '/military/academic',
-  'militaryRecords.route.js': '/military/records',
-  'yearlyResult.route.js': '/yearly-results',
-  'semesterResult.route.js': '/semester-results',
-  'subjectResult.route.js': '/subject-results',
-  'semester.route.js': '/semesters',
-  'timeTable.route.js': '/time-tables',
-  'tuitionFee.route.js': '/tuition-fees',
-  'achievement.route.js': '/achievements',
-  'achievementProfile.route.js': '/achievement-profiles',
-  'yearlyAchievement.route.js': '/yearly-achievements',
-  'scientificInitiative.route.js': '/scientific-initiatives',
-  'scientificTopic.route.js': '/scientific-topics',
-  'cutRice.route.js': '/cut-rice',
-  'commanderDutySchedule.route.js': '/commander-duty-schedules',
-  'notification.route.js': '/notifications',
+  'academic-results/gradeRequest.route.js': '',
+  'reports/adminDashboard.route.js': '/admins',
+  'reports/studentDashboard.route.js': '/students',
+  'reports/commanderReport.route.js': '/commanders',
+  'accounts/user.route.js': '/users',
+  'training-program/trainingProgram.route.js': '/training-programs',
+  'training-program/trainingClass.route.js': '/training-classes',
+  'training-program/trainingClassAcademic.route.js': '/training-class-academic',
+  'training-program/university.route.js': '/universities',
+  'training-program/organization.route.js': '/organizations',
+  'training-program/educationLevel.route.js': '/education-levels',
+  'training-program/class.route.js': '/classes',
+  'military-legacy/militaryClass.route.js': '/military/classes',
+  'military-legacy/militaryAcademic.route.js': '/military/academic',
+  'military-legacy/militaryRecords.route.js': '/military/records',
+  'academic-results/yearlyResult.route.js': '/yearly-results',
+  'academic-results/semesterResult.route.js': '/semester-results',
+  'academic-results/subjectResult.route.js': '/subject-results',
+  'academic-years/semester.route.js': '/semesters',
+  'schedules/timeTable.route.js': '/time-tables',
+  'tuition-and-meals/tuitionFee.route.js': '/tuition-fees',
+  'achievements/achievement.route.js': '/achievements',
+  'achievements/achievementProfile.route.js': '/achievement-profiles',
+  'achievements/yearlyAchievement.route.js': '/yearly-achievements',
+  'scientific-research/scientificInitiative.route.js': '/scientific-initiatives',
+  'scientific-research/scientificTopic.route.js': '/scientific-topics',
+  'tuition-and-meals/cutRice.route.js': '/cut-rice',
+  'schedules/commanderDutySchedule.route.js': '/commander-duty-schedules',
+  'notification/notification.route.js': '/notifications',
 };
 
 const normalizePath = (mountPath, routePath) => {
@@ -46,8 +46,8 @@ const readRouteMethods = () => {
   const routeDir = path.join(__dirname, '..', 'routes');
   const routeMethods = [];
 
-  for (const [fileName, mountPath] of Object.entries(routeMounts)) {
-    const filePath = path.join(routeDir, fileName);
+  for (const [relativePath, mountPath] of Object.entries(routeMounts)) {
+    const filePath = path.join(routeDir, relativePath);
     const source = fs.readFileSync(filePath, 'utf8');
     const routePattern = /router\.(get|post|put|delete)\(\s*(['"])([^'"]+)\2/g;
 

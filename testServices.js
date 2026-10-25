@@ -1,6 +1,6 @@
 const db = require('./backend/src/models');
-const universityService = require('./backend/src/services/university.service');
-const organizationService = require('./backend/src/services/organization.service');
+const universityService = require('./backend/src/services/training-program/university.service.js');
+const organizationService = require('./backend/src/services/training-program/organization.service.js');
 
 async function test() {
   const unis = await universityService.getAll({});

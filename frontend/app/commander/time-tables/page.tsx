@@ -1,5 +1,5 @@
-import TimeTablesMain from "@/components/commander/time-tables/Main";
-import CohortTimeTable from "@/components/commander/training-classes/TimeTable";
+import TimeTablesMain from "@/components/schedules/commander/time-tables/Main";
+import CohortTimeTable from "@/components/training-program/commander/training-classes/TimeTable";
 import { cookies } from "next/headers";
 
 export default async function TimeTablesPage() {

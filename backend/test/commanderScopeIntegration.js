@@ -20,8 +20,8 @@ if (
 }
 
 const db = require('../src/models');
-const studentService = require('../src/services/student.service');
-const userService = require('../src/services/user.service');
+const studentService = require('../src/services/profiles/student.service.js');
+const userService = require('../src/services/accounts/user.service.js');
 
 const createUser = async (username, role, trainingSystemId, profileId, systemType) => db.user.create({
   username,

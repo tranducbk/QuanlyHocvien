@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { User } from "@/types/auth";
+import { User } from "@/types/authentication/auth";
 import Cookies from "js-cookie";
 import { getTokenExpiration, isTokenExpired } from "@/utils/fn-common";
 import { JWT_CONFIG } from "@/constants/constants";

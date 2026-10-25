@@ -1,5 +1,5 @@
-import Main from "@/components/commander/semesters/Main";
-import CohortMain from "@/components/commander/training-classes/Semesters";
+import Main from "@/components/academic-years/commander/Main";
+import CohortMain from "@/components/training-program/commander/training-classes/Semesters";
 import { cookies } from "next/headers";
 
 export default async function SemestersPage() {

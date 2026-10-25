@@ -1,4 +1,4 @@
-import Main from "@/components/commander/profiles/Main";
+import Main from "@/components/profiles/commander/students/Main";
 import { cookies } from "next/headers";
 
 export default async function CommanderStudentProfilesPage() {

@@ -75,14 +75,14 @@ Page
 
 ## 6. Pages và components
 
-- `frontend/app`: route/page/layout mỏng.
-- `frontend/components/admin`: nghiệp vụ Admin.
-- `frontend/components/commander`: nghiệp vụ Chỉ huy.
-- `frontend/components/student`: nghiệp vụ Học viên.
-- `frontend/components/providers`: provider toàn ứng dụng.
+- `frontend/app`: route theo URL và role; page/layout giữ mỏng, không đổi URL khi tổ chức lại component.
+- `frontend/components`: nhóm component theo nghiệp vụ; trong domain có thể chia tiếp theo role khi UI khác nhau.
+- `frontend/components/shared`: layout role, provider và modal dùng chung.
 - `frontend/library`: UI dùng chung như Table, Input, Select, Modal, Typography.
 
-Types theo domain nằm trong `frontend/types`; validation dùng chung nằm tại `frontend/utils/validations.ts`.
+Các nhóm nghiệp vụ chính gồm `authentication`, `accounts`, `profiles`, `training-program`, `academic-results`, `academic-years`, `schedules`, `achievements`, `tuition-and-meals`, `scientific-research`, `notification`, `reports` và `military-legacy`.
+
+Service và type theo domain nằm trong các thư mục cùng tên dưới `frontend/services` và `frontend/types`. Axios client/server vẫn là hạ tầng dùng chung tại `frontend/services`; hook tổng quát vẫn ở `frontend/hooks`, hook riêng cho chương trình/lớp đào tạo nằm dưới `frontend/hooks/training-program`. Endpoint và query key tiếp tục tập trung tại `frontend/constants`; validation dùng chung nằm tại `frontend/utils/validations.ts`.
 
 ## 7. Chức năng giao diện
 
@@ -98,7 +98,7 @@ Sidebar và route được tổ chức theo role và hệ được phân công. 
 
 ## 9. Quy tắc khi mở rộng
 
-- Page trong `app` giữ mỏng; đặt nghiệp vụ vào `components` và `services`.
+- Page trong `app` giữ mỏng; tổ chức component, service và type theo cùng domain nghiệp vụ.
 - Tái sử dụng component trong `library` và hook hiện có.
 - Thêm endpoint/query key/type trước khi nối UI.
 - Không chỉ ẩn menu: backend vẫn phải là lớp bảo vệ quyền chính.

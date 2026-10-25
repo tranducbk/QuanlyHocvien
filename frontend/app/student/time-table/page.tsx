@@ -1,4 +1,4 @@
-import Main from "@/components/student/time-table/Main";
+import Main from "@/components/schedules/student/time-table/Main";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Lịch học | Cổng học viên",

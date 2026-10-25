@@ -1,4 +1,4 @@
-import Main from "@/components/admin/universities/[organizations]/[classes]/Main";
+import Main from "@/components/training-program/admin/universities/[organizations]/[classes]/Main";
 
 interface Props {
   params: Promise<{

@@ -1,4 +1,4 @@
-import Main from "@/components/admin/notification/Main";
+import Main from "@/components/notification/admin/Main";
 
 export const metadata = {
   title: "Thông báo | Cổng quản trị",

@@ -1,5 +1,5 @@
-import Main from "@/components/commander/dashboard/Main";
-import CohortMain from "@/components/commander/training-classes/Main";
+import Main from "@/components/reports/commander/Main";
+import CohortMain from "@/components/training-program/commander/training-classes/Main";
 import { cookies } from "next/headers";
 
 export default async function CommanderDashboardPage() {

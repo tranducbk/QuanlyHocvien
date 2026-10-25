@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Main from "@/components/commander/training-classes/Main";
+import Main from "@/components/training-program/commander/training-classes/Main";
 
 export default async function CommanderTrainingClassesPage() {
   const systemCode = (await cookies()).get("trainingSystemCode")?.value ?? "";

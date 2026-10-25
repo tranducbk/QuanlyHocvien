@@ -1,4 +1,4 @@
-import Main from "@/components/student/notification/Main";
+import Main from "@/components/notification/student/Main";
 
 export const metadata = {
   title: "Thông báo | Cổng học viên",

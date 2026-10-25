@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const db = require('../models');
-const JwtService = require('../services/jwt.service');
+const JwtService = require('../services/authentication/jwt.service.js');
 const { serialize } = require('../utils/serialize');
 const { BadTokenError, ForbiddenError } = require('../utils/apiError');
 

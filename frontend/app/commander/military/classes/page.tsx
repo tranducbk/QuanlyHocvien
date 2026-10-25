@@ -1,4 +1,4 @@
-import Main from "@/components/commander/military/classes/Main";
+import Main from "@/components/military-legacy/commander/classes/Main";
 
 export default function MilitaryClassesPage() {
   return <Main />;
