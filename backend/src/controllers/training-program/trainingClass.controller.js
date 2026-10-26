@@ -10,6 +10,11 @@ const listStudents = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.params, req.params);
   return success(res, await service.listStudents(req.params.id, req.user));
 });
+const listAvailableStudents = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.params, req.params);
+  await validateOrThrow(validation.availableStudentsQuery, req.query);
+  return success(res, await service.listAvailableStudents(req.params.id, req.query.search, req.user));
+});
 const assignStudent = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.params, req.params);
   await validateOrThrow(validation.student, req.body);
@@ -52,4 +57,4 @@ const assignCommander = asyncHandler(async (req, res) => {
   return success(res, await service.assignCommander(req.params.id, req.body.commanderId), 'Đã cập nhật Chỉ huy');
 });
 
-module.exports = { listOptions, list, listMine, listStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };
+module.exports = { listOptions, list, listMine, listStudents, listAvailableStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };

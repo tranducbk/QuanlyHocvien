@@ -15,6 +15,7 @@ Thay trang thông báo tạm của Chỉ huy Hệ 1/3/4/7 bằng Tổng quan và
 - `GET /training-classes/mine`: chỉ Chỉ huy Hệ 1/3/4/7, lọc lớp theo cả `commander_id` và `training_system_id` từ tài khoản đã xác thực.
 - `/commander`: tổng quan Hệ 1/3/4/7 với tên Hệ và số lớp được giao; Hệ 5 giữ dashboard cũ.
 - `/commander/training-classes`: danh sách lớp được giao và thông tin chương trình; chỉ mở cho Chỉ huy Hệ 1/3/4/7.
+- Khi xếp học viên vào lớp, Chỉ huy tìm và chọn từ danh sách học viên chưa xếp lớp do mình quản lý; API giới hạn kết quả theo Chỉ huy, Hệ và lớp được giao.
 - Hồ sơ học viên dùng lại trang chung ở chế độ quân sự, dựa trên API hồ sơ đã phân quyền theo Chỉ huy và Hệ.
 - Sidebar hiện đủ các mục chung: lớp, hồ sơ, phê duyệt, thành tích, lịch học, học tập, học kỳ và lịch trực. Những mục chưa có API đúng mô hình mới ở trạng thái vô hiệu hóa; route quân sự legacy vẫn đóng.
 

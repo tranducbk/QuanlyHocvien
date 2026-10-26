@@ -18,7 +18,7 @@ export type GradeResult = Omit<GradeInput, "midtermScore" | "finalScore"> & {
   isBestAttempt: boolean;
   classification: "FAIL" | "AVERAGE" | "GOOD" | "EXCELLENT";
   profile: { id: string; code: string; fullName: string };
-  trainingClassSubject: { id: string; subjectCode: string; subjectName: string };
+  trainingClassSubject: { id: string; subjectCode: string; subjectName: string; credits?: number };
   trainingClassSemester: { id: string; code: number; schoolYear: string };
 };
 export type GradeProposal = Omit<GradeInput, "midtermScore" | "finalScore"> & {
@@ -28,6 +28,7 @@ export type GradeProposal = Omit<GradeInput, "midtermScore" | "finalScore"> & {
   semesterId: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   reason: string;
+  createdAt: string;
   midtermScore: string;
   finalScore: string;
   reviewNote: string | null;
@@ -36,6 +37,35 @@ export type GradeProposal = Omit<GradeInput, "midtermScore" | "finalScore"> & {
   trainingClassSemester: { id: string; code: number; schoolYear: string };
 };
 export type StudentClassSubject = { id: string; subjectCode: string; subjectName: string; trainingClassSemester: { id: string; code: number; schoolYear: string } };
+export type StudentClassTimeTable = {
+  id: string;
+  trainingClassId: string;
+  semesterId: string;
+  trainingClassSemester: { id: string; code: number; schoolYear: string } | null;
+  schedules: Array<{
+    subjectId: string;
+    subjectCode: string | null;
+    subjectName: string | null;
+    day: number;
+    startTime: string;
+    endTime: string;
+    room: string | null;
+    week: number[];
+  }>;
+};
+export type StudentClassAchievement = {
+  id: string;
+  studentUserId: string;
+  category: "AWARD" | "SCIENTIFIC_TOPIC" | "SCIENTIFIC_INITIATIVE";
+  title: string;
+  award: string | null;
+  schoolYear: string | null;
+  semester: string | null;
+  content: string | null;
+  year: number | null;
+  description: string | null;
+  createdAt: string;
+};
 export type AcademicSummaryRow = {
   profileId: string; student: { id: string; code: string; fullName: string; unit?: string | null };
   schoolYear: string; semester?: number;
@@ -61,6 +91,10 @@ export const trainingClassAcademicService = {
     apiClient.post<unknown, ApiResponse<GradeProposal>>(ENDPOINTS.TRAINING_CLASSES.REVIEW_GRADE_PROPOSAL(classId, proposalId, decision), { reviewNote }),
   getMySubjects: (): Promise<ApiResponse<StudentClassSubject[]>> =>
     apiClient.get<unknown, ApiResponse<StudentClassSubject[]>>(ENDPOINTS.TRAINING_CLASS_ACADEMIC.MY_SUBJECTS),
+  getMyTimeTables: (): Promise<ApiResponse<StudentClassTimeTable[]>> =>
+    apiClient.get<unknown, ApiResponse<StudentClassTimeTable[]>>(ENDPOINTS.TRAINING_CLASS_ACADEMIC.MY_TIME_TABLES),
+  getMyAchievements: (): Promise<ApiResponse<StudentClassAchievement[]>> =>
+    apiClient.get<unknown, ApiResponse<StudentClassAchievement[]>>(ENDPOINTS.TRAINING_CLASS_ACADEMIC.MY_ACHIEVEMENTS),
   getMyResults: (): Promise<ApiResponse<GradeResult[]>> =>
     apiClient.get<unknown, ApiResponse<GradeResult[]>>(ENDPOINTS.TRAINING_CLASS_ACADEMIC.MY_RESULTS),
   getMyProposals: (): Promise<ApiResponse<GradeProposal[]>> =>

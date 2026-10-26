@@ -3,6 +3,7 @@ import {
   HiOutlineAcademicCap,
   HiOutlineBadgeCheck,
   HiOutlineCalendar,
+  HiOutlineBell,
   HiOutlineCash,
   HiOutlineHome,
   HiOutlineIdentification,
@@ -49,5 +50,38 @@ export const STUDENT_MENU = [
     title: "Học phí",
     path: "/student/tuition",
     icon: HiOutlineCash,
+  },
+] as const satisfies readonly MenuItem[];
+
+export const COHORT_STUDENT_MENU = [
+  {
+    title: "Tổng quan",
+    path: "/student",
+    icon: HiOutlineHome,
+  },
+  {
+    title: "Thông tin cá nhân",
+    path: "/student/profile",
+    icon: HiOutlineIdentification,
+  },
+  {
+    title: "Kết quả học tập",
+    path: "/student/results",
+    icon: HiOutlineAcademicCap,
+  },
+  {
+    title: "Quản lý lịch học",
+    path: "/student/time-table",
+    icon: HiOutlineCalendar,
+  },
+  {
+    title: "Thành tích",
+    path: "/student/achievements",
+    icon: HiOutlineBadgeCheck,
+  },
+  {
+    title: "Thông báo",
+    path: "/student/notification",
+    icon: HiOutlineBell,
   },
 ] as const satisfies readonly MenuItem[];

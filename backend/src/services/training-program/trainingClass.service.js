@@ -76,6 +76,31 @@ const listStudents = async (id, commander) => {
     .map((profile) => ({ id: profile.id, userId: profile.User.id, code: profile.code, fullName: profile.fullName }));
 };
 
+const listAvailableStudents = async (id, search, commander) => {
+  await getOwnedClass(id, commander);
+  const term = search.trim();
+  const profiles = await db.profile.findAll({
+    where: {
+      commanderId: commander.id,
+      trainingClassId: null,
+      [db.Sequelize.Op.or]: [
+        { fullName: { [db.Sequelize.Op.iLike]: `%${term}%` } },
+        { code: { [db.Sequelize.Op.iLike]: `%${term}%` } },
+      ],
+    },
+    attributes: ['id', 'code', 'fullName'],
+    include: [{
+      model: db.user,
+      attributes: [],
+      where: { role: 'STUDENT', isActive: true, trainingSystemId: commander.trainingSystemId },
+      required: true,
+    }],
+    order: [['fullName', 'ASC']],
+    limit: 20,
+  });
+  return profiles;
+};
+
 const assignStudent = async (id, studentCode, commander) => db.sequelize.transaction(async (transaction) => {
   const trainingClass = await db.trainingClass.findOne({
     where: { id, trainingSystemId: commander.trainingSystemId, commanderId: commander.id },
@@ -263,4 +288,4 @@ const assignCommander = async (id, commanderId) => {
   return trainingClass;
 };
 
-module.exports = { listOptions, list, listMine, listStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };
+module.exports = { listOptions, list, listMine, listStudents, listAvailableStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };

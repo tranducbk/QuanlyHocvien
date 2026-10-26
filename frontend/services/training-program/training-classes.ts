@@ -11,6 +11,8 @@ export const trainingClassService = {
     apiClient.get<unknown, ApiResponse<TrainingClass[]>>(ENDPOINTS.TRAINING_CLASSES.MINE),
   getStudents: (id: string): Promise<ApiResponse<{ id: string; userId: string; code: string; fullName: string }[]>> =>
     apiClient.get<unknown, ApiResponse<{ id: string; userId: string; code: string; fullName: string }[]>>(ENDPOINTS.TRAINING_CLASSES.STUDENTS(id)),
+  searchAvailableStudents: (id: string, search: string): Promise<ApiResponse<{ id: string; code: string; fullName: string }[]>> =>
+    apiClient.get<unknown, ApiResponse<{ id: string; code: string; fullName: string }[]>>(ENDPOINTS.TRAINING_CLASSES.AVAILABLE_STUDENTS(id), { params: { search } }),
   assignStudent: (id: string, studentCode: string): Promise<ApiResponse<{ id: string; code: string; fullName: string }>> =>
     apiClient.post<unknown, ApiResponse<{ id: string; code: string; fullName: string }>>(ENDPOINTS.TRAINING_CLASSES.STUDENTS(id), { studentCode }),
   getSemesters: (id: string): Promise<ApiResponse<{ id: string; code: number; schoolYear: string }[]>> =>

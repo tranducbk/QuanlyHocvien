@@ -1,6 +1,7 @@
 export interface Achievement {
   id: string;
   userId: string;
+  category?: "AWARD" | "SCIENTIFIC_TOPIC" | "SCIENTIFIC_INITIATIVE";
   semester?: string | null;
   schoolYear?: string | null;
   content?: string | null;

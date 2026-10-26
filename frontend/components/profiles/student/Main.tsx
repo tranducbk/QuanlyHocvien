@@ -28,6 +28,7 @@ import Button from "@/library/Button";
 import { DEFAULT_VALUES } from "@/constants/constants";
 import { formatDate, formatDateTime, textOrDash } from "@/utils/fn-common";
 import { useModalStore } from "@/store/useModalStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { IconType } from "react-icons";
 import ProfileSkeleton from "@/components/profiles/commander/account/ProfileSkeleton";
 import UpdateProfileForm from "./UpdateProfileForm";
@@ -39,6 +40,7 @@ import {
 
 export default function Main() {
   const { openModal } = useModalStore();
+  const userId = useAuthStore((state) => state.user?.id);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const {
     data: profileResponse,
@@ -47,7 +49,7 @@ export default function Main() {
     refetch,
     error,
   } = useQuery({
-    queryKey: [QUERY_KEYS.PROFILE],
+    queryKey: [QUERY_KEYS.PROFILE, userId],
     queryFn: () => authService.getProfile(),
   });
 

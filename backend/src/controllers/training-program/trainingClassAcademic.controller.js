@@ -37,6 +37,8 @@ const reviewProposal = (status) => asyncHandler(async (req, res) => {
     status === 'APPROVED' ? 'Đã duyệt đề xuất' : 'Đã từ chối đề xuất');
 });
 const listMySubjects = asyncHandler(async (req, res) => success(res, await service.listMySubjects(req.user)));
+const listMyTimeTables = asyncHandler(async (req, res) => success(res, await service.listMyTimeTables(req.user)));
+const listMyAchievements = asyncHandler(async (req, res) => success(res, await service.listMyAchievements(req.user)));
 const listMyResults = asyncHandler(async (req, res) => success(res, await service.listMyResults(req.user)));
 const listMyProposals = asyncHandler(async (req, res) => success(res, await service.listMyProposals(req.user)));
 const createProposal = asyncHandler(async (req, res) => {
@@ -44,4 +46,4 @@ const createProposal = asyncHandler(async (req, res) => {
   return success(res, await service.createProposal(req.body, req.user), 'Đã gửi đề xuất điểm', 201);
 });
 
-module.exports = { listClassResults, getClassSummary, exportYearlySummary, createResult, listClassProposals, approveProposal: reviewProposal('APPROVED'), rejectProposal: reviewProposal('REJECTED'), listMySubjects, listMyResults, listMyProposals, createProposal };
+module.exports = { listClassResults, getClassSummary, exportYearlySummary, createResult, listClassProposals, approveProposal: reviewProposal('APPROVED'), rejectProposal: reviewProposal('REJECTED'), listMySubjects, listMyTimeTables, listMyAchievements, listMyResults, listMyProposals, createProposal };

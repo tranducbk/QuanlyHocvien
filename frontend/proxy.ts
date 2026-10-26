@@ -115,31 +115,32 @@ export default function proxy(request: NextRequest) {
     isCohort &&
     pathname.startsWith("/student/military/") &&
     pathname !== "/student/military/unavailable" &&
-    pathname !== "/student/military/results"
+    ![
+      "/student/military/results",
+      "/student/military/time-table",
+      "/student/military/achievements",
+    ].includes(pathname)
   ) {
     return NextResponse.redirect(new URL("/student/military/unavailable", request.url));
+  }
+  if (role === ROLES.STUDENT.ROLE && isCohort && pathname.startsWith("/student/military/")) {
+    const legacyStudentRoutes: Record<string, string> = {
+      "/student/military/results": "/student/results",
+      "/student/military/time-table": "/student/time-table",
+      "/student/military/achievements": "/student/achievements",
+    };
+    const redirectPath = legacyStudentRoutes[pathname];
+    if (redirectPath) return NextResponse.redirect(new URL(redirectPath, request.url));
   }
   if (
     role === ROLES.STUDENT.ROLE &&
     isCohort &&
     [
-      "/student/time-table",
       "/student/meal-schedules",
       "/student/tuition",
-      "/student/results",
-      "/student/achievements",
     ].some((path) => pathname.startsWith(path))
   ) {
     return NextResponse.redirect(new URL("/student/military/unavailable", request.url));
-  }
-  if (
-    role === ROLES.STUDENT.ROLE &&
-    isCohort &&
-    pathname === "/student"
-  ) {
-    return NextResponse.redirect(
-      new URL("/student/military/unavailable", request.url)
-    );
   }
 
   return NextResponse.next();

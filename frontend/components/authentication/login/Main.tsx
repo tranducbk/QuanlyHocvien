@@ -10,7 +10,7 @@ import { loginSchema, LoginFormValues } from "@/utils/validations";
 import { ROLES } from "@/constants/constants";
 import Link from "next/link";
 import { m } from "motion/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authService } from "@/services/authentication/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -24,6 +24,7 @@ import { LoginRequest } from "@/types/authentication/auth";
 export default function Main() {
   const [showPassword, setShowPassword] = useState(false);
   const { replace } = useRouter();
+  const queryClient = useQueryClient();
   const { setAuth } = useAuthStore();
   const { showLoading, hideLoading } = useLoadingStore();
   const { addToast } = useToastStore();
@@ -48,6 +49,7 @@ export default function Main() {
     },
     onSuccess: (response) => {
       if (!response.data) return;
+      queryClient.removeQueries();
       setAuth({
         user: response.data.user,
         accessToken: response.data.accessToken,

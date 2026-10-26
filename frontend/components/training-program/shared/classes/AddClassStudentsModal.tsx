@@ -17,9 +17,13 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { classService } from "@/services/training-program/classes";
 import { userService } from "@/services/accounts/user";
 import { Class } from "@/types/training-program/classes";
-import { UserDetailResponse, UserQueryRequest } from "@/types/accounts/user";
+import {
+  StudentProfileQueryRequest,
+  UserDetailResponse,
+} from "@/types/accounts/user";
 import { textOrDash } from "@/utils/fn-common";
 import { FilterField } from "@/library/table/TableFilter";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Props {
   cls: Class;
@@ -99,12 +103,15 @@ export default function AddClassStudentsModal({ cls }: Props) {
     new Set()
   );
   const queryClient = useQueryClient();
+  const requester = useAuthStore((state) => state.user);
+  const isCommander = requester?.role === "COMMANDER";
 
   const studentsQueryKey = [QUERY_KEYS.CLASSES, cls.id, "students"];
   const availableStudentsQueryKey = [
     QUERY_KEYS.STUDENT_PROFILES,
     "assign-to-class",
     cls.id,
+    isCommander ? requester.id : "admin",
   ];
 
   const {
@@ -118,13 +125,15 @@ export default function AddClassStudentsModal({ cls }: Props) {
     setColumnFilters: setAvailableColumnFilters,
     sorting: availableSorting,
     setSorting: setAvailableSorting,
-  } = useTableQuery<UserDetailResponse, UserQueryRequest>({
+  } = useTableQuery<UserDetailResponse, StudentProfileQueryRequest>({
     queryKey: availableStudentsQueryKey,
     fetchData: (params) =>
-      userService.getAllUsers({
-        ...params,
-        role: ROLES.STUDENT.ROLE,
-      }),
+      isCommander
+        ? classService.getAvailableStudents(cls.id, params)
+        : userService.getAllUsers({
+            ...params,
+            role: ROLES.STUDENT.ROLE,
+          }),
   });
 
   const invalidateClassStudents = async () => {

@@ -34,6 +34,18 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  *     responses:
  *       200:
  *         description: Học viên đã được xếp lớp
+ * /training-classes/{id}/students/available:
+ *   get:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy tìm học viên chưa xếp lớp do mình quản lý
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         required: true
+ *         schema: { type: string, minLength: 2, maxLength: 100 }
+ *     responses:
+ *       200:
+ *         description: Học viên cùng Hệ, thuộc Chỉ huy hiện tại và chưa được xếp lớp
  * /training-classes/{id}/semesters:
  *   get:
  *     tags: [Training Classes]
@@ -248,6 +260,7 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  */
 router.use(authMiddleware);
 router.get('/mine', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listMine);
+router.get('/:id/students/available', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listAvailableStudents);
 router.get('/:id/students', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listStudents);
 router.post('/:id/students', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.assignStudent);
 router.get('/:id/semesters', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listSemesters);

@@ -1,5 +1,5 @@
 const db = require('../../models');
-const { NotFoundError, BadRequestError } = require('../../utils/apiError');
+const { NotFoundError, BadRequestError, ForbiddenError } = require('../../utils/apiError');
 const { paginateQuery } = require('../../utils/response');
 const { findStudentUsersByCodes } = require('../../utils/studentLookup');
 
@@ -131,27 +131,65 @@ const deleteRecord = async (id) => {
   return { deleted: true };
 };
 
-const getClassWithHierarchy = async (id) => {
+const getClassWithHierarchy = async (id, options = {}) => {
   const record = await Class.findByPk(id, {
     attributes: { include: [studentCountLiteral] },
     include: [{ model: EducationLevel, include: [{ model: Organization, include: [{ model: University }] }] }],
+    ...options,
   });
   if (!record) throw new NotFoundError('Không tìm thấy lớp học');
   return record;
 };
 
-const getStudentProfilesByUserIds = async (userIds = []) => {
+const isHe5Commander = (requester) =>
+  requester?.role === 'COMMANDER' && requester.trainingSystemCode === 'HE_5';
+
+const getCommanderClassScope = (record, requester) => {
+  const organizationId = record.EducationLevel?.organizationId || null;
+  const universityId = record.EducationLevel?.Organization?.universityId || null;
+  if (!record.educationLevelId || !organizationId || !universityId) {
+    throw new BadRequestError('Lớp chưa được gắn đầy đủ cơ sở, tổ chức và trình độ đào tạo');
+  }
+  if (!requester?.trainingSystemId) {
+    throw new ForbiddenError('Tài khoản Chỉ huy chưa được gán hệ đào tạo');
+  }
+
+  return {
+    commanderId: requester.id,
+    classId: null,
+    [Op.and]: [
+      { [Op.or]: [{ educationLevelId: null }, { educationLevelId: record.educationLevelId }] },
+      { [Op.or]: [{ organizationId: null }, { organizationId }] },
+      { [Op.or]: [{ universityId: null }, { universityId }] },
+    ],
+  };
+};
+
+const getStudentProfilesByUserIds = async (userIds = [], requester, record, transaction) => {
   const uniqueIds = [...new Set(userIds)];
+  const commanderScope = isHe5Commander(requester)
+    ? getCommanderClassScope(record, requester)
+    : null;
   const users = await User.findAll({
     where: {
       id: { [Op.in]: uniqueIds },
       role: 'STUDENT',
       systemType: 'EXTERNAL',
+      ...(commanderScope
+        ? { trainingSystemId: requester.trainingSystemId, isActive: true }
+        : {}),
     },
-    include: [{ model: Profile }],
+    include: [{
+      model: Profile,
+      ...(commanderScope ? { where: commanderScope, required: true } : {}),
+    }],
+    transaction,
   });
 
   if (users.length !== uniqueIds.length) {
+    if (commanderScope) {
+      throw new ForbiddenError('Chỉ huy chỉ được xếp học viên Hệ 5 chưa vào lớp và do mình quản lý');
+    }
     throw new BadRequestError('Có học viên không tồn tại');
   }
 
@@ -163,7 +201,95 @@ const getStudentProfilesByUserIds = async (userIds = []) => {
   return { uniqueIds, profiles };
 };
 
-const assignStudents = async (classId, userIds = []) => {
+const getAvailableStudents = async (classId, query = {}, requester) => {
+  if (!isHe5Commander(requester)) {
+    throw new ForbiddenError('Chỉ Chỉ huy Hệ 5 mới được tìm học viên khả dụng');
+  }
+
+  const record = await getClassWithHierarchy(classId);
+  const profileWhere = getCommanderClassScope(record, requester);
+  for (const field of ['code', 'fullName', 'unit']) {
+    if (query[field]?.trim()) {
+      profileWhere[field] = { [Op.iLike]: `%${query[field].trim()}%` };
+    }
+  }
+
+  const sortFields = {
+    code: [{ model: Profile }, 'code'],
+    fullName: [{ model: Profile }, 'fullName'],
+    unit: [{ model: Profile }, 'unit'],
+    username: ['username'],
+    createdAt: ['createdAt'],
+  };
+  const requestedSort = sortFields[query.sortBy];
+  const sortDirection = query.sortOrder === 'desc' ? 'DESC' : 'ASC';
+  const order = requestedSort
+    ? [[...requestedSort, sortDirection]]
+    : [['createdAt', 'DESC']];
+
+  return paginateQuery(User, {
+    page: query.page,
+    limit: query.limit,
+    fetchAll: query.fetchAll,
+  }, {
+    attributes: { exclude: ['password', 'refreshToken'] },
+    include: [{ model: Profile, where: profileWhere, required: true }],
+    where: {
+      role: 'STUDENT',
+      systemType: 'EXTERNAL',
+      trainingSystemId: requester.trainingSystemId,
+      isActive: true,
+    },
+    order,
+  });
+};
+
+const assignStudents = async (classId, userIds = [], requester) => {
+  if (requester?.role === 'COMMANDER' && !isHe5Commander(requester)) {
+    throw new ForbiddenError('Chỉ Chỉ huy Hệ 5 mới được thêm học viên vào lớp này');
+  }
+
+  if (isHe5Commander(requester)) {
+    const assignment = await db.sequelize.transaction(async (transaction) => {
+      const record = await getClassWithHierarchy(classId, { transaction });
+      const { uniqueIds, profiles } = await getStudentProfilesByUserIds(
+        userIds,
+        requester,
+        record,
+        transaction
+      );
+      const profileIds = profiles.map((profile) => profile.id);
+      const orgId = record.EducationLevel.organizationId;
+      const uniId = record.EducationLevel.Organization.universityId;
+      const commanderScope = getCommanderClassScope(record, requester);
+
+      const [updatedCount] = await Profile.update({
+        classId: record.id,
+        educationLevelId: record.educationLevelId,
+        organizationId: orgId,
+        universityId: uniId,
+      }, {
+        where: {
+          id: { [Op.in]: profileIds },
+          ...commanderScope,
+        },
+        transaction,
+      });
+
+      if (updatedCount !== profiles.length) {
+        throw new ForbiddenError('Danh sách học viên đã thay đổi; hãy tải lại rồi thử lại');
+      }
+
+      return {
+        classId: record.id,
+        updated: uniqueIds.length,
+      };
+    });
+
+    const updatedRecord = await getClassWithHierarchy(classId);
+    return { ...assignment, studentCount: updatedRecord.dataValues.studentCount };
+  }
+
   const record = await getClassWithHierarchy(classId);
   const { uniqueIds, profiles } = await getStudentProfilesByUserIds(userIds);
   const profileIds = profiles.map((profile) => profile.id);
@@ -185,7 +311,11 @@ const assignStudents = async (classId, userIds = []) => {
   return { classId: record.id, updated: uniqueIds.length, studentCount: updatedRecord.dataValues.studentCount };
 };
 
-const assignStudentsByCodes = async (classId, studentCodes = []) => {
+const assignStudentsByCodes = async (classId, studentCodes = [], requester) => {
+  if (requester?.role === 'COMMANDER') {
+    throw new ForbiddenError('Chỉ huy phải xếp lớp bằng danh sách học viên mình quản lý');
+  }
+
   const students = await findStudentUsersByCodes(studentCodes);
   const userIds = students.map((student) => student.user.id);
   const result = await assignStudents(classId, userIds);
@@ -224,4 +354,4 @@ const removeStudent = async (classId, userId) => {
   return { ...result, userId };
 };
 
-module.exports = { create, getAll, getDetail, getStudents, update, delete: deleteRecord, assignStudents, assignStudentsByCodes, removeStudents, removeStudent };
+module.exports = { create, getAll, getDetail, getStudents, getAvailableStudents, update, delete: deleteRecord, assignStudents, assignStudentsByCodes, removeStudents, removeStudent };

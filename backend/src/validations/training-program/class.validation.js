@@ -26,6 +26,16 @@ const query = yup.object({
   levelName: yup.string().max(255).nullable(),
 });
 
+const availableStudentsQuery = yup.object({
+  page: yup.number().integer().min(1).nullable(),
+  limit: yup.number().integer().min(1).max(100).nullable(),
+  sortBy: yup.string().oneOf(['code', 'fullName', 'unit', 'username', 'createdAt']).nullable(),
+  sortOrder: yup.string().oneOf(['asc', 'desc']).nullable(),
+  code: yup.string().max(255).nullable(),
+  fullName: yup.string().max(255).nullable(),
+  unit: yup.string().max(255).nullable(),
+});
+
 const assignStudents = yup.object({
   userIds: yup.array().of(yup.string().uuid('Mã người dùng không hợp lệ')).min(1, 'Danh sách học viên không được rỗng').required('Danh sách học viên là bắt buộc'),
 });
@@ -47,6 +57,7 @@ module.exports = {
   create,
   update,
   query,
+  availableStudentsQuery,
   assignStudents: assignStudentsFlexible,
   assignStudentsByCodes,
   removeStudents: assignStudents,

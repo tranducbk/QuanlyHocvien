@@ -54,12 +54,15 @@ export const ENDPOINTS = {
     RESULTS: (id: string) => `/api/training-classes/${id}/results`,
       RESULTS_SUMMARY: (id: string) => `/api/training-classes/${id}/results/summary`,
       RESULTS_EXPORT: (id: string) => `/api/training-classes/${id}/results/export`,
+    AVAILABLE_STUDENTS: (id: string) => `/api/training-classes/${id}/students/available`,
     GRADE_PROPOSALS: (id: string) => `/api/training-classes/${id}/grade-proposals`,
     REVIEW_GRADE_PROPOSAL: (id: string, proposalId: string, decision: "approve" | "reject") => `/api/training-classes/${id}/grade-proposals/${proposalId}/${decision}`,
     COMMANDER: (id: string) => `/api/training-classes/${id}/commander`,
   },
   TRAINING_CLASS_ACADEMIC: {
     MY_SUBJECTS: "/api/training-class-academic/me/subjects",
+    MY_TIME_TABLES: "/api/training-class-academic/me/time-tables",
+    MY_ACHIEVEMENTS: "/api/training-class-academic/me/achievements",
     MY_RESULTS: "/api/training-class-academic/me/results",
     MY_GRADE_PROPOSALS: "/api/training-class-academic/me/grade-proposals",
   },
@@ -74,6 +77,8 @@ export const ENDPOINTS = {
   },
   CLASSES: {
     BASE: "/api/classes",
+    AVAILABLE_STUDENTS: (id: string | number) =>
+      `/api/classes/${id}/available-students`,
     STUDENTS: (id: string | number) => `/api/classes/${id}/students`,
     STUDENT_DETAIL: (id: string | number, userId: string | number) =>
       `/api/classes/${id}/students/${userId}`,

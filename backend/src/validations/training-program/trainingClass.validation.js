@@ -15,6 +15,9 @@ const create = yup.object({
 const commander = yup.object({ commanderId: yup.string().uuid().nullable().defined() }).noUnknown();
 const params = yup.object({ id: yup.string().uuid().required() });
 const student = yup.object({ studentCode: yup.string().trim().max(50).required() }).noUnknown();
+const availableStudentsQuery = yup.object({
+  search: yup.string().trim().min(2).max(100).required(),
+}).noUnknown();
 const semester = yup.object({
   code: yup.number().integer().min(1).max(4).required(),
   schoolYear: yup.string().trim().matches(/^\d{4}-\d{4}$/).required(),
@@ -36,4 +39,4 @@ const timeTable = yup.object({
   }).noUnknown()).max(500).required(),
 }).noUnknown();
 
-module.exports = { create, commander, params, student, semester, semesterParams, subject, timeTable };
+module.exports = { create, commander, params, student, availableStudentsQuery, semester, semesterParams, subject, timeTable };

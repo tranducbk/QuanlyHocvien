@@ -9,6 +9,8 @@ import Select from "@/library/Select";
 import Typography from "@/library/Typography";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { timeTableService } from "@/services/schedules/time-tables";
+import { trainingClassAcademicService } from "@/services/academic-results/training-class-academic";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   ScheduleItem,
   TimeTable,
@@ -39,22 +41,60 @@ const getSemesterLabel = (semester: TimeTableSemester) => {
 
 export default function Main() {
   const [selectedSemesterId, setSelectedSemesterId] = useState("");
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
+  const isCohort = Boolean(trainingSystemCode && trainingSystemCode !== "HE_5");
+
+  const cohortTimeTablesQuery = useQuery({
+    queryKey: [QUERY_KEYS.TRAINING_CLASS_ACADEMIC, "me", "time-tables"],
+    queryFn: trainingClassAcademicService.getMyTimeTables,
+    enabled: isCohort,
+  });
 
   const {
     data: semestersResponse,
-    isLoading: isLoadingSemesters,
-    isError: isSemesterError,
-    error: semesterError,
-    refetch: refetchSemesters,
+    isLoading: isLoadingH5Semesters,
+    isError: isH5SemesterError,
+    error: h5SemesterError,
+    refetch: refetchH5Semesters,
   } = useQuery({
     queryKey: [QUERY_KEYS.STUDENT_TIME_TABLE, "semesters"],
     queryFn: timeTableService.getMyTimeTableSemesters,
+    enabled: trainingSystemCode === "HE_5",
   });
 
-  const semesters = useMemo(
-    () => semestersResponse?.data || [],
-    [semestersResponse]
-  );
+  const semesters = useMemo<TimeTableSemester[]>(() => {
+    if (!isCohort) return semestersResponse?.data || [];
+
+    const cohortSemesters = new Map<string, TimeTableSemester>();
+    for (const timeTable of cohortTimeTablesQuery.data?.data || []) {
+      const semester = timeTable.trainingClassSemester;
+      if (!semester) continue;
+      cohortSemesters.set(semester.id, {
+        id: semester.id,
+        code: semester.code,
+        schoolYearInfo: {
+          id: semester.id,
+          schoolYear: semester.schoolYear,
+        },
+      });
+    }
+    return Array.from(cohortSemesters.values());
+  }, [cohortTimeTablesQuery.data, isCohort, semestersResponse]);
+
+  const isLoadingSemesters = isCohort
+    ? cohortTimeTablesQuery.isLoading
+    : trainingSystemCode === "HE_5" && isLoadingH5Semesters;
+  const isSemesterError = isCohort
+    ? cohortTimeTablesQuery.isError
+    : trainingSystemCode === "HE_5" && isH5SemesterError;
+  const semesterError = isCohort ? cohortTimeTablesQuery.error : h5SemesterError;
+  const refetchSemesters = () => {
+    if (isCohort) {
+      void cohortTimeTablesQuery.refetch();
+      return;
+    }
+    void refetchH5Semesters();
+  };
 
   const activeSemesterId = semesters.some(
     (semester) => semester.id === selectedSemesterId
@@ -69,29 +109,59 @@ export default function Main() {
   );
 
   const {
-    data,
-    isLoading: isLoadingTimeTable,
-    isError: isTimeTableError,
-    error: timeTableError,
-    refetch: refetchTimeTable,
+    data: h5TimeTableResponse,
+    isLoading: isLoadingH5TimeTable,
+    isError: isH5TimeTableError,
+    error: h5TimeTableError,
+    refetch: refetchH5TimeTable,
   } = useQuery({
     queryKey: [QUERY_KEYS.STUDENT_TIME_TABLE, activeSemesterId],
     queryFn: () =>
       timeTableService.getMyTimeTables({
         semesterId: activeSemesterId,
       }),
-    enabled: Boolean(activeSemesterId),
+    enabled: trainingSystemCode === "HE_5" && Boolean(activeSemesterId),
   });
 
+  const isLoadingTimeTable = isCohort
+    ? cohortTimeTablesQuery.isLoading
+    : isLoadingH5TimeTable;
+  const isTimeTableError = isCohort
+    ? cohortTimeTablesQuery.isError
+    : isH5TimeTableError;
+  const timeTableError = isCohort ? cohortTimeTablesQuery.error : h5TimeTableError;
+  const refetchTimeTable = () => {
+    if (isCohort) {
+      void cohortTimeTablesQuery.refetch();
+      return;
+    }
+    void refetchH5TimeTable();
+  };
+
   const timeTable = useMemo<TimeTable>(() => {
-    const timeTables = data?.data || [];
-    const schedules = timeTables.flatMap((item) => item.schedules || []);
+    const cohortTimeTables = isCohort
+      ? cohortTimeTablesQuery.data?.data?.filter((item) => item.semesterId === activeSemesterId) || []
+      : [];
+    const timeTables = isCohort ? [] : h5TimeTableResponse?.data || [];
+    const cohortSchedules: ScheduleItem[] = cohortTimeTables.flatMap((item) =>
+      item.schedules.map((schedule) => ({
+        day: schedule.day === 7 ? "Chủ nhật" : `Thứ ${schedule.day + 1}`,
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
+        room: schedule.room || "",
+        subjectName: schedule.subjectName,
+        week: schedule.week,
+      })),
+    );
+    const schedules = isCohort
+      ? cohortSchedules
+      : timeTables.flatMap((item) => item.schedules || []);
 
     return {
-      id: timeTables[0]?.id || "my-time-table",
+      id: cohortTimeTables[0]?.id || timeTables[0]?.id || "my-time-table",
       userId: timeTables[0]?.userId || "",
       semesterId: activeSemesterId || null,
-      semester: timeTables[0]?.semester || selectedSemester,
+      semester: selectedSemester || timeTables[0]?.semester || null,
       schedules,
       scheduleCount: schedules.length,
       subjectNames: getUniqueStringValues(schedules, "subjectName"),
@@ -99,7 +169,7 @@ export default function Main() {
       createdAt: timeTables[0]?.createdAt || "",
       updatedAt: timeTables[0]?.updatedAt || "",
     };
-  }, [activeSemesterId, data, selectedSemester]);
+  }, [activeSemesterId, cohortTimeTablesQuery.data, h5TimeTableResponse, isCohort, selectedSemester]);
 
   const semesterOptions = useMemo(
     () =>
@@ -117,7 +187,11 @@ export default function Main() {
         { label: "Lịch học" },
       ]}
       title="Lịch học"
-      subtitle="Xem lịch học cá nhân theo ngày và lọc theo từng học kỳ."
+      subtitle={
+        isCohort
+          ? "Xem lịch học chung của lớp theo ngày và học kỳ."
+          : "Xem lịch học cá nhân theo ngày và lọc theo từng học kỳ."
+      }
       isLoading={isLoadingSemesters}
       skeleton={<TimeTableSkeleton />}
       isError={isSemesterError}

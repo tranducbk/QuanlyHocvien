@@ -62,7 +62,7 @@ Quản lý trường, tổ chức/chuyên ngành, trình độ, lớp và xếp 
 
 ### Trạng thái
 
-**Có trong source**.
+**Có trong source**. Với Hệ 5, Chỉ huy có thể tìm và xếp vào lớp các học viên Hệ 5 chưa thuộc lớp, do mình quản lý và phù hợp với cơ sở/tổ chức/trình độ của lớp. Quyền Admin hiện tại không thay đổi.
 
 ## F05 - Kết quả học tập
 
@@ -94,7 +94,7 @@ Quản lý lịch học, tự động/tùy chỉnh cắt cơm và yêu cầu li�
 
 ### Trạng thái
 
-**Có trong source**, cần kiểm thử các luồng hiện hành.
+**Có trong source**, cần kiểm thử các luồng hiện hành. Học viên Hệ 1/3/4/7 xem lịch theo lớp qua API tự phục vụ được scope theo lớp của tài khoản; không dùng API lịch Hệ 5 hoặc bảng quân sự legacy.
 
 ## F07 - Học phí
 
@@ -124,7 +124,11 @@ Quản lý thành tích, hồ sơ thành tích, đề tài và sáng kiến.
 
 **Có trong source**.
 
-Giao diện thành tích Hệ 1/3/4/7 đã bổ sung Năm học, Học kỳ, Nội dung, bộ lọc và nhập/xuất Excel theo lớp được giao. Cần chạy `migrateTrainingClassAchievementDetails.js --apply` trên database đúng và kiểm tra runtime trước khi xác nhận hoàn thành.
+Giao diện thành tích Hệ 1/3/4/7 đã bổ sung Năm học, Học kỳ, Nội dung, bộ lọc và nhập/xuất Excel theo lớp được giao. Cần chạy `migrateTrainingClassRecords.js` và `migrateTrainingClassAchievementDetails.js --apply` trên database đúng, sau đó kiểm tra runtime trước khi xác nhận hoàn thành.
+
+Học viên Hệ 1/3/4/7 xem thành tích cá nhân qua API tự phục vụ được scope theo lớp và tài khoản đã xác thực; dữ liệu bảng thành tích yêu cầu các migration nêu trên.
+
+Học viên Hệ 1/3/4/7 dùng lại các trang chung của Hệ 5 cho tổng quan, kết quả, lịch học và thành tích; giao diện chọn API theo hệ, còn menu không hiển thị học phí hoặc lịch cắt cơm.
 
 ## F09 - Học kỳ
 

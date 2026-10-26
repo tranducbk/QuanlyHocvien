@@ -78,6 +78,12 @@ const getStudents = asyncHandler(async (req, res) => {
   return paginated(res, result.rows, result.pagination);
 });
 
+const getAvailableStudents = asyncHandler(async (req, res) => {
+  await validateOrThrow(s.availableStudentsQuery, req.query);
+  const result = await service.getAvailableStudents(req.params.id, req.query, req.user);
+  return paginated(res, result.rows, result.pagination);
+});
+
 const deleteRecord = asyncHandler(async (req, res) => {
   await service.delete(req.params.id);
   return success(res, null, 'Xóa thành công');
@@ -86,8 +92,8 @@ const deleteRecord = asyncHandler(async (req, res) => {
 const assignStudents = asyncHandler(async (req, res) => {
   await validateOrThrow(s.assignStudents, req.body);
   const result = req.body.studentCodes
-    ? await service.assignStudentsByCodes(req.params.id, req.body.studentCodes || [])
-    : await service.assignStudents(req.params.id, req.body.userIds || []);
+    ? await service.assignStudentsByCodes(req.params.id, req.body.studentCodes || [], req.user)
+    : await service.assignStudents(req.params.id, req.body.userIds || [], req.user);
   return success(res, result, 'Thêm học viên vào lớp thành công');
 });
 
@@ -108,4 +114,4 @@ const removeStudents = asyncHandler(async (req, res) => {
   return success(res, result, 'Đã bỏ học viên khỏi lớp');
 });
 
-module.exports = { create, getAll, getDetail, getStudents, update, delete: deleteRecord, assignStudents, assignStudentsBatch, removeStudents, removeStudent };
+module.exports = { create, getAll, getDetail, getStudents, getAvailableStudents, update, delete: deleteRecord, assignStudents, assignStudentsBatch, removeStudents, removeStudent };

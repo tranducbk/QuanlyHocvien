@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../../controllers/training-program/class.controller.js');
-const { authMiddleware, requireRole, requireAdmin } = require('../../middlewares/auth.middleware.js');
+const { authMiddleware, requireRole, requireAdmin, requireTrainingSystem } = require('../../middlewares/auth.middleware.js');
 
 /**
  * @swagger
@@ -324,6 +324,39 @@ const { authMiddleware, requireRole, requireAdmin } = require('../../middlewares
  *       }
  *     }
  *   },
+ *   "/classes/{id}/available-students": {
+ *     "get": {
+ *       "tags": ["Classes"],
+ *       "summary": "Danh sách học viên Hệ 5 chưa xếp lớp do Chỉ huy quản lý",
+ *       "parameters": [
+ *         {
+ *           "in": "path",
+ *           "name": "id",
+ *           "required": true,
+ *           "schema": { "type": "string" },
+ *           "description": "Mã lớp"
+ *         },
+ *         {
+ *           "in": "query",
+ *           "name": "code",
+ *           "schema": { "type": "string" }
+ *         },
+ *         {
+ *           "in": "query",
+ *           "name": "fullName",
+ *           "schema": { "type": "string" }
+ *         },
+ *         {
+ *           "in": "query",
+ *           "name": "unit",
+ *           "schema": { "type": "string" }
+ *         }
+ *       ],
+ *       "responses": {
+ *         "200": { "description": "User[] + pagination" }
+ *       }
+ *     }
+ *   },
  *   "/classes/{id}/students/batch": {
  *     "post": {
  *       "tags": [
@@ -498,10 +531,16 @@ const { authMiddleware, requireRole, requireAdmin } = require('../../middlewares
 router.use(authMiddleware);
 router.use(requireRole('ADMIN', 'COMMANDER'));
 
+const requireAdminOrHe5Commander = (req, res, next) => {
+  if (req.user?.role === 'ADMIN') return next();
+  return requireTrainingSystem('HE_5')(req, res, next);
+};
+
 router.post('/', requireAdmin, controller.create);
 router.get('/', controller.getAll);
 router.post('/:id/students/batch', requireAdmin, controller.assignStudentsBatch);
-router.post('/:id/students', requireAdmin, controller.assignStudents);
+router.get('/:id/available-students', requireRole('COMMANDER'), requireTrainingSystem('HE_5'), controller.getAvailableStudents);
+router.post('/:id/students', requireAdminOrHe5Commander, controller.assignStudents);
 router.delete('/:id/students', requireAdmin, controller.removeStudents);
 router.delete('/:id/students/:userId', requireAdmin, controller.removeStudent);
 router.get('/:id/students', controller.getStudents);

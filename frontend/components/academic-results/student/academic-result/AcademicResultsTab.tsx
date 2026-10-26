@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { ColumnDef, Row } from "@tanstack/react-table";
+import { useAuthStore } from "@/store/useAuthStore";
 import { HiOutlineChevronRight } from "react-icons/hi";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import useTableQuery from "@/hooks/useTableQuery";
@@ -9,8 +10,11 @@ import Badge from "@/library/Badge";
 import ErrorState from "@/library/ErrorState";
 import Table from "@/library/Table";
 import { academicResultService } from "@/services/academic-results/academic-results";
+import { GradeResult, trainingClassAcademicService } from "@/services/academic-results/training-class-academic";
 import {
   AcademicResultQueryRequest,
+  SemesterResult,
+  SubjectResult,
   YearlyResult,
 } from "@/types/academic-results/student-academic";
 import AcademicResultsSkeleton from "./AcademicResultsSkeleton";
@@ -25,6 +29,7 @@ export type AcademicSubjectRow = {
   gradePoint4?: number | null;
   gradePoint10?: number | null;
   note?: string | null;
+  classification?: string | null;
 };
 
 export type AcademicGroupRow = {
@@ -49,7 +54,108 @@ const getSemesterLabel = (semester?: string | number | null) =>
 
 const formatSummaryValue = (value: number) => value.toLocaleString("vi-VN");
 
+const gradePoint4 = (score: number) =>
+  score >= 8.5 ? 4 : score >= 8 ? 3.5 : score >= 7 ? 3
+    : score >= 6.5 ? 2.5 : score >= 5.5 ? 2 : score >= 5 ? 1.5 : score >= 4 ? 1 : 0;
+
+const average = (values: number[]) =>
+  values.length
+    ? Math.round((values.reduce((total, value) => total + value, 0) / values.length) * 100) / 100
+    : null;
+
+const toCohortYearlyResults = (results: GradeResult[]): YearlyResult[] => {
+  const semesterGroups = new Map<string, SemesterResult>();
+  for (const result of results.filter((item) => item.isBestAttempt)) {
+    const semester = result.trainingClassSemester;
+    const semesterKey = `${semester.schoolYear}:${semester.code}`;
+    if (!semesterGroups.has(semesterKey)) {
+      semesterGroups.set(semesterKey, {
+        id: semester.id,
+        userId: result.profileId,
+        yearlyResultId: semester.schoolYear,
+        semester: String(semester.code),
+        schoolYear: semester.schoolYear,
+        subjectResults: [],
+      });
+    }
+    const semesterResult = semesterGroups.get(semesterKey)!;
+    const score = Number(result.totalScore);
+    const subject: SubjectResult & { classification?: string } = {
+      id: result.id,
+      semesterResultId: semesterResult.id,
+      subjectCode: result.trainingClassSubject.subjectCode,
+      subjectName: result.trainingClassSubject.subjectName,
+      credits: Number(result.trainingClassSubject.credits || 0),
+      gradePoint10: score,
+      gradePoint4: gradePoint4(score),
+      classification: {
+        FAIL: "Không đạt",
+        AVERAGE: "Trung bình",
+        GOOD: "Khá",
+        EXCELLENT: "Giỏi",
+      }[result.classification],
+      note: `Lần thi ${result.attemptNo}`,
+    };
+    semesterResult.subjectResults?.push(subject);
+  }
+
+  const orderedSemesters = Array.from(semesterGroups.values()).sort(
+    (left, right) =>
+      (left.schoolYear || "").localeCompare(right.schoolYear || "") ||
+      Number(left.semester) - Number(right.semester),
+  );
+  const cumulativeSubjects: SubjectResult[] = [];
+  for (const semester of orderedSemesters) {
+    const subjects = semester.subjectResults || [];
+    cumulativeSubjects.push(...subjects);
+    semester.totalCredits = subjects.reduce((total, subject) => total + (subject.credits || 0), 0);
+    semester.averageGrade10 = average(subjects.map((subject) => subject.gradePoint10 || 0));
+    semester.averageGrade4 = average(subjects.map((subject) => subject.gradePoint4 || 0));
+    semester.cumulativeCredits = cumulativeSubjects
+      .filter((subject) => (subject.gradePoint10 || 0) >= 5)
+      .reduce((total, subject) => total + (subject.credits || 0), 0);
+    semester.cumulativeGrade10 = average(cumulativeSubjects.map((subject) => subject.gradePoint10 || 0));
+    semester.cumulativeGrade4 = average(cumulativeSubjects.map((subject) => subject.gradePoint4 || 0));
+    semester.failedSubjects = subjects.filter((subject) => (subject.gradePoint10 || 0) < 5).length;
+  }
+
+  const years = new Map<string, SemesterResult[]>();
+  for (const semester of orderedSemesters) {
+    const schoolYear = semester.schoolYear || "";
+    const yearSemesters = years.get(schoolYear) || [];
+    yearSemesters.push(semester);
+    years.set(schoolYear, yearSemesters);
+  }
+
+  const yearlyResults: YearlyResult[] = [];
+  const yearlyCumulativeSubjects: SubjectResult[] = [];
+  for (const [schoolYear, semesterResults] of years) {
+    const subjects = semesterResults.flatMap((semester) => semester.subjectResults || []);
+    yearlyCumulativeSubjects.push(...subjects);
+    yearlyResults.push({
+      id: schoolYear,
+      userId: semesterResults[0]?.userId || "",
+      schoolYear,
+      semesterResults: [...semesterResults].reverse(),
+      totalCredits: subjects.reduce((total, subject) => total + (subject.credits || 0), 0),
+      totalSubjects: subjects.length,
+      passedSubjects: subjects.filter((subject) => (subject.gradePoint10 || 0) >= 5).length,
+      failedSubjects: subjects.filter((subject) => (subject.gradePoint10 || 0) < 5).length,
+      cumulativeCredits: yearlyCumulativeSubjects
+        .filter((subject) => (subject.gradePoint10 || 0) >= 5)
+        .reduce((total, subject) => total + (subject.credits || 0), 0),
+      averageGrade10: average(subjects.map((subject) => subject.gradePoint10 || 0)),
+      averageGrade4: average(subjects.map((subject) => subject.gradePoint4 || 0)),
+      cumulativeGrade10: average(yearlyCumulativeSubjects.map((subject) => subject.gradePoint10 || 0)),
+      cumulativeGrade4: average(yearlyCumulativeSubjects.map((subject) => subject.gradePoint4 || 0)),
+    });
+  }
+  return yearlyResults.reverse();
+};
+
 export default function AcademicResultsTab() {
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
+  const isCohort = Boolean(trainingSystemCode && trainingSystemCode !== "HE_5");
   const {
     data,
     isLoading,
@@ -58,8 +164,27 @@ export default function AcademicResultsTab() {
     setPagination,
     refetch,
   } = useTableQuery<YearlyResult, AcademicResultQueryRequest>({
-    queryKey: [QUERY_KEYS.STUDENT_RESULTS],
-    fetchData: academicResultService.getAcademicResults,
+    queryKey: isCohort
+      ? [QUERY_KEYS.TRAINING_CLASS_ACADEMIC, "me", "results"]
+      : [QUERY_KEYS.STUDENT_RESULTS],
+    fetchData: async (params) => {
+      if (!isCohort) return academicResultService.getAcademicResults(params);
+
+      const response = await trainingClassAcademicService.getMyResults();
+      const results = toCohortYearlyResults(response.data || []);
+      return {
+        statusCode: response.statusCode,
+        message: response.message,
+        data: results,
+        pagination: {
+          total: results.length,
+          page: 1,
+          limit: Math.max(results.length, 1),
+          totalPages: 1,
+        },
+      };
+    },
+    enabled: trainingSystemCode === "HE_5" || isCohort,
   });
 
   const academicGroups = useMemo<AcademicGroupRow[]>(() => {
@@ -208,12 +333,14 @@ export default function AcademicResultsTab() {
       },
       {
         id: "letterGrade",
-        header: "Điểm chữ",
+        header: isCohort ? "Xếp loại" : "Điểm chữ",
         cell: ({ row }) => {
           if (isSubjectRow(row.original)) {
             return (
               <Badge variant="primary">
-                {row.original.letterGrade || "---"}
+                {isCohort
+                  ? row.original.classification || "---"
+                  : row.original.letterGrade || "---"}
               </Badge>
             );
           }
@@ -247,7 +374,7 @@ export default function AcademicResultsTab() {
         },
       },
     ],
-    []
+    [isCohort]
   );
 
   const renderGroupRow = (row: Row<AcademicTableRow>) => {

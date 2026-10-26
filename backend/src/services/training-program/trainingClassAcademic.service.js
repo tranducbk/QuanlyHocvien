@@ -200,6 +200,45 @@ const listMySubjects = async (student) => {
   });
 };
 
+const listMyTimeTables = async (student) => {
+  const { trainingClass } = await ownStudent(student);
+  const [timeTables, semesters, subjects] = await Promise.all([
+    db.trainingClassTimeTable.findAll({
+      where: { trainingClassId: trainingClass.id },
+      order: [['updatedAt', 'DESC']],
+    }),
+    db.trainingClassSemester.findAll({
+      where: { trainingClassId: trainingClass.id },
+      attributes: ['id', 'code', 'schoolYear'],
+      raw: true,
+    }),
+    db.trainingClassSubject.findAll({
+      where: { trainingClassId: trainingClass.id },
+      attributes: ['id', 'subjectCode', 'subjectName'],
+      raw: true,
+    }),
+  ]);
+  const semesterById = new Map(semesters.map((semester) => [semester.id, semester]));
+  const subjectById = new Map(subjects.map((subject) => [subject.id, subject]));
+  return timeTables.map((timeTable) => ({
+    ...timeTable.get({ plain: true }),
+    trainingClassSemester: semesterById.get(timeTable.semesterId) || null,
+    schedules: timeTable.schedules.map((schedule) => ({
+      ...schedule,
+      subjectCode: subjectById.get(schedule.subjectId)?.subjectCode || null,
+      subjectName: subjectById.get(schedule.subjectId)?.subjectName || null,
+    })),
+  }));
+};
+
+const listMyAchievements = async (student) => {
+  const { trainingClass } = await ownStudent(student);
+  return db.trainingClassAchievement.findAll({
+    where: { trainingClassId: trainingClass.id, studentUserId: student.id },
+    order: [['createdAt', 'DESC']],
+  });
+};
+
 const listMyResults = async (student) => {
   const { profile, trainingClass } = await ownStudent(student);
   const rows = await db.trainingClassResult.findAll({
@@ -291,4 +330,4 @@ const reviewProposal = async (classId, proposalId, status, reviewNote, commander
   }
 };
 
-module.exports = { calculate, summarize, listClassResults, getClassSummary, exportYearlySummary, createResult, listMySubjects, listMyResults, listMyProposals, createProposal, listClassProposals, reviewProposal };
+module.exports = { calculate, summarize, listClassResults, getClassSummary, exportYearlySummary, createResult, listMySubjects, listMyTimeTables, listMyAchievements, listMyResults, listMyProposals, createProposal, listClassProposals, reviewProposal };

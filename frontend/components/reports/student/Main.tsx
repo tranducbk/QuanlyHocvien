@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
+  HiOutlineAcademicCap,
   HiOutlineCalendar,
   HiOutlineCash,
   HiOutlineChartBar,
@@ -17,6 +18,8 @@ import Typography from "@/library/Typography";
 import { DonutChart, TrendChart } from "@/library/charts";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { dashboardService } from "@/services/reports/dashboard";
+import { authService } from "@/services/authentication/auth";
+import { trainingClassAcademicService } from "@/services/academic-results/training-class-academic";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   formatCurrency,
@@ -43,28 +46,104 @@ const formatNumber = (value?: number) => (value ?? 0).toLocaleString("vi-VN");
 
 export default function Main() {
   const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
+  const isCohort = Boolean(trainingSystemCode && trainingSystemCode !== "HE_5");
   const dashboardQuery = useQuery({
     queryKey: [QUERY_KEYS.STUDENT_DASHBOARD],
     queryFn: dashboardService.getStudentDashboard,
+    enabled: trainingSystemCode === "HE_5",
+  });
+  const profileQuery = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE],
+    queryFn: authService.getProfile,
+    enabled: isCohort,
+  });
+  const cohortResultsQuery = useQuery({
+    queryKey: [QUERY_KEYS.TRAINING_CLASS_ACADEMIC, "me", "results"],
+    queryFn: trainingClassAcademicService.getMyResults,
+    enabled: isCohort,
+  });
+  const cohortTimeTablesQuery = useQuery({
+    queryKey: [QUERY_KEYS.TRAINING_CLASS_ACADEMIC, "me", "time-tables"],
+    queryFn: trainingClassAcademicService.getMyTimeTables,
+    enabled: isCohort,
+  });
+  const cohortAchievementsQuery = useQuery({
+    queryKey: [QUERY_KEYS.TRAINING_CLASS_ACADEMIC, "me", "achievements"],
+    queryFn: trainingClassAcademicService.getMyAchievements,
+    enabled: isCohort,
   });
 
   const dashboard = dashboardQuery.data?.data;
   const profile = dashboard?.profile;
   const overview = dashboard?.overview;
 
-  if (trainingSystemCode && trainingSystemCode !== "HE_5") {
+  if (isCohort) {
+    const bestResults = cohortResultsQuery.data?.data?.filter((result) => result.isBestAttempt) ?? [];
+    const averageGrade = bestResults.length
+      ? bestResults.reduce((total, result) => total + Number(result.totalScore), 0) / bestResults.length
+      : null;
+    const passedSubjects = bestResults.filter((result) => Number(result.totalScore) >= 5).length;
+    const schedules = cohortTimeTablesQuery.data?.data?.flatMap((table) =>
+      table.schedules.map((schedule) => ({
+        ...schedule,
+        schoolYear: table.trainingClassSemester?.schoolYear,
+        semesterCode: table.trainingClassSemester?.code,
+      })),
+    ) ?? [];
+    const cohortQueries = [profileQuery, cohortResultsQuery, cohortTimeTablesQuery, cohortAchievementsQuery];
     return (
-      <PageContainer breadcrumb={[{ label: "Tổng quan" }]} title={profile?.fullName || profile?.username || "Học viên"} subtitle={`${profile?.className || "Chưa xếp lớp"} · Theo dõi kết quả học tập, lịch học chung của lớp và lịch trực.`} isLoading={dashboardQuery.isLoading} skeleton={<DashboardSkeleton />} isError={dashboardQuery.isError} onRetry={dashboardQuery.refetch} className="space-y-8">
+      <PageContainer
+        breadcrumb={[{ label: "Tổng quan" }]}
+        title={profileQuery.data?.data?.profile?.fullName || "Học viên"}
+        subtitle="Theo dõi kết quả, lịch học và thành tích cá nhân."
+        isLoading={cohortQueries.some((query) => query.isLoading)}
+        isError={cohortQueries.some((query) => query.isError)}
+        onRetry={() => {
+          void profileQuery.refetch();
+          void cohortResultsQuery.refetch();
+          void cohortTimeTablesQuery.refetch();
+          void cohortAchievementsQuery.refetch();
+        }}
+        className="space-y-8"
+      >
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Điểm trung bình hệ 4" value={formatScore(overview?.cpa4)} helper={`${overview?.credits || 0} môn đã có điểm`} icon={HiOutlineChartBar} tone="primary" />
-          <StatCard label="Môn đạt" value={formatNumber(overview?.passedSubjects)} helper={`${overview?.failedSubjects || 0} môn chưa đạt`} icon={HiOutlineCheckCircle} tone="success" />
-          <StatCard label="Lịch học lớp" value={formatNumber(overview?.scheduleCount)} helper="Lịch áp dụng chung cho cả lớp" icon={HiOutlineCalendar} tone="secondary" />
-          <StatCard label="Đề xuất chờ duyệt" value={formatNumber(overview?.pendingGradeRequests)} helper="Đề xuất điều chỉnh điểm" icon={HiOutlineCheckCircle} tone="warning" />
+          <StatCard label="Điểm trung bình hệ 10" value={formatScore(averageGrade)} helper="Lần thi cao nhất của từng môn" icon={HiOutlineChartBar} tone="primary" />
+          <StatCard label="Môn đã đạt" value={formatNumber(passedSubjects)} helper={`${bestResults.length - passedSubjects} môn chưa đạt`} icon={HiOutlineCheckCircle} tone="success" />
+          <StatCard label="Tiết học lớp" value={formatNumber(schedules.length)} helper="Lịch áp dụng chung cho lớp" icon={HiOutlineCalendar} tone="secondary" />
+          <StatCard label="Thành tích" value={formatNumber(cohortAchievementsQuery.data?.data?.length)} helper="Thành tích cá nhân đã ghi nhận" icon={HiOutlineCheckCircle} tone="warning" />
         </section>
         <section className="grid gap-6 xl:grid-cols-2">
-          <Panel title="Tình trạng môn học"><DonutChart data={dashboard?.charts.subjectStatus || []} /></Panel>
-          <Panel title="Lịch trực gần đây">
-            <div className="space-y-3">{dashboard?.recent.dutySchedules?.length ? dashboard.recent.dutySchedules.map((duty) => <div key={duty.id} className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"><Typography variant="body" weight="semibold">{duty.position}</Typography><Typography variant="caption" color="gray" className="mt-1 block">{duty.workDay}</Typography></div>) : <EmptyLine icon={HiOutlineCalendar} text="Chưa có lịch trực được phân công." />}</div>
+          <Panel title="Kết quả học tập" href="/student/results">
+            <div className="space-y-3">
+              {bestResults.slice(0, 5).map((result) => (
+                <div key={result.id} className="flex items-center justify-between gap-4 rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+                  <div className="min-w-0">
+                    <Typography variant="body" weight="semibold">{result.trainingClassSubject.subjectName}</Typography>
+                    <Typography variant="caption" color="gray" className="mt-1 block">
+                      {result.trainingClassSemester.schoolYear} · Học kỳ {result.trainingClassSemester.code}
+                    </Typography>
+                  </div>
+                  <Badge variant={Number(result.totalScore) >= 5 ? "success" : "warning"}>
+                    {result.totalScore}
+                  </Badge>
+                </div>
+              ))}
+              {!bestResults.length && <EmptyLine icon={HiOutlineAcademicCap} text="Chưa có kết quả học tập." />}
+            </div>
+          </Panel>
+          <Panel title="Lịch học lớp" href="/student/time-table">
+            <div className="space-y-3">
+              {schedules.slice(0, 5).map((schedule, index) => (
+                <div key={`${schedule.subjectId}-${schedule.day}-${schedule.startTime}-${index}`} className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+                  <Typography variant="body" weight="semibold">{schedule.subjectName || "Môn học"}</Typography>
+                  <Typography variant="caption" color="gray" className="mt-1 block">
+                    {schedule.day === 7 ? "Chủ nhật" : `Thứ ${schedule.day + 1}`} · {schedule.startTime}–{schedule.endTime}
+                    {schedule.schoolYear ? ` · HK ${schedule.semesterCode} ${schedule.schoolYear}` : ""}
+                  </Typography>
+                </div>
+              ))}
+              {!schedules.length && <EmptyLine icon={HiOutlineCalendar} text="Chưa có lịch học được công bố." />}
+            </div>
           </Panel>
         </section>
       </PageContainer>

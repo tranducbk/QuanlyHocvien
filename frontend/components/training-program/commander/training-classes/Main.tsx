@@ -26,7 +26,8 @@ const systemNames: Record<string, string> = {
 
 export default function Main({ systemCode, view }: { systemCode: string; view: "overview" | "classes" }) {
   const [selectedClassId, setSelectedClassId] = useState("");
-  const [studentCode, setStudentCode] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<{ id: string; code: string; fullName: string } | null>(null);
   const [assignmentMessage, setAssignmentMessage] = useState("");
   const queryClient = useQueryClient();
   const commanderId = useAuthStore((state) => state.user?.id);
@@ -43,12 +44,21 @@ export default function Main({ systemCode, view }: { systemCode: string; view: "
     queryFn: () => trainingClassService.getStudents(selectedClassId),
     enabled: Boolean(commanderId && selectedClassId),
   });
+  const availableStudentsQuery = useQuery({
+    queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, selectedClassId, "available", studentSearch.trim()],
+    queryFn: () => trainingClassService.searchAvailableStudents(selectedClassId, studentSearch.trim()),
+    enabled: Boolean(commanderId && selectedClassId && studentSearch.trim().length >= 2 && !selectedStudent),
+  });
   const assignStudent = useMutation({
-    mutationFn: () => trainingClassService.assignStudent(selectedClassId, studentCode.trim()),
+    mutationFn: (studentCode: string) => trainingClassService.assignStudent(selectedClassId, studentCode),
     onSuccess: async () => {
-      setStudentCode("");
+      setStudentSearch("");
+      setSelectedStudent(null);
       setAssignmentMessage("Đã xếp học viên vào lớp.");
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, selectedClassId, "students"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, selectedClassId, "students"] }),
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.COMMANDER_TRAINING_CLASSES, commanderId, selectedClassId, "available"] }),
+      ]);
     },
     onError: () => setAssignmentMessage("Không xếp được học viên. Kiểm tra mã học viên, Hệ và Chỉ huy quản lý."),
   });
@@ -66,15 +76,78 @@ export default function Main({ systemCode, view }: { systemCode: string; view: "
         <TrainingClassOverview classes={classes} isLoading={!commanderId || classesQuery.isLoading} />
       ) : <section className="space-y-6">
         {!commanderId || classesQuery.isLoading ? <p>Đang tải lớp...</p> : (
-          <TrainingClassesTable classes={classes} onSelectClass={(id) => { setSelectedClassId(id); setAssignmentMessage(""); }} />
+          <TrainingClassesTable classes={classes} onSelectClass={(id) => {
+            setSelectedClassId(id);
+            setStudentSearch("");
+            setSelectedStudent(null);
+            setAssignmentMessage("");
+          }} />
         )}
         {selectedClassId && (
           <section className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none">
             <Typography variant="h3" weight="bold">Học viên trong lớp {classes.find((item) => item.id === selectedClassId)?.name}</Typography>
-            <form className="mt-4 flex flex-wrap gap-2" onSubmit={(event) => { event.preventDefault(); setAssignmentMessage(""); if (studentCode.trim()) assignStudent.mutate(); }}>
-              <input className="rounded-lg border border-neutral-300 px-3 py-2 dark:bg-neutral-900" value={studentCode} onChange={(event) => setStudentCode(event.target.value)} placeholder="Mã học viên đang quản lý" aria-label="Mã học viên" required />
-              <button className="rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white disabled:opacity-50" disabled={assignStudent.isPending}>Xếp vào lớp</button>
-            </form>
+            <div className="mt-4 flex flex-wrap items-start gap-2">
+              <div className="relative w-full max-w-md">
+                <label htmlFor="managed-student-search" className="sr-only">Tìm học viên do bạn quản lý</label>
+                <input
+                  id="managed-student-search"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:bg-neutral-900"
+                  value={studentSearch}
+                  onChange={(event) => {
+                    setStudentSearch(event.target.value);
+                    setSelectedStudent(null);
+                    setAssignmentMessage("");
+                  }}
+                  placeholder="Tìm học viên do bạn quản lý..."
+                  aria-label="Tìm học viên do bạn quản lý"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-controls="managed-student-options"
+                  aria-expanded={!selectedStudent && studentSearch.trim().length >= 2}
+                />
+                {!selectedStudent && studentSearch.trim().length >= 2 && (
+                  <ul id="managed-student-options" className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900" role="listbox">
+                    {availableStudentsQuery.isLoading ? (
+                      <li className="px-3 py-2 text-sm text-neutral-500">Đang tìm học viên...</li>
+                    ) : availableStudentsQuery.isError ? (
+                      <li className="px-3 py-2 text-sm text-red-600">Không tìm được danh sách học viên. Vui lòng thử lại.</li>
+                    ) : (availableStudentsQuery.data?.data ?? []).length === 0 ? (
+                      <li className="px-3 py-2 text-sm text-neutral-500">Không tìm thấy học viên chưa xếp lớp do bạn quản lý.</li>
+                    ) : (availableStudentsQuery.data?.data ?? []).map((student) => (
+                      <li key={student.id}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={false}
+                          className="w-full px-3 py-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                          onClick={() => {
+                            setSelectedStudent(student);
+                            setStudentSearch(`${student.fullName} (${student.code})`);
+                          }}
+                        >
+                          {student.fullName} <span className="text-neutral-500">({student.code})</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {!selectedStudent && studentSearch.trim().length > 0 && studentSearch.trim().length < 2 && (
+                  <p className="mt-1 text-xs text-neutral-500">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
+                )}
+              </div>
+              <button
+                type="button"
+                className="rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
+                disabled={!selectedStudent || assignStudent.isPending}
+                onClick={() => {
+                  if (!selectedStudent) return;
+                  setAssignmentMessage("");
+                  assignStudent.mutate(selectedStudent.code);
+                }}
+              >
+                {assignStudent.isPending ? "Đang xếp lớp..." : "Xếp vào lớp"}
+              </button>
+            </div>
             {assignmentMessage && <p className="mt-2 text-sm" role="status">{assignmentMessage}</p>}
             {studentsQuery.isLoading ? <p className="mt-4">Đang tải học viên...</p> : studentsQuery.isError ? <p className="mt-4 text-red-600">Không tải được danh sách học viên.</p> : (
               (studentsQuery.data?.data ?? []).length === 0 ? <p className="mt-4 text-neutral-500">Lớp chưa có học viên.</p> :

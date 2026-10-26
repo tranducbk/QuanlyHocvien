@@ -4,11 +4,16 @@ import { useState } from "react";
 import { HiOutlineAcademicCap, HiOutlineDocumentAdd } from "react-icons/hi";
 import PageContainer from "@/library/PageContainer";
 import Tabs from "@/library/Tabs";
+import { useAuthStore } from "@/store/useAuthStore";
 import AcademicResultsTab from "./academic-result/AcademicResultsTab";
 import GradeRequestsTab from "./grade-request/GradeRequestsTab";
 
 export default function Main() {
   const [activeTab, setActiveTab] = useState<"results" | "requests">("results");
+  const trainingSystemCode = useAuthStore(
+    (state) => state.user?.trainingSystemCode
+  );
+  const isCohort = Boolean(trainingSystemCode && trainingSystemCode !== "HE_5");
 
   const handleTabChange = (id: string) => {
     setActiveTab(id as "results" | "requests");
@@ -16,12 +21,17 @@ export default function Main() {
 
   const subtitleByTab = {
     results: "Theo dõi kết quả học tập, điểm từng môn và CPA theo từng học kỳ.",
-    requests: "Theo dõi trạng thái đề xuất chỉnh sửa điểm và gửi yêu cầu mới khi cần.",
+    requests: isCohort
+      ? "Gửi đề xuất điểm và theo dõi trạng thái xử lý."
+      : "Theo dõi trạng thái đề xuất chỉnh sửa điểm và gửi yêu cầu mới khi cần.",
   } satisfies Record<typeof activeTab, string>;
 
   return (
     <PageContainer
-      breadcrumb={[{ label: "Trang chủ", href: "/student" }, { label: "Kết quả học tập" }]}
+      breadcrumb={[
+        { label: "Trang chủ", href: "/student" },
+        { label: "Kết quả học tập" },
+      ]}
       title="Kết quả học tập"
       subtitle={subtitleByTab[activeTab]}
       className="space-y-8"

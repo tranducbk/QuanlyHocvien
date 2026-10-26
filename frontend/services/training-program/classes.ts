@@ -8,7 +8,11 @@ import {
   CreateClassRequest,
   UpdateClassRequest,
 } from "@/types/training-program/classes";
-import { Student, StudentProfileQueryRequest } from "@/types/accounts/user";
+import {
+  Student,
+  StudentProfileQueryRequest,
+  UserDetailResponse,
+} from "@/types/accounts/user";
 
 export const classService = {
   getClasses: async (
@@ -39,6 +43,13 @@ export const classService = {
     params?: StudentProfileQueryRequest
   ): Promise<PaginatedResponse<Student>> => {
     return apiClient.get(ENDPOINTS.CLASSES.STUDENTS(id), { params });
+  },
+
+  getAvailableStudents: async (
+    id: string,
+    params?: StudentProfileQueryRequest
+  ): Promise<PaginatedResponse<UserDetailResponse>> => {
+    return apiClient.get(ENDPOINTS.CLASSES.AVAILABLE_STUDENTS(id), { params });
   },
 
   assignStudentsBatch: async (

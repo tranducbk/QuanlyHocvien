@@ -24,6 +24,7 @@ import {
   NotificationType,
 } from "@/types/notification/notifications";
 import { formatDateTime, textOrDash } from "@/utils/fn-common";
+import { useAuthStore } from "@/store/useAuthStore";
 import NotificationSkeleton from "./NotificationSkeleton";
 
 const notificationTypeMap: Record<
@@ -43,6 +44,7 @@ const getTypeConfig = (type?: string | null) =>
 export default function Main() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const trainingSystemCode = useAuthStore((state) => state.user?.trainingSystemCode);
 
   const {
     data,
@@ -186,9 +188,13 @@ export default function Main() {
         type: "select",
         options: [
           { label: "Điểm", value: "GRADE" },
-          { label: "Cắt cơm", value: "CUT_RICE" },
           { label: "Khen thưởng", value: "ACHIEVEMENT" },
-          { label: "Học phí", value: "TUITION" },
+          ...(trainingSystemCode === "HE_5"
+            ? [
+                { label: "Cắt cơm", value: "CUT_RICE" },
+                { label: "Học phí", value: "TUITION" },
+              ]
+            : []),
           { label: "Chung", value: "GENERAL" },
         ],
       },
@@ -202,7 +208,7 @@ export default function Main() {
         ],
       },
     ],
-    []
+    [trainingSystemCode]
   );
 
   return (
