@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => sequelize.define('TrainingClassResult
   totalScore: { type: DataTypes.DECIMAL(4, 2), allowNull: false },
   classification: { type: DataTypes.STRING(20), allowNull: false },
   enteredBy: { type: DataTypes.UUID, allowNull: false },
+  correctedAt: { type: DataTypes.DATE, allowNull: true },
 }, {
   tableName: 'training_class_results',
   timestamps: true,

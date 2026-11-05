@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const service = require('../../services/training-program/trainingClassAcademic.service.js');
 const validation = require('../../validations/training-program/trainingClassAcademic.validation.js');
+const lifecycle = require('../../services/training-program/gradeLifecycle.service');
 const { success, validateOrThrow } = require('../../utils/response');
 
 const listClassResults = asyncHandler(async (req, res) => {
@@ -46,4 +47,28 @@ const createProposal = asyncHandler(async (req, res) => {
   return success(res, await service.createProposal(req.body, req.user), 'Đã gửi đề xuất điểm', 201);
 });
 
-module.exports = { listClassResults, getClassSummary, exportYearlySummary, createResult, listClassProposals, approveProposal: reviewProposal('APPROVED'), rejectProposal: reviewProposal('REJECTED'), listMySubjects, listMyTimeTables, listMyAchievements, listMyResults, listMyProposals, createProposal };
+const updateResult = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.resultParams, req.params);
+  await validateOrThrow(validation.updateResult, req.body);
+  return success(res, await service.updateResult(req.params.id, req.params.resultId, req.body, req.user), 'Đã sửa điểm và lưu lịch sử');
+});
+const resultHistory = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.resultParams, req.params);
+  return success(res, await lifecycle.history(req.params.id, req.params.resultId, req.user));
+});
+const semesterStatus = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.semesterParams, req.params);
+  return success(res, await lifecycle.status(req.params.id, req.params.semesterId, req.user));
+});
+const closeSemester = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.semesterParams, req.params);
+  await validateOrThrow(validation.closeSemester, req.body);
+  return success(res, await lifecycle.close(req.params.id, req.params.semesterId, req.body.confirmIncomplete === true, req.user), 'Đã chốt điểm học kỳ');
+});
+
+const saveSubjectGrades = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.semesterParams, req.params);
+  await validateOrThrow(validation.bulkGrades, req.body);
+  return success(res, await service.saveSubjectGrades(req.params.id, req.params.semesterId, req.body, req.user), 'Đã lưu bảng điểm và lịch sử');
+});
+module.exports = { saveSubjectGrades, updateResult, resultHistory, semesterStatus, closeSemester, listClassResults, getClassSummary, exportYearlySummary, createResult, listClassProposals, approveProposal: reviewProposal('APPROVED'), rejectProposal: reviewProposal('REJECTED'), listMySubjects, listMyTimeTables, listMyAchievements, listMyResults, listMyProposals, createProposal };

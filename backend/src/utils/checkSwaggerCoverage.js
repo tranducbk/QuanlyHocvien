@@ -49,7 +49,7 @@ const readRouteMethods = () => {
   for (const [relativePath, mountPath] of Object.entries(routeMounts)) {
     const filePath = path.join(routeDir, relativePath);
     const source = fs.readFileSync(filePath, 'utf8');
-    const routePattern = /router\.(get|post|put|delete)\(\s*(['"])([^'"]+)\2/g;
+    const routePattern = /router\.(get|post|put|patch|delete)\(\s*(['"])([^'"]+)\2/g;
 
     for (const match of source.matchAll(routePattern)) {
       const method = match[1].toUpperCase();

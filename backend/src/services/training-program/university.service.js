@@ -1,5 +1,5 @@
 const db = require('../../models');
-const { NotFoundError } = require('../../utils/apiError');
+const { BadRequestError, NotFoundError } = require('../../utils/apiError');
 const { paginateQuery } = require('../../utils/response');
 
 const University = db.university;
@@ -43,7 +43,11 @@ const create = async (data) => {
 
           const levels = orgData.educationLevels
             ? orgData.educationLevels.split(',').map((l) => l.trim()).filter((l) => l)
-            : ['Đại học', 'Thạc sĩ', 'Tiến sĩ'];
+            : ['Cử nhân', 'Kỹ sư'];
+
+          if (levels.some((levelName) => !['Cử nhân', 'Kỹ sư'].includes(levelName))) {
+            throw new BadRequestError('Trình độ đào tạo Hệ 5 chỉ gồm Cử nhân hoặc Kỹ sư');
+          }
 
           for (const levelName of levels) {
             await EducationLevel.create(

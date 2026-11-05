@@ -1,29 +1,6 @@
 const db = require('../../models');
 const { BadRequestError, NotFoundError } = require('../../utils/apiError');
-
-const listOptions = async () => {
-  const [commanders, providers] = await Promise.all([
-    db.user.findAll({
-      where: { role: 'COMMANDER', isActive: true },
-      attributes: ['id', 'username', 'trainingSystemId'],
-      include: [{ model: db.profile, attributes: ['fullName'] }],
-      order: [['username', 'ASC']],
-    }),
-    db.university.findAll({
-      where: { status: 'ACTIVE' },
-      attributes: ['id', 'universityName'],
-      order: [['universityName', 'ASC']],
-    }),
-  ]);
-  return {
-    commanders: commanders.map((user) => ({
-      id: user.id,
-      trainingSystemId: user.trainingSystemId,
-      name: user.Profile?.fullName || user.username,
-    })),
-    providers: providers.map((provider) => ({ id: provider.id, name: provider.universityName })),
-  };
-};
+const { ensureDefaultSemesters } = require('./defaultSemesters');
 
 const list = async (where) => {
   const [classes, systems, programs, versions, commanders, providers] = await Promise.all([
@@ -78,16 +55,26 @@ const listStudents = async (id, commander) => {
 
 const listAvailableStudents = async (id, search, commander) => {
   await getOwnedClass(id, commander);
-  const term = search.trim();
+  const term = (search || '').trim();
+  const where = {
+    trainingClassId: null,
+    [db.Sequelize.Op.or]: [
+      { commanderId: commander.id },
+      { commanderId: null },
+    ],
+  };
+  if (term) {
+    where[db.Sequelize.Op.and] = [
+      {
+        [db.Sequelize.Op.or]: [
+          { fullName: { [db.Sequelize.Op.iLike]: `%${term}%` } },
+          { code: { [db.Sequelize.Op.iLike]: `%${term}%` } },
+        ],
+      },
+    ];
+  }
   const profiles = await db.profile.findAll({
-    where: {
-      commanderId: commander.id,
-      trainingClassId: null,
-      [db.Sequelize.Op.or]: [
-        { fullName: { [db.Sequelize.Op.iLike]: `%${term}%` } },
-        { code: { [db.Sequelize.Op.iLike]: `%${term}%` } },
-      ],
-    },
+    where,
     attributes: ['id', 'code', 'fullName'],
     include: [{
       model: db.user,
@@ -96,7 +83,7 @@ const listAvailableStudents = async (id, search, commander) => {
       required: true,
     }],
     order: [['fullName', 'ASC']],
-    limit: 20,
+    limit: 50,
   });
   return profiles;
 };
@@ -112,14 +99,16 @@ const assignStudent = async (id, studentCode, commander) => db.sequelize.transac
     include: [{ model: db.profile, where: { code: studentCode }, required: true }],
     transaction,
   });
-  if (!student?.Profile || student.Profile.commanderId !== commander.id) {
+  if (!student?.Profile || (student.Profile.commanderId && student.Profile.commanderId !== commander.id)) {
     throw new BadRequestError('Học viên phải thuộc cùng Hệ và do Chỉ huy này quản lý');
   }
   const profile = await db.profile.findByPk(student.Profile.id, { transaction, lock: transaction.LOCK.UPDATE });
   if (profile.trainingClassId && profile.trainingClassId !== id) {
     throw new BadRequestError('Học viên đã thuộc lớp khác; chưa hỗ trợ chuyển lớp');
   }
-  if (!profile.trainingClassId) await profile.update({ trainingClassId: id }, { transaction });
+  if (!profile.trainingClassId) {
+    await profile.update({ trainingClassId: id, commanderId: commander.id }, { transaction });
+  }
   return { id: profile.id, code: profile.code, fullName: profile.fullName, trainingClassId: id };
 });
 
@@ -132,8 +121,17 @@ const listSemesters = async (id, commander) => {
 };
 
 const createSemester = async (id, data, commander) => {
-  await getOwnedClass(id, commander);
+  const trainingClass = await getOwnedClass(id, commander);
+  const system = await db.trainingSystem.findByPk(trainingClass.trainingSystemId);
+  if (system?.code !== 'HE_5' || data.code !== 3) {
+    throw new BadRequestError('HK1 và HK2 được tạo tự động theo niên khóa; chỉ Hệ 5 được thêm kỳ hè');
+  }
   const schoolYear = data.schoolYear.trim();
+  const year = Number(schoolYear.slice(0, 4));
+  if (schoolYear !== `${year}-${year + 1}` || trainingClass.startYear == null || trainingClass.endYear == null
+      || year < trainingClass.startYear || year >= trainingClass.endYear) {
+    throw new BadRequestError('Năm học phải nằm trong niên khóa của lớp');
+  }
   if (await db.trainingClassSemester.findOne({ where: { trainingClassId: id, schoolYear, code: data.code } })) {
     throw new BadRequestError('Học kỳ đã tồn tại trong lớp');
   }
@@ -162,13 +160,21 @@ const listSubjects = async (classId, semesterId, commander) => {
 
 const createSubject = async (classId, semesterId, data, commander) => {
   await getOwnedSemester(classId, semesterId, commander);
-  const subjectCode = data.subjectCode.trim();
-  const subjectName = data.subjectName.trim();
-  if (await db.trainingClassSubject.findOne({ where: { trainingClassId: classId, semesterId, subjectCode } })) {
+  const catalog = data.catalogSubjectId
+    ? await require('./subjectCatalog.service').get(data.catalogSubjectId, commander) : null;
+  const subjectCode = catalog ? catalog.subjectCode : data.subjectCode.trim();
+  const subjectName = catalog ? catalog.subjectName : data.subjectName.trim();
+  const duplicate = catalog
+    ? { [db.Sequelize.Op.or]: [{ subjectCode }, { catalogSubjectId: catalog.id }] } : { subjectCode };
+  if (await db.trainingClassSubject.findOne({ where: { trainingClassId: classId, semesterId, ...duplicate } })) {
     throw new BadRequestError('Mã môn đã tồn tại trong học kỳ của lớp');
   }
   try {
-    return await db.trainingClassSubject.create({ trainingClassId: classId, semesterId, subjectCode, subjectName, credits: data.credits });
+    return await db.trainingClassSubject.create({
+      trainingClassId: classId, semesterId, subjectCode, subjectName,
+      credits: catalog ? catalog.credits : data.credits,
+      ...(catalog ? { catalogSubjectId: catalog.id } : {}),
+    });
   } catch (error) {
     if (error.name === 'SequelizeUniqueConstraintError') throw new BadRequestError('Mã môn đã tồn tại trong học kỳ của lớp');
     throw error;
@@ -216,29 +222,40 @@ const saveTimeTable = async (classId, semesterId, schedules, commander) => {
   });
 };
 
-const checkCommander = async (commanderId, trainingSystemId) => {
-  if (!commanderId) return;
-  const user = await db.user.findByPk(commanderId);
-  if (!user || user.role !== 'COMMANDER' || !user.isActive || user.trainingSystemId !== trainingSystemId) {
-    throw new BadRequestError('Chỉ huy phải đang hoạt động và thuộc cùng Hệ với lớp');
+const slugifyClassCode = (name) => name
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/đ/g, 'd')
+  .replace(/Đ/g, 'D')
+  .toUpperCase()
+  .replace(/[^A-Z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+const buildClassCode = async (trainingSystemId, name) => {
+  const base = slugifyClassCode(name).slice(0, 44) || 'LOP';
+  let code = base;
+  let attempt = 2;
+  while (await db.trainingClass.findOne({ where: { trainingSystemId, code } })) {
+    const suffix = `-${attempt}`;
+    code = `${base.slice(0, 50 - suffix.length)}${suffix}`;
+    attempt += 1;
   }
+  return code;
 };
 
-const create = async (data) => {
-  const system = await db.trainingSystem.findByPk(data.trainingSystemId);
+const create = async (data, commander) => {
+  const system = await db.trainingSystem.findByPk(commander.trainingSystemId);
   if (!system || !system.isActive) throw new BadRequestError('Hệ đào tạo không tồn tại hoặc đã ngừng hoạt động');
   const isHe5 = system.code === 'HE_5';
-  if (isHe5 && !data.educationProviderId) throw new BadRequestError('Lớp Hệ 5 cần cơ sở đào tạo');
   if (!isHe5 && data.educationProviderId) throw new BadRequestError('Cơ sở đào tạo ngoài quân đội chỉ dùng cho Hệ 5');
   if (!isHe5 && (!data.trainingProgramId || !data.curriculumVersionId)) {
-    throw new BadRequestError('Lớp của Hệ này cần chương trình và phiên bản');
+    throw new BadRequestError('Lớp của Hệ này cần chương trình và khóa');
   }
-  if (Boolean(data.trainingProgramId) !== Boolean(data.curriculumVersionId)) {
-    throw new BadRequestError('Chương trình và phiên bản phải được chọn cùng nhau');
+  if (isHe5 && data.curriculumVersionId && !data.trainingProgramId) {
+    throw new BadRequestError('Phải chọn chương trình trước khi chọn khóa');
   }
-  if (data.startYear != null && data.endYear != null && data.endYear < data.startYear) {
-    throw new BadRequestError('Năm kết thúc phải sau hoặc bằng năm bắt đầu');
-  }
+  let startYear = data.startYear ?? null;
+  let endYear = data.endYear ?? null;
   if (data.educationProviderId) {
     const provider = await db.university.findByPk(data.educationProviderId);
     if (!provider || provider.status !== 'ACTIVE') throw new BadRequestError('Cơ sở đào tạo không tồn tại hoặc đã ngừng hoạt động');
@@ -248,28 +265,49 @@ const create = async (data) => {
     if (!program || !program.isActive || program.trainingSystemId !== system.id) {
       throw new BadRequestError('Chương trình không thuộc Hệ đã chọn hoặc đã ngừng hoạt động');
     }
-    const version = await db.curriculumVersion.findByPk(data.curriculumVersionId);
-    if (!version || version.trainingProgramId !== program.id) {
-      throw new BadRequestError('Phiên bản không thuộc chương trình đã chọn');
+    if (data.curriculumVersionId) {
+      const version = await db.curriculumVersion.findByPk(data.curriculumVersionId);
+      if (!version || version.trainingProgramId !== program.id) {
+        throw new BadRequestError('Khóa không thuộc chương trình đã chọn');
+      }
+      if (!isHe5) {
+        if (version.effectiveFrom) {
+          const fromYear = Number(String(version.effectiveFrom).slice(0, 4));
+          if (!Number.isNaN(fromYear)) startYear = fromYear;
+        }
+        if (version.effectiveTo) {
+          const toYear = Number(String(version.effectiveTo).slice(0, 4));
+          if (!Number.isNaN(toYear)) endYear = toYear;
+        }
+      }
     }
   }
-  await checkCommander(data.commanderId, system.id);
-  const code = data.code.trim();
+  if (startYear != null && endYear != null && endYear <= startYear) {
+    throw new BadRequestError('Năm kết thúc phải sau năm bắt đầu');
+  }
+  const code = data.code?.trim() || await buildClassCode(system.id, data.name.trim());
+  if (!isHe5 && (!Number.isInteger(startYear) || !Number.isInteger(endYear))) {
+    throw new BadRequestError('Cần bổ sung năm bắt đầu và năm kết thúc của khóa để tạo học kỳ tự động');
+  }
   if (await db.trainingClass.findOne({ where: { trainingSystemId: system.id, code } })) {
     throw new BadRequestError('Mã lớp đã tồn tại trong Hệ này');
   }
   try {
-    return await db.trainingClass.create({
-      trainingSystemId: system.id,
-      code,
-      name: data.name.trim(),
-      commanderId: data.commanderId || null,
-      educationProviderId: data.educationProviderId || null,
-      trainingProgramId: data.trainingProgramId || null,
-      curriculumVersionId: data.curriculumVersionId || null,
-      startYear: data.startYear ?? null,
-      endYear: data.endYear ?? null,
-      status: 'ACTIVE',
+    return await db.sequelize.transaction(async (transaction) => {
+      const trainingClass = await db.trainingClass.create({
+        trainingSystemId: system.id,
+        code,
+        name: data.name.trim(),
+        commanderId: commander.id,
+        educationProviderId: isHe5 ? data.educationProviderId || null : null,
+        trainingProgramId: data.trainingProgramId || null,
+        curriculumVersionId: data.curriculumVersionId || null,
+        startYear,
+        endYear,
+        status: 'ACTIVE',
+      }, { transaction });
+      await ensureDefaultSemesters(trainingClass, transaction);
+      return trainingClass;
     });
   } catch (error) {
     if (error.name === 'SequelizeUniqueConstraintError') throw new BadRequestError('Mã lớp đã tồn tại trong Hệ này');
@@ -277,15 +315,75 @@ const create = async (data) => {
   }
 };
 
-const assignCommander = async (id, commanderId) => {
-  const trainingClass = await db.trainingClass.findByPk(id);
-  if (!trainingClass) throw new NotFoundError('Không tìm thấy lớp đào tạo');
-  await checkCommander(commanderId, trainingClass.trainingSystemId);
-  if (trainingClass.commanderId !== (commanderId || null) && await db.profile.count({ where: { trainingClassId: id } })) {
-    throw new BadRequestError('Lớp đã có học viên; chưa hỗ trợ đổi Chỉ huy của lớp');
+const updateClass = async (id, data, commander) => {
+  const trainingClass = await getOwnedClass(id, commander);
+  const system = await db.trainingSystem.findByPk(trainingClass.trainingSystemId);
+  if (!system || !system.isActive) throw new BadRequestError('Hệ đào tạo không tồn tại hoặc đã ngừng hoạt động');
+
+  const merged = { ...trainingClass.get({ plain: true }), ...data };
+  const isHe5 = system.code === 'HE_5';
+  if (!isHe5 && merged.educationProviderId) throw new BadRequestError('Cơ sở đào tạo ngoài quân đội chỉ dùng cho Hệ 5');
+  if (!isHe5 && (!merged.trainingProgramId || !merged.curriculumVersionId)) {
+    throw new BadRequestError('Lớp của Hệ này cần chương trình và khóa');
   }
-  await trainingClass.update({ commanderId: commanderId || null });
-  return trainingClass;
+  if (isHe5 && merged.curriculumVersionId && !merged.trainingProgramId) {
+    throw new BadRequestError('Phải chọn chương trình trước khi chọn khóa');
+  }
+  let startYear = merged.startYear ?? null;
+  let endYear = merged.endYear ?? null;
+  if (merged.educationProviderId) {
+    const provider = await db.university.findByPk(merged.educationProviderId);
+    if (!provider || provider.status !== 'ACTIVE') throw new BadRequestError('Cơ sở đào tạo không tồn tại hoặc đã ngừng hoạt động');
+  }
+  if (merged.trainingProgramId) {
+    const program = await db.trainingProgram.findByPk(merged.trainingProgramId);
+    if (!program || !program.isActive || program.trainingSystemId !== system.id) {
+      throw new BadRequestError('Chương trình không thuộc Hệ đã chọn hoặc đã ngừng hoạt động');
+    }
+    if (merged.curriculumVersionId) {
+      const version = await db.curriculumVersion.findByPk(merged.curriculumVersionId);
+      if (!version || version.trainingProgramId !== program.id) {
+        throw new BadRequestError('Khóa không thuộc chương trình đã chọn');
+      }
+      if (!isHe5) {
+        if (version.effectiveFrom) {
+          const fromYear = Number(String(version.effectiveFrom).slice(0, 4));
+          if (!Number.isNaN(fromYear)) startYear = fromYear;
+        }
+        if (version.effectiveTo) {
+          const toYear = Number(String(version.effectiveTo).slice(0, 4));
+          if (!Number.isNaN(toYear)) endYear = toYear;
+        }
+      }
+    }
+  }
+  if (startYear != null && endYear != null && endYear <= startYear) {
+    throw new BadRequestError('Năm kết thúc phải sau năm bắt đầu');
+  }
+  const code = merged.code.trim();
+  if (code !== trainingClass.code && await db.trainingClass.findOne({
+    where: { trainingSystemId: system.id, code, id: { [db.Sequelize.Op.ne]: id } },
+  })) {
+    throw new BadRequestError('Mã lớp đã tồn tại trong Hệ này');
+  }
+  return db.sequelize.transaction(async (transaction) => {
+    const updated = await trainingClass.update({
+      code,
+      name: merged.name.trim(),
+      educationProviderId: isHe5 ? merged.educationProviderId || null : null,
+      trainingProgramId: merged.trainingProgramId || null,
+      curriculumVersionId: merged.curriculumVersionId || null,
+      startYear,
+      endYear,
+    }, { transaction });
+    await ensureDefaultSemesters(updated, transaction);
+    return updated;
+  });
 };
 
-module.exports = { listOptions, list, listMine, listStudents, listAvailableStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };
+const updateClassStatus = async (id, status, commander) => {
+  const trainingClass = await getOwnedClass(id, commander);
+  return trainingClass.update({ status });
+};
+
+module.exports = { listMine, listStudents, listAvailableStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, updateClass, updateClassStatus };

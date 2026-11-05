@@ -75,7 +75,6 @@ export default function Main() {
       helper: "Trường/đơn vị cấp trường",
       icon: HiOutlineOfficeBuilding,
       tone: "primary",
-      href: "/admin/universities",
     },
     {
       label: "Khoa/Đơn vị",
@@ -83,7 +82,6 @@ export default function Main() {
       helper: "Đơn vị trực thuộc",
       icon: HiOutlineCollection,
       tone: "sky",
-      href: "/admin/universities",
     },
     {
       label: "Lớp học",
@@ -91,7 +89,6 @@ export default function Main() {
       helper: "Lớp đang quản lý",
       icon: HiOutlineAcademicCap,
       tone: "success",
-      href: "/admin/classes",
     },
     {
       label: "Học viên",

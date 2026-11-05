@@ -47,7 +47,7 @@ export default function CreateSemesterForm({
   } = useForm<CreateSemesterFormValues>({
     resolver: zodResolver(createSemesterSchema),
     defaultValues: {
-      code: "",
+      code: "3",
       schoolYear: initialSchoolYear,
     },
   });
@@ -60,7 +60,7 @@ export default function CreateSemesterForm({
         term: Number(data.code) as 1 | 2 | 3,
       }),
     invalidateQueryKey: [QUERY_KEYS.SEMESTERS],
-    successMessage: "Thêm học kỳ thành công!",
+    successMessage: "Thêm kỳ hè thành công!",
     errorMessage: "Đã có lỗi xảy ra!",
     onSuccess: () => closeModal(),
   });
@@ -78,9 +78,9 @@ export default function CreateSemesterForm({
             label="Học kỳ"
             placeholder="Chọn học kỳ"
             prefixIcon={<HiOutlineAcademicCap />}
-            options={[1, 2, 3].map((semester) => ({
+            options={[3].map((semester) => ({
               value: String(semester),
-              label: `Học kỳ ${semester}`,
+              label: semester === 3 ? "Kỳ hè" : `Học kỳ ${semester}`,
             }))}
             value={field.value}
             onChange={(value) => field.onChange(String(value))}

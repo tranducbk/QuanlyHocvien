@@ -12,6 +12,7 @@ export type GradeResult = Omit<GradeInput, "midtermScore" | "finalScore"> & {
   profileId: string;
   trainingClassId: string;
   semesterId: string;
+  correctedAt?: string | null;
   totalScore: string;
   midtermScore: string;
   finalScore: string;
@@ -19,7 +20,7 @@ export type GradeResult = Omit<GradeInput, "midtermScore" | "finalScore"> & {
   classification: "FAIL" | "AVERAGE" | "GOOD" | "EXCELLENT";
   profile: { id: string; code: string; fullName: string };
   trainingClassSubject: { id: string; subjectCode: string; subjectName: string; credits?: number };
-  trainingClassSemester: { id: string; code: number; schoolYear: string };
+  trainingClassSemester: { id: string; code: number; schoolYear: string; gradeClosedAt?: string | null };
 };
 export type GradeProposal = Omit<GradeInput, "midtermScore" | "finalScore"> & {
   id: string;
@@ -77,13 +78,23 @@ export type AcademicSummaryRow = {
 };
 
 export const trainingClassAcademicService = {
+  saveSubjectGrades: (classId: string, semesterId: string, data: { subjectId: string; attemptNo: number; rows: SubjectGradeInput[] }): Promise<ApiResponse<GradeResult[]>> =>
+    apiClient.post(ENDPOINTS.TRAINING_CLASSES.SUBJECT_GRADES(classId, semesterId), data),
+  updateResult: (classId: string, resultId: string, data: { midtermScore: number; finalScore: number; reason?: string }): Promise<ApiResponse<GradeResult>> =>
+    apiClient.put(ENDPOINTS.TRAINING_CLASSES.RESULT_ITEM(classId, resultId), data),
+  history: (classId: string, resultId: string): Promise<ApiResponse<GradeRevision[]>> =>
+    apiClient.get(ENDPOINTS.TRAINING_CLASSES.RESULT_HISTORY(classId, resultId)),
+  gradeStatus: (classId: string, semesterId: string): Promise<ApiResponse<GradeStatus>> =>
+    apiClient.get(ENDPOINTS.TRAINING_CLASSES.GRADE_STATUS(classId, semesterId)),
+  closeGrades: (classId: string, semesterId: string, confirmIncomplete: boolean): Promise<ApiResponse<unknown>> =>
+    apiClient.post(ENDPOINTS.TRAINING_CLASSES.CLOSE_GRADES(classId, semesterId), { confirmIncomplete }),
   getClassResults: (classId: string, semesterId?: string): Promise<ApiResponse<GradeResult[]>> =>
     apiClient.get<unknown, ApiResponse<GradeResult[]>>(ENDPOINTS.TRAINING_CLASSES.RESULTS(classId), { params: semesterId ? { semesterId } : {} }),
   getClassSummary: (classId: string): Promise<ApiResponse<{ semesters: AcademicSummaryRow[]; years: AcademicSummaryRow[] }>> =>
     apiClient.get(ENDPOINTS.TRAINING_CLASSES.RESULTS_SUMMARY(classId)),
   exportYearlySummary: (classId: string, params?: Record<string, unknown>): Promise<Blob> =>
     apiClient.get(ENDPOINTS.TRAINING_CLASSES.RESULTS_EXPORT(classId), { params, responseType: "blob" }),
-  createResult: (classId: string, data: GradeInput & { profileId: string }): Promise<ApiResponse<GradeResult>> =>
+  createResult: (classId: string, data: GradeInput & { profileId: string; reason?: string }): Promise<ApiResponse<GradeResult>> =>
     apiClient.post<unknown, ApiResponse<GradeResult>>(ENDPOINTS.TRAINING_CLASSES.RESULTS(classId), data),
   getClassProposals: (classId: string, status?: GradeProposal["status"]): Promise<ApiResponse<GradeProposal[]>> =>
     apiClient.get<unknown, ApiResponse<GradeProposal[]>>(ENDPOINTS.TRAINING_CLASSES.GRADE_PROPOSALS(classId), { params: status ? { status } : {} }),
@@ -102,3 +113,8 @@ export const trainingClassAcademicService = {
   createProposal: (data: GradeInput & { reason: string }): Promise<ApiResponse<GradeProposal>> =>
     apiClient.post<unknown, ApiResponse<GradeProposal>>(ENDPOINTS.TRAINING_CLASS_ACADEMIC.MY_GRADE_PROPOSALS, data),
 };
+
+export type GradeStatus = { gradeClosedAt: string | null; gradeClosedBy: string | null; missing: number; pending: number; studentCount: number; subjectCount: number };
+export type GradeSnapshot = { midtermScore: number; finalScore: number; totalScore: number; classification: string };
+export type GradeRevision = { id: string; changedBy: string; editor?: { username: string }; reason: string | null; beforeScore: GradeSnapshot | null; afterScore: GradeSnapshot; wasClosed: boolean; createdAt: string };
+export type SubjectGradeInput = { profileId: string; resultId?: string; midtermScore: number; finalScore: number; reason?: string; expectedMidtermScore?: number; expectedFinalScore?: number };

@@ -1,5 +1,5 @@
-import Main from "@/components/training-program/admin/training-classes/Main";
+import { redirect } from "next/navigation";
 
 export default function TrainingClassesPage() {
-  return <Main />;
+  redirect("/admin/accounts");
 }

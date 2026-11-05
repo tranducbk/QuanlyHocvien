@@ -1,19 +1,13 @@
 const router = require('express').Router();
 const controller = require('../../controllers/training-program/trainingClass.controller.js');
+const catalogController = require('../../controllers/training-program/subjectCatalog.controller.js');
 const recordsController = require('../../controllers/training-program/trainingClassRecords.controller.js');
 const academicController = require('../../controllers/training-program/trainingClassAcademic.controller.js');
 const { uploadExcel } = require('../../middlewares/upload.middleware.js');
-const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = require('../../middlewares/auth.middleware.js');
+const { authMiddleware, requireRole, requireTrainingSystem } = require('../../middlewares/auth.middleware.js');
 
 /**
  * @swagger
- * /training-classes/options:
- *   get:
- *     tags: [Training Classes]
- *     summary: Admin lấy Chỉ huy và cơ sở đào tạo để tạo lớp
- *     responses:
- *       200:
- *         description: Danh sách lựa chọn
  * /training-classes/mine:
  *   get:
  *     tags: [Training Classes]
@@ -41,8 +35,8 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  *     parameters:
  *       - in: query
  *         name: search
- *         required: true
- *         schema: { type: string, minLength: 2, maxLength: 100 }
+ *         required: false
+ *         schema: { type: string, maxLength: 100 }
  *     responses:
  *       200:
  *         description: Học viên cùng Hệ, thuộc Chỉ huy hiện tại và chưa được xếp lớp
@@ -55,7 +49,7 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  *         description: Danh sách học kỳ
  *   post:
  *     tags: [Training Classes]
- *     summary: Chỉ huy tạo học kỳ cho lớp được giao cùng Hệ
+ *     summary: Chỉ huy Hệ 5 thêm kỳ hè cho lớp; HK1 và HK2 được tạo tự động theo niên khóa
  *     responses:
  *       201:
  *         description: Học kỳ đã tạo
@@ -69,6 +63,22 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  *   post:
  *     tags: [Training Classes]
  *     summary: Chỉ huy thêm môn học trong học kỳ của lớp được giao
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 required: [catalogSubjectId]
+ *                 properties:
+ *                   catalogSubjectId: { type: string, format: uuid }
+ *               - type: object
+ *                 required: [subjectCode, subjectName, credits]
+ *                 properties:
+ *                   subjectCode: { type: string, maxLength: 50 }
+ *                   subjectName: { type: string, maxLength: 255 }
+ *                   credits: { type: integer, minimum: 0, maximum: 100 }
  *     responses:
  *       201:
  *         description: Môn học đã tạo
@@ -209,25 +219,23 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  * /training-classes:
  *   get:
  *     tags: [Training Classes]
- *     summary: Admin xem lớp của năm Hệ
+ *     summary: Chỉ huy xem lớp do mình quản lý trong Hệ được giao
  *     responses:
  *       200:
  *         description: Danh sách lớp
  *   post:
  *     tags: [Training Classes]
- *     summary: Admin tạo lớp trong Hệ đã chọn
+ *     summary: Chỉ huy tạo lớp trong Hệ được giao
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [trainingSystemId, code, name]
+ *             required: [code, name]
  *             properties:
- *               trainingSystemId: { type: string, format: uuid }
  *               code: { type: string }
  *               name: { type: string }
- *               commanderId: { type: string, format: uuid, nullable: true }
  *               educationProviderId: { type: string, format: uuid, nullable: true }
  *               trainingProgramId: { type: string, format: uuid, nullable: true }
  *               curriculumVersionId: { type: string, format: uuid, nullable: true }
@@ -236,13 +244,94 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  *     responses:
  *       201:
  *         description: Đã tạo lớp
- * /training-classes/{id}/commander:
+ * /training-classes/{id}:
  *   put:
  *     tags: [Training Classes]
- *     summary: Admin phân công Chỉ huy cùng Hệ
+ *     summary: Chỉ huy cập nhật lớp do mình quản lý
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code: { type: string }
+ *               name: { type: string }
+ *               educationProviderId: { type: string, format: uuid, nullable: true }
+ *               trainingProgramId: { type: string, format: uuid, nullable: true }
+ *               curriculumVersionId: { type: string, format: uuid, nullable: true }
+ *               startYear: { type: integer, nullable: true }
+ *               endYear: { type: integer, nullable: true }
+ *     responses:
+ *       200:
+ *         description: Đã cập nhật lớp đào tạo
+ *
+ * /training-classes/{id}/status:
+ *   patch:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy kích hoạt hoặc ngừng lớp
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE]
+ *     responses:
+ *       200:
+ *         description: Đã cập nhật trạng thái lớp
+ */
+/**
+ * @swagger
+ * /training-classes/subject-catalog:
+ *   get:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy xem danh mục môn riêng của Hệ 1, 3, 4, 7
+ *     responses:
+ *       200:
+ *         description: Danh mục môn trong Hệ đã xác thực
+ *   post:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy tạo môn trong danh mục của Hệ
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [subjectCode, subjectName, credits]
+ *             properties:
+ *               subjectCode: { type: string, maxLength: 50 }
+ *               subjectName: { type: string, maxLength: 255 }
+ *               credits: { type: integer, minimum: 0, maximum: 100 }
+ *     responses:
+ *       201:
+ *         description: Môn đã tạo
+ * /training-classes/subject-catalog/{subjectId}:
+ *   put:
+ *     tags: [Training Classes]
+ *     summary: Sửa danh mục cùng Hệ, không đổi môn đã gán vào lớp hoặc điểm cũ
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
  *         required: true
  *         schema: { type: string, format: uuid }
  *     requestBody:
@@ -251,24 +340,31 @@ const { authMiddleware, requireAdmin, requireRole, requireTrainingSystem } = req
  *         application/json:
  *           schema:
  *             type: object
- *             required: [commanderId]
+ *             required: [subjectCode, subjectName, credits]
  *             properties:
- *               commanderId: { type: string, format: uuid, nullable: true }
+ *               subjectCode: { type: string, maxLength: 50 }
+ *               subjectName: { type: string, maxLength: 255 }
+ *               credits: { type: integer, minimum: 0, maximum: 100 }
  *     responses:
  *       200:
- *         description: Đã cập nhật Chỉ huy
+ *         description: Danh mục đã cập nhật
  */
 router.use(authMiddleware);
-router.get('/mine', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listMine);
-router.get('/:id/students/available', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listAvailableStudents);
-router.get('/:id/students', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listStudents);
-router.post('/:id/students', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.assignStudent);
-router.get('/:id/semesters', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listSemesters);
-router.post('/:id/semesters', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.createSemester);
-router.get('/:id/semesters/:semesterId/subjects', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.listSubjects);
-router.post('/:id/semesters/:semesterId/subjects', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.createSubject);
-router.get('/:id/semesters/:semesterId/time-table', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.getTimeTable);
-router.put('/:id/semesters/:semesterId/time-table', requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7'), controller.saveTimeTable);
+const catalogCommander = [requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7')];
+router.get('/subject-catalog', ...catalogCommander, catalogController.list);
+router.post('/subject-catalog', ...catalogCommander, catalogController.create);
+router.put('/subject-catalog/:subjectId', ...catalogCommander, catalogController.update);
+const commander = [requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7')];
+router.get('/mine', ...commander, controller.listMine);
+router.get('/:id/students/available', ...commander, controller.listAvailableStudents);
+router.get('/:id/students', ...commander, controller.listStudents);
+router.post('/:id/students', ...commander, controller.assignStudent);
+router.get('/:id/semesters', ...commander, controller.listSemesters);
+router.post('/:id/semesters', ...commander, controller.createSemester);
+router.get('/:id/semesters/:semesterId/subjects', ...commander, controller.listSubjects);
+router.post('/:id/semesters/:semesterId/subjects', ...commander, controller.createSubject);
+router.get('/:id/semesters/:semesterId/time-table', ...commander, controller.getTimeTable);
+router.put('/:id/semesters/:semesterId/time-table', ...commander, controller.saveTimeTable);
 const cohortCommander = [requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_7')];
 router.get('/:id/achievements', ...cohortCommander, recordsController.listAchievements);
 router.post('/:id/achievements', ...cohortCommander, recordsController.createAchievement);
@@ -281,17 +377,62 @@ router.get('/:id/duty-schedules', ...cohortCommander, recordsController.listDuty
 router.post('/:id/duty-schedules', ...cohortCommander, recordsController.createDutySchedule);
 router.put('/:id/duty-schedules/:recordId', ...cohortCommander, recordsController.updateDutySchedule);
 router.delete('/:id/duty-schedules/:recordId', ...cohortCommander, recordsController.deleteDutySchedule);
+/**
+ * @swagger
+ * /training-classes/{id}/results/{resultId}:
+ *   put:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy sửa điểm trong lớp được giao; sau chốt bắt buộc lý do, luôn lưu lịch sử
+ *     responses:
+ *       200:
+ *         description: Điểm và lịch sử được lưu trong cùng transaction
+ * /training-classes/{id}/results/{resultId}/history:
+ *   get:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy xem lịch sử điểm trước/sau và lý do sửa trong lớp được giao
+ *     responses:
+ *       200:
+ *         description: Lịch sử chỉ đọc
+ * /training-classes/{id}/semesters/{semesterId}/grade-status:
+ *   get:
+ *     tags: [Training Classes]
+ *     summary: Trạng thái chốt và số môn còn thiếu điểm/đề xuất chờ duyệt
+ *     responses:
+ *       200:
+ *         description: Trạng thái điểm của lớp và học kỳ
+ * /training-classes/{id}/semesters/{semesterId}/close-grades:
+ *   post:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy chốt điểm học kỳ của lớp, xác nhận nếu còn thiếu dữ liệu
+ *     responses:
+ *       200:
+ *         description: Học kỳ đã chốt; đính chính sau đó yêu cầu lý do
+ */
+/**
+ * @swagger
+ * /training-classes/{id}/semesters/{semesterId}/subject-grades:
+ *   post:
+ *     tags: [Training Classes]
+ *     summary: Chỉ huy lưu nhiều dòng điểm của một môn/lần thi, nguyên tử và có lịch sử
+ *     responses:
+ *       200:
+ *         description: Toàn bộ dòng điểm hợp lệ đã lưu; nếu lỗi một dòng thì rollback tất cả
+ */
+router.post('/:id/semesters/:semesterId/subject-grades', ...cohortCommander, academicController.saveSubjectGrades);
 router.get('/:id/results', ...cohortCommander, academicController.listClassResults);
+router.put('/:id/results/:resultId', ...cohortCommander, academicController.updateResult);
+router.get('/:id/results/:resultId/history', ...cohortCommander, academicController.resultHistory);
+router.get('/:id/semesters/:semesterId/grade-status', ...cohortCommander, academicController.semesterStatus);
+router.post('/:id/semesters/:semesterId/close-grades', ...cohortCommander, academicController.closeSemester);
 router.post('/:id/results', ...cohortCommander, academicController.createResult);
 router.get('/:id/results/summary', ...cohortCommander, academicController.getClassSummary);
 router.get('/:id/results/export', ...cohortCommander, academicController.exportYearlySummary);
 router.get('/:id/grade-proposals', ...cohortCommander, academicController.listClassProposals);
 router.post('/:id/grade-proposals/:proposalId/approve', ...cohortCommander, academicController.approveProposal);
 router.post('/:id/grade-proposals/:proposalId/reject', ...cohortCommander, academicController.rejectProposal);
-router.use(requireAdmin);
-router.get('/options', controller.listOptions);
-router.get('/', controller.list);
-router.post('/', controller.create);
-router.put('/:id/commander', controller.assignCommander);
+router.get('/', ...commander, controller.listMine);
+router.post('/', ...commander, controller.create);
+router.put('/:id', ...commander, controller.update);
+router.patch('/:id/status', ...commander, controller.updateStatus);
 
 module.exports = router;

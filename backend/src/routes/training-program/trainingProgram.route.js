@@ -1,45 +1,45 @@
 const router = require('express').Router();
 const controller = require('../../controllers/training-program/trainingProgram.controller.js');
-const { authMiddleware, requireAdmin } = require('../../middlewares/auth.middleware.js');
+const { authMiddleware, requireRole, requireTrainingSystem } = require('../../middlewares/auth.middleware.js');
 
 /**
  * @swagger
- * /training-programs/systems:
- *   get:
- *     tags: [Training Programs]
- *     summary: Danh mục hệ đào tạo cho Admin
- *     responses:
- *       200:
- *         description: Danh sách hệ đào tạo
  * /training-programs:
  *   get:
  *     tags: [Training Programs]
- *     summary: Danh sách chương trình và phiên bản cho Admin
+ *     summary: Chương trình và khóa trong Hệ của Chỉ huy
+ *     parameters:
+ *       - in: query
+ *         name: universityId
+ *         required: false
+ *         schema: { type: string, format: uuid }
+ *         description: Chỉ áp dụng cho Hệ 5 để lọc chương trình theo trường
  *     responses:
  *       200:
  *         description: Danh sách chương trình
  *   post:
  *     tags: [Training Programs]
- *     summary: Admin tạo chương trình đào tạo
+ *     summary: Chỉ huy tạo chương trình trong Hệ được giao (Hệ 5 chỉ cần trường, ngành, trình độ)
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [trainingSystemId, code, name]
  *             properties:
- *               trainingSystemId: { type: string, format: uuid }
- *               code: { type: string }
- *               name: { type: string }
+ *               code: { type: string, description: 'Bắt buộc với Hệ 1/3/4/7, Hệ 5 tự sinh' }
+ *               name: { type: string, description: 'Bắt buộc với Hệ 1/3/4/7, Hệ 5 tự sinh từ trường/ngành/trình độ' }
  *               description: { type: string }
+ *               universityId: { type: string, format: uuid, nullable: true, description: 'Bắt buộc với Hệ 5' }
+ *               organizationId: { type: string, format: uuid, nullable: true, description: 'Bắt buộc với Hệ 5, phải thuộc universityId' }
+ *               educationLevelId: { type: string, format: uuid, nullable: true, description: 'Bắt buộc với Hệ 5, phải thuộc organizationId' }
  *     responses:
  *       201:
  *         description: Đã tạo chương trình
- * /training-programs/{id}/versions:
- *   post:
+ * /training-programs/{id}:
+ *   put:
  *     tags: [Training Programs]
- *     summary: Admin thêm phiên bản DRAFT
+ *     summary: Chỉ huy cập nhật chương trình trong Hệ được giao
  *     parameters:
  *       - in: path
  *         name: id
@@ -51,21 +51,68 @@ const { authMiddleware, requireAdmin } = require('../../middlewares/auth.middlew
  *         application/json:
  *           schema:
  *             type: object
- *             required: [versionCode, name]
  *             properties:
- *               versionCode: { type: string }
+ *               code: { type: string, description: 'Chỉ dùng cho Hệ 1/3/4/7' }
+ *               name: { type: string, description: 'Chỉ dùng cho Hệ 1/3/4/7' }
+ *               description: { type: string, nullable: true }
+ *               universityId: { type: string, format: uuid, nullable: true, description: 'Bắt buộc với Hệ 5' }
+ *               organizationId: { type: string, format: uuid, nullable: true, description: 'Bắt buộc với Hệ 5, phải thuộc universityId' }
+ *               educationLevelId: { type: string, format: uuid, nullable: true, description: 'Bắt buộc với Hệ 5, phải thuộc organizationId' }
+ *     responses:
+ *       200:
+ *         description: Đã cập nhật chương trình
+ * /training-programs/{id}/status:
+ *   patch:
+ *     tags: [Training Programs]
+ *     summary: Chỉ huy bật hoặc ngừng chương trình trong Hệ được giao
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [isActive]
+ *             properties:
+ *               isActive: { type: boolean }
+ *     responses:
+ *       200:
+ *         description: Đã cập nhật trạng thái chương trình
+ * /training-programs/{id}/versions:
+ *   post:
+ *     tags: [Training Programs]
+ *     summary: Chỉ huy thêm khóa DRAFT cho chương trình trong Hệ được giao (không áp dụng Hệ 5)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               versionCode: { type: string, description: 'Tùy chọn, tự sinh nếu để trống' }
  *               name: { type: string }
  *               effectiveFrom: { type: string, format: date }
  *               effectiveTo: { type: string, format: date }
  *     responses:
  *       201:
- *         description: Đã tạo phiên bản
+ *         description: Đã tạo khóa
  */
 
-router.use(authMiddleware, requireAdmin);
-router.get('/systems', controller.listSystems);
+router.use(authMiddleware, requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7'));
 router.get('/', controller.listPrograms);
 router.post('/', controller.createProgram);
+router.put('/:id', controller.updateProgram);
+router.patch('/:id/status', controller.updateProgramStatus);
 router.post('/:id/versions', controller.createVersion);
 
 module.exports = router;

@@ -15,7 +15,10 @@ import useAppMutation from "@/hooks/useAppMutation";
 import useTableQuery from "@/hooks/useTableQuery";
 import { academicManagementService } from "@/services/academic-results/academic-management";
 import { semesterService } from "@/services/academic-years/semesters";
-import { QUERY_KEYS } from "@/constants/query-keys";
+import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
+import { useModalStore } from "@/store/useModalStore";
+import CreateSchoolYearForm from "@/components/academic-years/commander/CreateSchoolYearForm";
+import CreateSemesterForm from "@/components/academic-years/commander/CreateSemesterForm";
 import {
   SemesterResult,
   YearlyResult,
@@ -24,12 +27,16 @@ import {
 import { downloadBlob, formatScore, textOrDash } from "@/utils/fn-common";
 import StudentSemestersTable from "./StudentSemestersTable";
 import AcademicResultsLayout from "./AcademicResultsLayout";
-import { getAcademicClassification, getClassificationVariant } from "./classification";
+import {
+  getAcademicClassification,
+  getClassificationVariant,
+} from "./classification";
 
 type ResultView = "semester" | "year";
 
 export default function Main() {
   const router = useRouter();
+  const openModal = useModalStore((state) => state.openModal);
   const [activeView, setActiveView] = useState<ResultView>("semester");
 
   const schoolYearsQuery = useQuery({
@@ -95,7 +102,7 @@ export default function Main() {
       },
       {
         id: "unit",
-        header: "Đại đội",
+        header: "Đơn vị",
         enableSorting: false,
         accessorFn: (row) => row.user?.profile?.unit,
         cell: (info) => (
@@ -226,7 +233,10 @@ export default function Main() {
         header: "Xếp loại",
         accessorKey: "academicStatus",
         cell: (info) => {
-          const classification = getAcademicClassification(info.row.original.averageGrade10, info.row.original.academicStatus);
+          const classification = getAcademicClassification(
+            info.row.original.averageGrade10,
+            info.row.original.academicStatus
+          );
           return (
             <Badge
               variant={getClassificationVariant(classification)}
@@ -409,6 +419,38 @@ export default function Main() {
       isLoading={activeQuery.isLoading}
       isError={activeQuery.isError}
       onRetry={activeQuery.refetch}
-    />
+    >
+      <div className="flex flex-wrap items-center gap-3 px-4">
+        <Button
+          variant="outline"
+          onClick={() =>
+            openModal({
+              title: "Thêm năm học",
+              content: <CreateSchoolYearForm />,
+              size: "md",
+              config: { mutationKey: MUTATION_KEYS.CREATE_SCHOOL_YEAR },
+            })
+          }
+        >
+          Thêm năm học
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() =>
+            openModal({
+              title: "Thêm kỳ hè",
+              content: <CreateSemesterForm />,
+              size: "md",
+              config: { mutationKey: MUTATION_KEYS.CREATE_SEMESTER },
+            })
+          }
+        >
+          Thêm kỳ hè
+        </Button>
+        <p className="text-sm text-neutral-500">
+          Mỗi năm học có sẵn HK1 và HK2. Chỉ thêm kỳ hè khi phát sinh.
+        </p>
+      </div>
+    </AcademicResultsLayout>
   );
 }

@@ -35,10 +35,18 @@ const attachSchoolYear = async (data) => {
 
 const createSchoolYear = async (data) => {
   const schoolYear = normalizeSchoolYear(data.schoolYear);
+  const year = Number(schoolYear.slice(0, 4));
+  if (!Number.isInteger(year) || schoolYear !== `${year}-${year + 1}`) {
+    throw new BadRequestError('Năm học phải gồm hai năm liên tiếp, ví dụ 2025-2026');
+  }
   const existed = await SchoolYear.findOne({ where: { schoolYear } });
   if (existed) throw new BadRequestError('Năm học đã tồn tại');
 
-  return SchoolYear.create({ schoolYear });
+  return db.sequelize.transaction(async (transaction) => {
+    const record = await SchoolYear.create({ schoolYear }, { transaction });
+    await Semester.bulkCreate([1, 2].map((code) => ({ schoolYearId: record.id, code })), { transaction });
+    return record;
+  });
 };
 
 const getSchoolYears = async (query = {}) => {
@@ -50,6 +58,9 @@ const getSchoolYears = async (query = {}) => {
 const createTerm = async (data) => {
   const schoolYear = await resolveSchoolYear(data);
   const term = Number(data.term);
+  if (term !== 3 || (data.code !== undefined && Number(data.code) !== 3)) {
+    throw new BadRequestError('HK1 và HK2 được tạo cùng năm học; chỉ cần thêm kỳ hè (kỳ 3)');
+  }
   const code = data.code || buildTermCode(term);
   const existed = await Semester.findOne({ where: { code, schoolYearId: schoolYear.id } });
   if (existed) throw new BadRequestError(`Đã có học kỳ ${term} cho năm học ${schoolYear.schoolYear}`);
@@ -61,6 +72,7 @@ const createTerm = async (data) => {
 };
 
 const create = async (data) => {
+  if (Number(data.code) !== 3) throw new BadRequestError('Chỉ cần thêm kỳ hè (kỳ 3); HK1 và HK2 được tạo tự động');
   await attachSchoolYear(data);
   data.code = Number(data.code);
   const schoolYear = await SchoolYear.findByPk(data.schoolYearId);

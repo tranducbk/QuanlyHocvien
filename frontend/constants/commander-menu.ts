@@ -22,13 +22,13 @@ export type MenuItem = {
 
 export const COHORT_COMMANDER_MENU: MenuItem[] = [
   { title: "Tổng quan", path: "/commander", icon: HiOutlineHome },
+  { title: "Chương trình đào tạo", path: "/commander/training-programs", icon: HiOutlineAcademicCap },
   { title: "Quản lý lớp học", path: "/commander/training-classes", icon: HiOutlineViewGrid },
   { title: "Hồ sơ học viên", path: "/commander/profiles", icon: HiOutlineIdentification },
   { title: "Phê duyệt đề xuất", path: "/commander/approvals", icon: HiOutlineCheckCircle },
   { title: "Quản lý thành tích", path: "/commander/achievements", icon: HiOutlineStop },
   { title: "Lịch học", path: "/commander/time-tables", icon: HiOutlineCalendar },
   { title: "Quản lý học tập", path: "/commander/academic-results", icon: HiOutlineAcademicCap },
-  { title: "Quản lý học kỳ", path: "/commander/semesters", icon: HiOutlineAcademicCap },
   { title: "Môn học", path: "/commander/subjects", icon: HiOutlineAcademicCap },
   { title: "Phân công lịch trực", path: "/commander/duty-schedules", icon: HiOutlineClipboardList },
 ];
@@ -40,13 +40,18 @@ export const COMMANDER_MENU = [
     icon: HiOutlineHome,
   },
   {
+    title: "Chương trình đào tạo",
+    path: "/commander/training-programs",
+    icon: HiOutlineAcademicCap,
+  },
+  {
     title: "Cơ sở đào tạo",
     path: "/commander/universities",
     icon: HiOutlineOfficeBuilding,
   },
   {
     title: "Quản lý lớp học",
-    path: "/commander/classes",
+    path: "/commander/training-classes",
     icon: HiOutlineViewGrid,
   },
   {
@@ -82,11 +87,6 @@ export const COMMANDER_MENU = [
   {
     title: "Quản lý học tập",
     path: "/commander/academic-results",
-    icon: HiOutlineAcademicCap,
-  },
-  {
-    title: "Quản lý học kỳ",
-    path: "/commander/semesters",
     icon: HiOutlineAcademicCap,
   },
   {

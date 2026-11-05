@@ -1,20 +1,49 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
+import { HiOutlinePencil } from "react-icons/hi";
+import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
 import Table from "@/library/Table";
 import Typography from "@/library/Typography";
 import { FilterField } from "@/library/table/TableFilter";
 import useTableQuery from "@/hooks/useTableQuery";
-import { QUERY_KEYS } from "@/constants/query-keys";
+import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
+import { useModalStore } from "@/store/useModalStore";
 import { universityService } from "@/services/training-program/universities";
 import { University, UniversityQueryRequest } from "@/types/training-program/universities";
+import CreateUniversityForm from "./CreateUniversityForm";
+import UpdateUniversityForm from "./UpdateUniversityForm";
 import UniversitySkeleton from "./UniversitySkeleton";
 
 export default function Main() {
+  const { openModal } = useModalStore();
+  const handleOpenCreateModal = useCallback(() => {
+    openModal({
+      title: "Thêm trường đại học",
+      content: <CreateUniversityForm />,
+      size: "md",
+      config: {
+        mutationKey: MUTATION_KEYS.CREATE_UNIVERSITY,
+      },
+    });
+  }, [openModal]);
+  const handleOpenUpdateModal = useCallback(
+    (university: University) => {
+      openModal({
+        title: "Chỉnh sửa trường đại học",
+        content: <UpdateUniversityForm university={university} />,
+        size: "md",
+        config: {
+          mutationKey: MUTATION_KEYS.UPDATE_UNIVERSITY,
+        },
+      });
+    },
+    [openModal]
+  );
   const {
     data,
     isLoading,
@@ -89,8 +118,20 @@ export default function Main() {
           </Badge>
         ),
       },
+      {
+        id: "actions",
+        header: "Hành động",
+        cell: ({ row }) => (
+          <ActionButton
+            tooltipText="Chỉnh sửa trường"
+            icon={HiOutlinePencil}
+            color="blue"
+            onClick={() => handleOpenUpdateModal(row.original)}
+          />
+        ),
+      },
     ],
-    []
+    [handleOpenUpdateModal]
   );
 
   const filterOptions = useMemo<FilterField[]>(
@@ -147,6 +188,8 @@ export default function Main() {
             onSortingChange={setSorting}
             filterFields={filterOptions}
             emptyText="Không tìm thấy cơ sở đào tạo nào phù hợp"
+            onAdd={handleOpenCreateModal}
+            addLabel="Thêm trường đại học"
           />
         </div>
       </div>

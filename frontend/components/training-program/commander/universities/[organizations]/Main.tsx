@@ -7,17 +7,24 @@ import {
   HiOutlineCollection,
   HiOutlineClock,
   HiOutlineChevronDown,
+  HiOutlinePencil,
+  HiOutlinePlus,
   HiOutlineUserGroup,
 } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
+import Button from "@/library/Button";
 import PageContainer from "@/library/PageContainer";
 import Typography from "@/library/Typography";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useModalStore } from "@/store/useModalStore";
 import { organizationService } from "@/services/training-program/organizations";
 import { universityService } from "@/services/training-program/universities";
-import { QUERY_KEYS } from "@/constants/query-keys";
+import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { DEFAULT_PAGE } from "@/constants/constants";
+import type { Organization } from "@/types/training-program/organizations";
+import CreateOrganizationForm from "./CreateOrganizationForm";
+import UpdateOrganizationForm from "./UpdateOrganizationForm";
 import OrganizationLevelsList from "./education-level/OrganizationLevelsList";
 import OrganizationSkeleton from "./OrganizationSkeleton";
 
@@ -27,6 +34,7 @@ interface Props {
 
 export default function Main({ universityId }: Props) {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const { openModal } = useModalStore();
 
   const {
     data: organizations,
@@ -74,6 +82,33 @@ export default function Main({ universityId }: Props) {
     );
   };
 
+  const handleOpenCreateOrgModal = () => {
+    openModal({
+      title: "Thêm chuyên ngành mới",
+      content: <CreateOrganizationForm universityId={universityId} />,
+      size: "md",
+      config: {
+        mutationKey: MUTATION_KEYS.CREATE_ORGANIZATION,
+      },
+    });
+  };
+
+  const handleOpenUpdateOrgModal = (organization: Organization) => {
+    openModal({
+      title: "Chỉnh sửa chuyên ngành",
+      content: (
+        <UpdateOrganizationForm
+          organization={organization}
+          universityId={universityId}
+        />
+      ),
+      size: "md",
+      config: {
+        mutationKey: MUTATION_KEYS.UPDATE_ORGANIZATION,
+      },
+    });
+  };
+
   return (
     <PageContainer
       breadcrumb={[
@@ -88,6 +123,16 @@ export default function Main({ universityId }: Props) {
       isError={isError || isUniversityError}
       onRetry={() => refetch()}
     >
+      <div className="flex justify-end mb-6">
+        <Button
+          onClick={handleOpenCreateOrgModal}
+          className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-primary-700 hover:border-primary-700 transition-all shadow-lg shadow-primary-600/20 cursor-pointer active:scale-95 h-auto"
+          icon={HiOutlinePlus}
+        >
+          Thêm chuyên ngành / Đơn vị
+        </Button>
+      </div>
+
       <div className="space-y-6">
         {organizations && organizations.length > 0 ? (
           <div className="grid gap-4">
@@ -128,14 +173,22 @@ export default function Main({ universityId }: Props) {
                       </div>
                     </div>
                   </button>
-                  <ActionButton
-                    tooltipText="Xem trình độ đào tạo"
-                    icon={HiOutlineChevronDown}
-                    color="neutral"
-                    className={expandedIds.includes(org.id) ? "bg-primary-50 text-primary-600!" : ""}
-                    iconClassName={`transition-transform ${expandedIds.includes(org.id) ? "rotate-180" : ""}`}
-                    onClick={() => toggleExpand(org.id)}
-                  />
+                  <div className="flex items-center gap-1">
+                    <ActionButton
+                      tooltipText="Chỉnh sửa ngành"
+                      icon={HiOutlinePencil}
+                      color="blue"
+                      onClick={() => handleOpenUpdateOrgModal(org)}
+                    />
+                    <ActionButton
+                      tooltipText="Xem trình độ đào tạo"
+                      icon={HiOutlineChevronDown}
+                      color="neutral"
+                      className={expandedIds.includes(org.id) ? "bg-primary-50 text-primary-600!" : ""}
+                      iconClassName={`transition-transform ${expandedIds.includes(org.id) ? "rotate-180" : ""}`}
+                      onClick={() => toggleExpand(org.id)}
+                    />
+                  </div>
                 </div>
                 <AnimatePresence>
                   {expandedIds.includes(org.id) && (

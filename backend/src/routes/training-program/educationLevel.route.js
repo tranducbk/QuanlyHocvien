@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../../controllers/training-program/educationLevel.controller.js');
-const { authMiddleware, requireRole, requireAdmin } = require('../../middlewares/auth.middleware.js');
+const { authMiddleware, requireRole, requireTrainingSystem } = require('../../middlewares/auth.middleware.js');
 
 /**
  * @swagger
@@ -131,12 +131,13 @@ const { authMiddleware, requireRole, requireAdmin } = require('../../middlewares
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
+router.use(requireTrainingSystem('HE_5'));
 
-router.post('/', requireAdmin, controller.create);
+router.post('/', controller.create);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);
-router.put('/:id', requireAdmin, controller.update);
-router.delete('/:id', requireAdmin, controller.delete);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
 
 module.exports = router;

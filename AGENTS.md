@@ -61,7 +61,7 @@ Khi tài liệu mâu thuẫn:
 - Hệ 5 quản lý học viên học tại cơ sở đào tạo ngoài quân đội và có các chức năng riêng được mô tả trong `doc/SPEC.md`.
 - Chỉ huy quản lý học viên và nghiệp vụ thuộc hệ được phân công. Với lớp quân sự, Admin tạo lớp và phân công Chỉ huy; Chỉ huy quản lý học viên trong lớp được giao.
 - Chỉ Chỉ huy được truy cập các API quản lý kết quả học tập; Học viên chỉ xem dữ liệu của mình qua API dành cho Học viên.
-- Điểm đã nhập là bất biến: không có sửa, xóa hoặc mở khóa.
+- Hệ 1/3/4/7: Chỉ huy được sửa điểm trong lớp được giao; sau chốt điểm lớp/học kỳ phải có lý do. Mọi lần ghi/sửa lưu người, thời gian, điểm trước/sau; không xóa điểm hoặc lịch sử. Hệ 5 giữ luồng hiện tại cho đến khi có task chuyển đổi riêng.
 - Admin được xem và chỉnh sửa tài khoản của mọi hệ; chỉ được xem thông tin chính trị nội bộ, không được chỉnh sửa thông tin này hoặc xem điểm nghiệp vụ.
 
 Chi tiết và tiêu chí đầy đủ nằm trong `QLHV.md`.

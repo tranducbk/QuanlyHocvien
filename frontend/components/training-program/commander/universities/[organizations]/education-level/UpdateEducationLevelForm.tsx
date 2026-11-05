@@ -46,7 +46,7 @@ export default function UpdateEducationLevelForm({ level, organizationId }: Prop
     <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-6 py-2">
       <Input
         label="Tên trình độ đào tạo"
-        placeholder="VD: Đại học, Cao đẳng, Sau đại học..."
+        placeholder="Chọn Cử nhân hoặc Kỹ sư"
         prefixIcon={<HiOutlineAcademicCap />}
         error={errors.levelName?.message}
         isLoading={mutation.isPending}

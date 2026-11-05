@@ -241,7 +241,11 @@ export type UpdateOrganizationFormValues = z.infer<
  * Schema validation cho form thêm trình độ (EducationLevel)
  */
 export const createEducationLevelSchema = z.object({
-  levelName: z.string().min(1, "Tên trình độ là bắt buộc"),
+  levelName: z
+    .string()
+    .refine((value) => ["Cử nhân", "Kỹ sư"].includes(value), {
+      message: "Chọn trình độ Cử nhân hoặc Kỹ sư",
+    }),
   organizationId: z.string().min(1, "Organization ID is required"),
 });
 
@@ -253,7 +257,11 @@ export type CreateEducationLevelFormValues = z.infer<
  * Schema validation cho form cập nhật trình độ (EducationLevel)
  */
 export const updateEducationLevelSchema = z.object({
-  levelName: z.string().min(1, "Tên trình độ là bắt buộc"),
+  levelName: z
+    .string()
+    .refine((value) => ["Cử nhân", "Kỹ sư"].includes(value), {
+      message: "Chọn trình độ Cử nhân hoặc Kỹ sư",
+    }),
 });
 
 export type UpdateEducationLevelFormValues = z.infer<

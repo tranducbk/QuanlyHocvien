@@ -52,7 +52,13 @@ export default function proxy(request: NextRequest) {
   }
   if (
     role === ROLES.ADMIN.ROLE &&
-    ["/admin/universities", "/admin/classes", "/admin/military"].some((path) => pathname.startsWith(path))
+    [
+      "/admin/universities",
+      "/admin/classes",
+      "/admin/military",
+      "/admin/training-programs",
+      "/admin/training-classes",
+    ].some((path) => pathname.startsWith(path))
   ) {
     return NextResponse.redirect(new URL("/admin/accounts", request.url));
   }
@@ -76,6 +82,7 @@ export default function proxy(request: NextRequest) {
     isCohort &&
     pathname.startsWith("/commander/") &&
     pathname !== "/commander/training-classes" &&
+    pathname !== "/commander/training-programs" &&
     pathname !== "/commander/profiles" &&
     pathname !== "/commander/semesters" &&
     pathname !== "/commander/subjects" &&
@@ -88,13 +95,6 @@ export default function proxy(request: NextRequest) {
     return NextResponse.redirect(
       new URL("/commander", request.url)
     );
-  }
-  if (
-    role === ROLES.COMMANDER.ROLE &&
-    isHe5 &&
-    pathname === "/commander/training-classes"
-  ) {
-    return NextResponse.redirect(new URL("/commander", request.url));
   }
   if (
     role === ROLES.COMMANDER.ROLE &&

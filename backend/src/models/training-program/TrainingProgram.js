@@ -1,6 +1,9 @@
 module.exports = (sequelize, DataTypes) => sequelize.define('TrainingProgram', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   trainingSystemId: { type: DataTypes.UUID, allowNull: false },
+  universityId: { type: DataTypes.UUID, allowNull: true },
+  organizationId: { type: DataTypes.UUID, allowNull: true },
+  educationLevelId: { type: DataTypes.UUID, allowNull: true },
   code: { type: DataTypes.STRING(50), allowNull: false },
   name: { type: DataTypes.STRING(255), allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: true },

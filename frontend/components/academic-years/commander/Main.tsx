@@ -125,7 +125,7 @@ export default function Main() {
   const handleAddSemester = useCallback(
     (schoolYear?: string) => {
       openModal({
-        title: "Thêm học kỳ mới",
+        title: "Thêm kỳ hè",
         content: <CreateSemesterForm initialSchoolYear={schoolYear || ""} />,
         size: "md",
         config: {
@@ -198,7 +198,7 @@ export default function Main() {
 
           return (
             <Typography variant="body" weight="semibold" color="neutral">
-              Học kỳ {row.code}
+              {row.code === 3 ? "Kỳ hè" : `Học kỳ ${row.code}`}
             </Typography>
           );
         },
@@ -300,6 +300,7 @@ export default function Main() {
         { label: "Quản lý năm học & học kỳ" },
       ]}
       title="Quản lý năm học & học kỳ"
+      subtitle="Mỗi năm học tự có HK1, HK2. Chỉ thêm kỳ hè khi phát sinh."
       isLoading={isSemestersLoading}
       skeleton={<SemesterSkeleton />}
       isError={isSemestersError}
@@ -321,7 +322,7 @@ export default function Main() {
           onBulkUpdate={handleAddSchoolYear}
           bulkUpdateLabel="Thêm năm học"
           onAdd={() => handleAddSemester()}
-          addLabel="Thêm học kỳ"
+          addLabel="Thêm kỳ hè"
         />
       </div>
     </PageContainer>

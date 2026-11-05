@@ -30,7 +30,7 @@ export default function CreateSchoolYearForm() {
     mutationFn: (data: SchoolYearFormValues) =>
       semesterService.createSchoolYear(data),
     invalidateQueryKey: [QUERY_KEYS.SEMESTERS],
-    successMessage: "Tạo năm học thành công!",
+    successMessage: "Đã tạo năm học cùng HK1 và HK2!",
     errorMessage: "Tạo năm học thất bại!",
     onSuccess: () => closeModal(),
   });

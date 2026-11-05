@@ -3,6 +3,8 @@ module.exports = (sequelize, DataTypes) => sequelize.define('TrainingClassSemest
   trainingClassId: { type: DataTypes.UUID, allowNull: false },
   code: { type: DataTypes.INTEGER, allowNull: false },
   schoolYear: { type: DataTypes.STRING(50), allowNull: false },
+  gradeClosedAt: { type: DataTypes.DATE, allowNull: true },
+  gradeClosedBy: { type: DataTypes.UUID, allowNull: true },
 }, {
   tableName: 'training_class_semesters',
   timestamps: true,

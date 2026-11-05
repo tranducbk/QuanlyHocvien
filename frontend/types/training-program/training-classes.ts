@@ -18,16 +18,19 @@ export interface TrainingClass {
   status: string;
 }
 
-export interface TrainingClassOptions {
-  commanders: { id: string; trainingSystemId: string; name: string }[];
-  providers: { id: string; name: string }[];
+export interface CreateTrainingClass {
+  code?: string;
+  name: string;
+  educationProviderId?: string | null;
+  trainingProgramId?: string | null;
+  curriculumVersionId?: string | null;
+  startYear?: number | null;
+  endYear?: number | null;
 }
 
-export interface CreateTrainingClass {
-  trainingSystemId: string;
-  code: string;
-  name: string;
-  commanderId?: string | null;
+export interface UpdateTrainingClass {
+  code?: string;
+  name?: string;
   educationProviderId?: string | null;
   trainingProgramId?: string | null;
   curriculumVersionId?: string | null;

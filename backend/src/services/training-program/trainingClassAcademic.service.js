@@ -1,6 +1,7 @@
 const db = require('../../models');
 const ExcelJS = require('exceljs');
 const { BadRequestError, NotFoundError } = require('../../utils/apiError');
+const lifecycle = require('./gradeLifecycle.service');
 
 const ownClass = async (classId, commander, transaction) => {
   const trainingClass = await db.trainingClass.findOne({
@@ -54,7 +55,7 @@ const calculate = ({ midtermScore, finalScore }) => {
 const resultInclude = [
   { model: db.profile, attributes: ['id', 'code', 'fullName', 'unit', 'trainingClassId'] },
   { model: db.trainingClassSubject, attributes: ['id', 'subjectCode', 'subjectName', 'credits'] },
-  { model: db.trainingClassSemester, attributes: ['id', 'code', 'schoolYear'] },
+  { model: db.trainingClassSemester, attributes: ['id', 'code', 'schoolYear', 'gradeClosedAt'] },
 ];
 
 const markBestAttempt = (rows) => {
@@ -174,6 +175,7 @@ const createResult = async (classId, data, commander) => {
   const grade = calculate(data);
   try {
     return await db.sequelize.transaction(async (transaction) => {
+      await lifecycle.prepareWrite(classId, subject.semesterId, data.reason, commander, transaction);
       await db.profile.findByPk(data.profileId, { transaction, lock: transaction.LOCK.UPDATE });
       const where = { profileId: data.profileId, subjectId: subject.id, attemptNo: data.attemptNo };
       if (await db.trainingClassResult.findOne({ where, transaction })) throw new BadRequestError('Lần thi này đã có điểm chính thức');
@@ -264,6 +266,8 @@ const createProposal = async (data, student) => {
   const where = { profileId: profile.id, subjectId: subject.id, attemptNo: data.attemptNo };
   try {
     return await db.sequelize.transaction(async (transaction) => {
+      const semester = await lifecycle.lockSemester(trainingClass.id, subject.semesterId, transaction);
+      if (semester.gradeClosedAt) throw new BadRequestError('Học kỳ đã chốt. Liên hệ Chỉ huy để ghi nhận hoặc đính chính điểm.');
       await db.profile.findByPk(profile.id, { transaction, lock: transaction.LOCK.UPDATE });
       if (await db.trainingClassResult.findOne({ where, transaction })) throw new BadRequestError('Lần thi này đã có điểm chính thức');
       return db.trainingClassGradeProposal.create({
@@ -297,6 +301,8 @@ const reviewProposal = async (classId, proposalId, status, reviewNote, commander
   if (!candidate) throw new NotFoundError('Không tìm thấy đề xuất trong lớp được giao');
   try {
     return await db.sequelize.transaction(async (transaction) => {
+      if (status === 'APPROVED') await lifecycle.prepareWrite(classId, candidate.semesterId, reviewNote, commander, transaction);
+      else await lifecycle.lockSemester(classId, candidate.semesterId, transaction);
       await db.profile.findByPk(candidate.profileId, { transaction, lock: transaction.LOCK.UPDATE });
       const proposal = await db.trainingClassGradeProposal.findOne({
         where: { id: proposalId, trainingClassId: classId }, transaction, lock: transaction.LOCK.UPDATE,
@@ -330,4 +336,50 @@ const reviewProposal = async (classId, proposalId, status, reviewNote, commander
   }
 };
 
-module.exports = { calculate, summarize, listClassResults, getClassSummary, exportYearlySummary, createResult, listMySubjects, listMyTimeTables, listMyAchievements, listMyResults, listMyProposals, createProposal, listClassProposals, reviewProposal };
+const updateResult = async (classId, resultId, data, commander) => {
+  await ownClass(classId, commander);
+  const candidate = await db.trainingClassResult.findOne({ where: { id: resultId, trainingClassId: classId } });
+  if (!candidate) throw new NotFoundError('Không tìm thấy điểm trong lớp');
+  return db.sequelize.transaction(async (transaction) => {
+    await lifecycle.prepareWrite(classId, candidate.semesterId, data.reason, commander, transaction);
+    const result = await db.trainingClassResult.findOne({ where: { id: resultId, trainingClassId: classId }, transaction, lock: transaction.LOCK.UPDATE });
+    if (!result) throw new NotFoundError('Không tìm thấy điểm trong lớp');
+    return result.update(calculate(data), { transaction });
+  });
+};
+
+const saveSubjectGrades = async (classId, semesterId, data, commander) => {
+  await ownClass(classId, commander);
+  return db.sequelize.transaction(async (transaction) => {
+    await lifecycle.lockSemester(classId, semesterId, transaction);
+    const subject = await subjectInClass(classId, data.subjectId, transaction);
+    if (subject.semesterId !== semesterId) throw new BadRequestError('Môn học không thuộc học kỳ đã chọn');
+    const saved = [];
+    for (const row of [...data.rows].sort((a, b) => a.profileId.localeCompare(b.profileId))) {
+      const profile = await studentInClass(classId, row.profileId, commander, transaction);
+      await db.profile.findByPk(row.profileId, { transaction, lock: transaction.LOCK.UPDATE });
+      await lifecycle.prepareWrite(classId, semesterId, row.reason, commander, transaction);
+      const where = { profileId: row.profileId, subjectId: subject.id, attemptNo: data.attemptNo };
+      const existing = await db.trainingClassResult.findOne({ where, transaction, lock: transaction.LOCK.UPDATE });
+      if (existing) {
+        if (row.resultId !== existing.id || Number(row.expectedMidtermScore) !== Number(existing.midtermScore)
+            || Number(row.expectedFinalScore) !== Number(existing.finalScore)) {
+          throw new BadRequestError(`${profile.code}: điểm đã thay đổi. Tải lại bảng trước khi lưu.`);
+        }
+        saved.push(await existing.update(calculate(row), { transaction }));
+      } else {
+        if (row.resultId) throw new BadRequestError(`${profile.code}: bản ghi điểm không còn khớp. Hãy tải lại.`);
+        if (await db.trainingClassGradeProposal.findOne({ where: { ...where, status: 'PENDING' }, transaction })) {
+          throw new BadRequestError(`${profile.code}: có đề xuất chờ duyệt, cần xử lý đề xuất trước.`);
+        }
+        saved.push(await db.trainingClassResult.create({
+          trainingClassId: classId, semesterId, subjectId: subject.id, profileId: row.profileId,
+          attemptNo: data.attemptNo, ...calculate(row), enteredBy: commander.id,
+        }, { transaction }));
+      }
+    }
+    return saved;
+  });
+};
+
+module.exports = { saveSubjectGrades, calculate, summarize, listClassResults, getClassSummary, exportYearlySummary, createResult, updateResult, listMySubjects, listMyTimeTables, listMyAchievements, listMyResults, listMyProposals, createProposal, listClassProposals, reviewProposal };

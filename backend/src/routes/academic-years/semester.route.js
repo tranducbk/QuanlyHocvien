@@ -140,7 +140,7 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *       "tags": [
  *         "Semesters"
  *       ],
- *       "summary": "CH-08: Tạo năm học",
+ *       "summary": "CH-08: Tạo năm học cùng HK1 và HK2 tự động",
  *       "requestBody": {
  *         "required": true,
  *         "content": {
@@ -207,8 +207,8 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *       "tags": [
  *         "Semesters"
  *       ],
- *       "summary": "CH-08: Tạo học kỳ thuộc năm học",
- *       "description": "Tạo học kỳ 1 hoặc 2 sau khi đã tạo năm học.",
+ *       "summary": "CH-08: Thêm kỳ hè thuộc năm học",
+ *       "description": "HK1 và HK2 được tạo cùng năm học. Chỉ thêm kỳ hè (kỳ 3) khi phát sinh.",
  *       "requestBody": {
  *         "required": true,
  *         "content": {
@@ -232,10 +232,9 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *                 "term": {
  *                   "type": "integer",
  *                   "enum": [
- *                     1,
- *                     2
+ *                     3
  *                   ],
- *                   "example": 1
+ *                   "example": 3
  *                 }
  *               }
  *             }
@@ -254,7 +253,7 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *       "tags": [
  *         "Semesters"
  *       ],
- *       "summary": "CH-08: Thêm học kỳ",
+ *       "summary": "CH-08: Thêm kỳ hè (code 3)",
  *       "requestBody": {
  *         "content": {
  *           "application/json": {

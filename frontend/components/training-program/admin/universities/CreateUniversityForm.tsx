@@ -126,7 +126,7 @@ export default function CreateUniversityForm() {
                       isLoading={mutation.isPending}
                     />
                     <Input
-                      placeholder={`Các Bậc đào tạo (VD: Đại học, Thạc sĩ...) - Mặc định: Đại học, Thạc sĩ, Tiến sĩ`}
+                      placeholder={`Các bậc đào tạo (Cử nhân, Kỹ sư) - Mặc định: Cử nhân, Kỹ sư`}
                       {...register(`organizations.${index}.educationLevels`)}
                       error={errors.organizations?.[index]?.educationLevels?.message}
                       isLoading={mutation.isPending}

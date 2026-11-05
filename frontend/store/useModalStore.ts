@@ -6,6 +6,7 @@ import type { MutationKey } from "@tanstack/react-query";
  * Cấu hình bổ sung cho Modal
  */
 interface ModalConfig {
+  beforeClose?: () => boolean;
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   className?: string;
@@ -23,7 +24,7 @@ interface ModalState {
   footer: React.ReactNode;
   size: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
   config: ModalConfig;
-  
+
   /** Mở modal với các tham số cấu hình */
   openModal: (params: {
     title?: React.ReactNode;
@@ -32,7 +33,7 @@ interface ModalState {
     size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
     config?: ModalConfig;
   }) => void;
-  
+
   /** Đóng modal */
   closeModal: () => void;
 }
@@ -40,23 +41,26 @@ interface ModalState {
 /**
  * Store quản lý trạng thái Modal toàn cục
  */
-export const useModalStore = create<ModalState>((set) => ({
+export const useModalStore = create<ModalState>((set, get) => ({
   isOpen: false,
   title: null,
   content: null,
   footer: null,
   size: "md",
   config: {},
-  
+
   openModal: ({ title, content, footer, size = "md", config = {} }) =>
-    set({ 
-      isOpen: true, 
-      title, 
-      content, 
-      footer, 
-      size, 
-      config 
+    set({
+      isOpen: true,
+      title,
+      content,
+      footer,
+      size,
+      config,
     }),
-    
-  closeModal: () => set({ isOpen: false }),
+
+  closeModal: () => {
+    if (get().config.beforeClose?.() === false) return;
+    set({ isOpen: false });
+  },
 }));

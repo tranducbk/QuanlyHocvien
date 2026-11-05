@@ -20,7 +20,7 @@ export default function GradeEntry({ classes, commanderId }: { classes: Training
     {classId && <Select label="Học kỳ" placeholder="Chọn học kỳ" value={semesterId} onChange={(value) => setSemesterId(String(value))} isLoading={semesters.isLoading} options={(semesters.data?.data ?? []).map((item) => ({ value: item.id, label: `${item.schoolYear} · HK ${item.code}` }))} />}
     {semesterId && (students.isLoading || subjects.isLoading ? <p>Đang tải học viên và môn học...</p>
       : students.isError || subjects.isError ? <p role="alert">Không tải được học viên hoặc môn học.</p>
-      : (students.data?.data?.length ?? 0) > 0 && (subjects.data?.data?.length ?? 0) > 0 ? <ClassGradeForm classId={classId} commanderId={commanderId} students={students.data?.data ?? []} subjects={subjects.data?.data ?? []} />
+      : (students.data?.data?.length ?? 0) > 0 && (subjects.data?.data?.length ?? 0) > 0 ? <ClassGradeForm key={`${classId}:${semesterId}`} classId={classId} commanderId={commanderId} closed={Boolean(semesters.data?.data?.find((item) => item.id === semesterId)?.gradeClosedAt)} students={students.data?.data ?? []} subjects={subjects.data?.data ?? []} />
       : <p>Học kỳ này cần có học viên và môn học để ghi điểm.</p>)}
   </div>;
 }

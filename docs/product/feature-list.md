@@ -76,9 +76,11 @@ Chỉ huy nhập điểm; Học viên xem điểm chính thức.
 
 ### Trạng thái
 
-**Cần thay đổi**: API kết quả môn/học kỳ hiện chỉ còn tạo/nhập/đọc cho Chỉ huy; API sửa/xóa điểm và duyệt đề nghị chỉnh điểm cũ đã được gỡ theo bất biến hiện hành. Service legacy còn hàm sửa/xóa chưa được dọn. Truy vấn kết quả môn/học kỳ/năm và báo cáo Hệ 5 đã được kiểm tra với dữ liệu trên PostgreSQL test: chỉ Chỉ huy được giao đọc được. Route kết quả quân sự legacy tạm trả 403 cho đến khi dữ liệu được phân tách theo hệ trong Phase 005B/005C.
+Hệ 5 hiện giữ API tạo/nhập/đọc điểm, chưa chuyển sang quy trình sửa/chốt mới. Service legacy còn hàm sửa/xóa chưa được dọn; route quân sự legacy vẫn đóng. Quyền xem điểm không mở rộng cho Admin.
 
 API và giao diện kết quả/đề xuất mới cho Hệ 1/3/4/7 đã có trong source, gắn với `training_classes` và công thức giữa kỳ 50%, cuối kỳ 50%. Cần chạy `migrateTrainingClassResults.js` và kiểm tra tích hợp trên PostgreSQL trước khi coi là hoàn thành ở runtime; route quân sự legacy vẫn đóng.
+
+Hệ 1/3/4/7 bổ sung sửa điểm, chốt lớp/học kỳ và lịch sử theo [TASK-008](../tasks/TASK-008-grade-lifecycle.md). Sau chốt bắt buộc lý do khi sửa/bổ sung; không xóa điểm/lịch sử. Chạy `migrateGradeLifecycle.js` sau migration điểm nền để thay trigger bất biến cũ. Chưa kiểm chứng trigger mới trên PostgreSQL thật.
 
 Bảng tổng hợp học kỳ/năm cho Hệ 1/3/4/7 tính từ điểm môn chính thức theo trung bình đều các môn và có xuất Excel năm học. Giao diện dùng chung mẫu bảng, bộ lọc và cột hiển thị. Cần kiểm tra runtime trên dữ liệu thật trước khi xác nhận hoàn thành.
 
@@ -142,7 +144,7 @@ Quản lý năm học và học kỳ phục vụ lịch/điểm.
 
 ### Trạng thái
 
-**Có trong source**.
+Tự sinh HK1 và HK2 theo mỗi năm của niên khóa khi tạo/cập nhật lớp Hệ 1/3/4/7. Hệ 5 tạo năm học kèm hai kỳ thường, thêm kỳ hè khi phát sinh. Dữ liệu cũ cần bổ sung kỳ thiếu theo [TASK-007](../tasks/TASK-007-default-semesters.md); không đổi ID kỳ, môn và điểm đã có.
 
 ## F10 - Thông báo
 
@@ -200,7 +202,7 @@ Quản lý danh mục môn học riêng theo từng hệ.
 
 ### Trạng thái
 
-Quản lý danh mục môn học độc lập theo hệ; Chỉ huy chỉ truy cập môn thuộc hệ được phân công.
+Hệ 1, 3, 4, 7 có danh mục môn độc lập theo hệ, do Chỉ huy cùng hệ tạo/sửa. Chọn môn từ danh mục để thêm vào học kỳ của lớp được giao; môn đã gán giữ snapshot khi danh mục thay đổi. Cần chạy migration trong [TASK-006](../tasks/TASK-006-subject-catalog.md). Hệ 5 giữ nguyên luồng hiện hành.
 
 ## F14 - Quản lý lớp theo hệ
 

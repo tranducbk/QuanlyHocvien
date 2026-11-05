@@ -61,6 +61,8 @@ export interface TableProps<TData> {
   emptyText?: string;
   /** Class CSS bổ sung cho container của bảng */
   className?: string;
+  /** Ép bảng vừa chiều rộng container thay vì cuộn ngang. */
+  fitToContainer?: boolean;
   /** Class CSS cho các hàng (tr) */
   rowClassName?: string;
   /** Lay cac row con de expand tren client */
@@ -102,6 +104,7 @@ const Table = <TData,>({
   defaultFilterOpen = false,
   emptyText = "Không có dữ liệu hiển thị",
   className = "",
+  fitToContainer = false,
   rowClassName = "",
   getSubRows,
   renderGroupRow,
@@ -228,8 +231,24 @@ const Table = <TData,>({
         <div
           className={`w-full rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden bg-white dark:bg-neutral-950 shadow-sm dark:shadow-none transition-colors ${className}`}
         >
-          <div className="overflow-x-auto custom-scrollbar relative">
-            <table className="w-full text-left border-collapse">
+          <div
+            className={`${fitToContainer ? "overflow-x-hidden" : "overflow-x-auto custom-scrollbar"} relative`}
+          >
+            <table
+              className={`w-full text-left border-collapse ${fitToContainer ? "table-fixed" : ""}`}
+            >
+              {fitToContainer && (
+                <colgroup>
+                  {table.getVisibleLeafColumns().map((column) => (
+                    <col
+                      key={column.id}
+                      style={{
+                        width: `${(column.getSize() / table.getTotalSize()) * 100}%`,
+                      }}
+                    />
+                  ))}
+                </colgroup>
+              )}
               <thead className="bg-neutral-50/50 dark:bg-neutral-900/70">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>

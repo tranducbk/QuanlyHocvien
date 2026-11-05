@@ -3,8 +3,6 @@ const service = require('../../services/training-program/trainingClass.service.j
 const validation = require('../../validations/training-program/trainingClass.validation.js');
 const { success, validateOrThrow } = require('../../utils/response');
 
-const listOptions = asyncHandler(async (_req, res) => success(res, await service.listOptions()));
-const list = asyncHandler(async (_req, res) => success(res, await service.list()));
 const listMine = asyncHandler(async (req, res) => success(res, await service.listMine(req.user)));
 const listStudents = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.params, req.params);
@@ -49,12 +47,17 @@ const saveTimeTable = asyncHandler(async (req, res) => {
 });
 const create = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.create, req.body);
-  return success(res, await service.create(req.body), 'Đã tạo lớp đào tạo', 201);
+  return success(res, await service.create(req.body, req.user), 'Đã tạo lớp đào tạo', 201);
 });
-const assignCommander = asyncHandler(async (req, res) => {
+const update = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.params, req.params);
-  await validateOrThrow(validation.commander, req.body);
-  return success(res, await service.assignCommander(req.params.id, req.body.commanderId), 'Đã cập nhật Chỉ huy');
+  await validateOrThrow(validation.update, req.body);
+  return success(res, await service.updateClass(req.params.id, req.body, req.user), 'Đã cập nhật lớp đào tạo');
+});
+const updateStatus = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.params, req.params);
+  await validateOrThrow(validation.status, req.body);
+  return success(res, await service.updateClassStatus(req.params.id, req.body.status, req.user), 'Đã cập nhật trạng thái lớp');
 });
 
-module.exports = { listOptions, list, listMine, listStudents, listAvailableStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, assignCommander };
+module.exports = { listMine, listStudents, listAvailableStudents, assignStudent, listSemesters, createSemester, listSubjects, createSubject, getTimeTable, saveTimeTable, create, update, updateStatus };

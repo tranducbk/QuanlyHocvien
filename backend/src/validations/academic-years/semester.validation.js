@@ -2,7 +2,7 @@ const yup = require('yup');
 const { schoolYear: schoolYearSchema, semesterCode } = require('../common');
 
 const create = yup.object({
-  code: semesterCode().required('Mã học kỳ là bắt buộc'),
+  code: yup.number().integer().oneOf([3], 'Chỉ cần thêm kỳ hè (kỳ 3)').required('Mã học kỳ là bắt buộc'),
   schoolYearId: yup.string().uuid('Mã năm học không hợp lệ').nullable(),
   schoolYear: schoolYearSchema().nullable(),
 }).test('has-school-year', 'Cần truyền schoolYearId hoặc schoolYear', (value) => Boolean(value?.schoolYearId || value?.schoolYear));
@@ -24,7 +24,7 @@ const createTerm = yup.object({
   term: yup.number()
     .typeError('Kỳ học phải là số')
     .integer('Kỳ học phải là số nguyên')
-    .oneOf([1, 2], 'Kỳ học chỉ gồm 1 hoặc 2')
+    .oneOf([3], 'HK1 và HK2 được tạo tự động; chỉ thêm kỳ hè (kỳ 3)')
     .required('Kỳ học là bắt buộc'),
 }).test('has-school-year', 'Cần truyền schoolYearId hoặc schoolYear', (value) => Boolean(value?.schoolYearId || value?.schoolYear));
 

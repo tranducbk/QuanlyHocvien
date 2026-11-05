@@ -3,16 +3,28 @@ const service = require('../../services/training-program/trainingProgram.service
 const validation = require('../../validations/training-program/trainingProgram.validation.js');
 const { success, validateOrThrow } = require('../../utils/response');
 
-const listSystems = asyncHandler(async (_req, res) => success(res, await service.listSystems()));
-const listPrograms = asyncHandler(async (_req, res) => success(res, await service.listPrograms()));
+const listPrograms = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.listProgramsQuery, req.query);
+  return success(res, await service.listPrograms(req.user, req.query));
+});
 const createProgram = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.createProgram, req.body);
-  return success(res, await service.createProgram(req.body), 'Đã tạo chương trình đào tạo', 201);
+  return success(res, await service.createProgram(req.body, req.user), 'Đã tạo chương trình đào tạo', 201);
+});
+const updateProgram = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.versionParams, req.params);
+  await validateOrThrow(validation.updateProgram, req.body);
+  return success(res, await service.updateProgram(req.params.id, req.body, req.user), 'Đã cập nhật chương trình đào tạo');
+});
+const updateProgramStatus = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.versionParams, req.params);
+  await validateOrThrow(validation.updateProgramStatus, req.body);
+  return success(res, await service.updateProgramStatus(req.params.id, req.body.isActive, req.user), 'Đã cập nhật trạng thái chương trình');
 });
 const createVersion = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.versionParams, req.params);
   await validateOrThrow(validation.createVersion, req.body);
-  return success(res, await service.createVersion(req.params.id, req.body), 'Đã tạo phiên bản chương trình', 201);
+  return success(res, await service.createVersion(req.params.id, req.body, req.user), 'Đã tạo khóa chương trình', 201);
 });
 
-module.exports = { listSystems, listPrograms, createProgram, createVersion };
+module.exports = { listPrograms, createProgram, updateProgram, updateProgramStatus, createVersion };
