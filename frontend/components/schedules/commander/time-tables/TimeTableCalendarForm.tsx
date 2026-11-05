@@ -12,6 +12,7 @@ import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 import Button from "@/library/Button";
 import Input from "@/library/Input";
 import MultiSelect from "@/library/MultiSelect";
+import Select, { type SelectOption } from "@/library/Select";
 import TimeRangePicker from "@/library/TimeRangePicker";
 import Typography from "@/library/Typography";
 import { CreateTimeTableFormValues } from "@/utils/validations";
@@ -56,6 +57,8 @@ interface TimeTableCalendarFormProps {
   errors: FieldErrors<TimeTableFormValues>;
   append: UseFieldArrayAppend<TimeTableFormValues, "schedules">;
   remove: UseFieldArrayRemove;
+  subjectOptions?: SelectOption[];
+  roomRequired?: boolean;
 }
 
 interface ScheduleFieldsProps {
@@ -65,6 +68,8 @@ interface ScheduleFieldsProps {
   index: number;
   fieldsLength: number;
   schedulesErrors?: ScheduleError;
+  subjectOptions?: SelectOption[];
+  roomRequired: boolean;
 }
 
 function ScheduleFields({
@@ -74,6 +79,8 @@ function ScheduleFields({
   index,
   fieldsLength,
   schedulesErrors,
+  subjectOptions,
+  roomRequired,
 }: ScheduleFieldsProps) {
   return (
     <>
@@ -127,15 +134,35 @@ function ScheduleFields({
           placeholder="VD: P451"
           error={schedulesErrors?.[index]?.room?.message}
           {...register(`schedules.${index}.room`)}
-          required
+          required={roomRequired}
         />
-        <Input
-          label="Tên môn học"
-          required
-          placeholder="VD: Toán cao cấp"
-          error={schedulesErrors?.[index]?.subjectName?.message}
-          {...register(`schedules.${index}.subjectName`)}
-        />
+        {subjectOptions ? (
+          <Controller
+            control={control}
+            name={`schedules.${index}.subjectId`}
+            render={({ field }) => (
+              <Select
+                label="Môn học"
+                placeholder="Chọn môn của lớp"
+                options={subjectOptions}
+                value={field.value ?? ""}
+                onChange={(value) => field.onChange(String(value))}
+                error={schedulesErrors?.[index]?.subjectId?.message}
+                required
+                filter={{ enabled: true, mode: "client" }}
+                emptyText="Chưa có môn học được xếp cho lớp"
+              />
+            )}
+          />
+        ) : (
+          <Input
+            label="Tên môn học"
+            required
+            placeholder="VD: Toán cao cấp"
+            error={schedulesErrors?.[index]?.subjectName?.message}
+            {...register(`schedules.${index}.subjectName`)}
+          />
+        )}
       </div>
     </>
   );
@@ -148,6 +175,8 @@ export default function TimeTableCalendarForm({
   errors,
   append,
   remove,
+  subjectOptions,
+  roomRequired = true,
 }: TimeTableCalendarFormProps) {
   const schedulesErrors = errors.schedules as ScheduleError | undefined;
 
@@ -207,6 +236,8 @@ export default function TimeTableCalendarForm({
                         index={index}
                         fieldsLength={fields.length}
                         schedulesErrors={schedulesErrors}
+                        subjectOptions={subjectOptions}
+                        roomRequired={roomRequired}
                       />
                     </div>
                   ))}

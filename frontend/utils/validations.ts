@@ -383,6 +383,7 @@ export const scheduleItemSchema = z.object({
   }),
   room: z.string().min(1, "Phòng học là bắt buộc"),
   subjectName: z.string().min(1, "Môn học là bắt buộc"),
+  subjectId: z.string().optional(),
   week: z
     .array(
       z
