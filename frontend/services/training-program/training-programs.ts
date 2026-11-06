@@ -6,6 +6,7 @@ import type {
   CreateTrainingProgram,
   CreateCurriculumVersion,
   UpdateTrainingProgram,
+  UpdateCurriculumVersion,
 } from "@/types/training-program/training-programs";
 
 export const trainingProgramService = {
@@ -19,4 +20,6 @@ export const trainingProgramService = {
     apiClient.patch<unknown, ApiResponse<TrainingProgram>>(ENDPOINTS.TRAINING_PROGRAMS.PROGRAM_STATUS(id), { isActive }),
   createVersion: (programId: string, data: CreateCurriculumVersion): Promise<ApiResponse<CurriculumVersion>> =>
     apiClient.post<unknown, ApiResponse<CurriculumVersion>>(ENDPOINTS.TRAINING_PROGRAMS.VERSIONS(programId), data),
+  updateVersion: (programId: string, versionId: string, data: UpdateCurriculumVersion): Promise<ApiResponse<CurriculumVersion>> =>
+    apiClient.put<unknown, ApiResponse<CurriculumVersion>>(ENDPOINTS.TRAINING_PROGRAMS.VERSION(programId, versionId), data),
 };

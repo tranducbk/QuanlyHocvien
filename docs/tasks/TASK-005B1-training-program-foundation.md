@@ -11,9 +11,15 @@ Tạo `TrainingProgram` thuộc đúng một trong năm Hệ và `CurriculumVers
 ## Phạm vi
 
 - Thêm bảng `training_programs` với `training_system_id`, `code`, `name`, `description`, `is_active`, timestamps. Mã chương trình duy nhất trong mỗi Hệ.
-- Thêm bảng `curriculum_versions` với `training_program_id`, `version_code`, `name`, `effective_from`, `effective_to`, `status`, timestamps. Mã phiên bản duy nhất trong mỗi chương trình; ngày kết thúc không trước ngày bắt đầu.
+- Thêm bảng `curriculum_versions` với `training_program_id`, `version_code`, `name`, `start_year`, `end_year`, `status`, timestamps. Mã phiên bản duy nhất trong mỗi chương trình; năm kết thúc phải sau năm bắt đầu.
 - Thêm model Sequelize và quan hệ với `TrainingSystem`.
 - Migration chỉ thêm cấu trúc, chạy lặp được, không tự tạo chương trình và không sửa dữ liệu legacy.
+
+### Cập nhật cách lưu niên khóa
+
+Thời gian khóa được lưu thành hai trường số nguyên `start_year` và `end_year`. API nhận năm trong khoảng 1945–2100; UI dùng thanh trượt chọn năm. Với database đã có hai cột ngày cũ, migration `backend/src/utils/migrateCurriculumVersionYears.js` đổi kiểu cột và giữ lại phần năm. Trước khi áp dụng trên database cần nâng cấp, chạy `node src/utils/migrateCurriculumVersionYears.js --report` và `--dry-run`; migration dừng nếu có năm ngoài khoảng hỗ trợ. Chỉ chạy `--apply` sau khi xác nhận báo cáo, backup và database đích. Database mới tạo có thể chạy script migration cơ sở trước, sau đó chạy migration năm (idempotent với schema mới).
+
+Trong màn hình Chỉ huy, modal chương trình hiển thị tối đa bốn khóa mỗi trang theo lưới responsive; thao tác thêm hoặc sửa chuyển sang biểu mẫu trong cùng modal. Modal được giới hạn theo chiều cao viewport và không cuộn nội bộ.
 
 `status` của phiên bản bắt đầu ở `DRAFT`; chưa có API chuyển trạng thái hoặc gán phiên bản cho lớp trong lát cắt này. `CurriculumSubject` phụ thuộc `AcademicSubject` của Phase 005C nên triển khai sau khi danh mục môn chuẩn tồn tại. Admin được tự nhập chương trình và phiên bản qua màn hình quản trị; quyền gán chương trình cho lớp sẽ chốt trong task triển khai sau.
 

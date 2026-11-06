@@ -26,5 +26,10 @@ const createVersion = asyncHandler(async (req, res) => {
   await validateOrThrow(validation.createVersion, req.body);
   return success(res, await service.createVersion(req.params.id, req.body, req.user), 'Đã tạo khóa chương trình', 201);
 });
+const updateVersion = asyncHandler(async (req, res) => {
+  await validateOrThrow(validation.versionParams, req.params);
+  await validateOrThrow(validation.updateVersion, req.body);
+  return success(res, await service.updateVersion(req.params.id, req.params.versionId, req.body, req.user), 'Đã cập nhật tên khóa');
+});
 
-module.exports = { listPrograms, createProgram, updateProgram, updateProgramStatus, createVersion };
+module.exports = { listPrograms, createProgram, updateProgram, updateProgramStatus, createVersion, updateVersion };

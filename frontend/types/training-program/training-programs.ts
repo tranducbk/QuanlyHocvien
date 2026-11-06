@@ -10,8 +10,8 @@ export interface CurriculumVersion {
   trainingProgramId: string;
   versionCode: string;
   name: string;
-  effectiveFrom: string | null;
-  effectiveTo: string | null;
+  startYear: number | null;
+  endYear: number | null;
   status: string;
 }
 
@@ -71,6 +71,12 @@ export interface UpdateTrainingProgram {
 export interface CreateCurriculumVersion {
   versionCode?: string;
   name: string;
-  effectiveFrom?: string | null;
-  effectiveTo?: string | null;
+  startYear: number;
+  endYear: number;
+}
+
+export interface UpdateCurriculumVersion {
+  name: string;
+  startYear: number;
+  endYear: number;
 }

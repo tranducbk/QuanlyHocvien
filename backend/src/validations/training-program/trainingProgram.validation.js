@@ -1,11 +1,12 @@
 const yup = require('yup');
 
-const isoDate = yup.string().nullable().test('iso-date', 'Ngày phải có định dạng YYYY-MM-DD', (value) => {
-  if (!value) return true;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-});
+const MIN_YEAR = 1945;
+const MAX_YEAR = 2100;
+const courseYear = (label) => yup.number()
+  .integer(`${label} phải là năm hợp lệ`)
+  .min(MIN_YEAR, `${label} không được trước năm ${MIN_YEAR}`)
+  .max(MAX_YEAR, `${label} không được sau năm ${MAX_YEAR}`)
+  .required(`${label} là bắt buộc`);
 
 const placementFields = {
   universityId: yup.string().uuid('Trường không hợp lệ').nullable(),
@@ -40,10 +41,24 @@ const updateProgramStatus = yup.object({
 const createVersion = yup.object({
   versionCode: yup.string().trim().max(50),
   name: yup.string().trim().max(255).required('Tên khóa là bắt buộc'),
-  effectiveFrom: isoDate,
-  effectiveTo: isoDate,
-}).noUnknown();
+  startYear: courseYear('Năm bắt đầu khóa học'),
+  endYear: courseYear('Năm kết thúc khóa học'),
+}).noUnknown().test(
+  'date-order',
+  'Năm kết thúc phải sau năm bắt đầu',
+  (value) => !value?.startYear || !value?.endYear || value.endYear > value.startYear,
+);
+
+const updateVersion = yup.object({
+  name: yup.string().trim().min(1, 'Tên khóa không được để trống').max(255).required('Tên khóa là bắt buộc'),
+  startYear: courseYear('Năm bắt đầu khóa học'),
+  endYear: courseYear('Năm kết thúc khóa học'),
+}).noUnknown().test(
+  'date-order',
+  'Năm kết thúc phải sau năm bắt đầu',
+  (value) => !value?.startYear || !value?.endYear || value.endYear > value.startYear,
+);
 
 const versionParams = yup.object({ id: yup.string().uuid().required(), versionId: yup.string().uuid() });
 
-module.exports = { listProgramsQuery, createProgram, updateProgram, updateProgramStatus, createVersion, versionParams };
+module.exports = { listProgramsQuery, createProgram, updateProgram, updateProgramStatus, createVersion, updateVersion, versionParams };

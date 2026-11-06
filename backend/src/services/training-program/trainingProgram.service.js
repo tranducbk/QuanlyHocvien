@@ -211,10 +211,16 @@ const createVersion = async (programId, data, requester) => {
   if (system?.code === 'HE_5') throw new BadRequestError('Chương trình Hệ 5 không sử dụng khóa');
   const name = data.name?.trim();
   if (!name) throw new BadRequestError('Tên khóa là bắt buộc');
-  const versionCode = data.versionCode?.trim() || await buildVersionCode(programId, name);
-  if (data.effectiveFrom && data.effectiveTo && data.effectiveTo < data.effectiveFrom) {
-    throw new BadRequestError('Ngày kết thúc phải sau hoặc bằng ngày bắt đầu');
+  if (!Number.isInteger(data.startYear) || !Number.isInteger(data.endYear)) {
+    throw new BadRequestError('Năm bắt đầu và năm kết thúc khóa học là bắt buộc');
   }
+  if (data.endYear <= data.startYear) {
+    throw new BadRequestError('Năm kết thúc phải sau năm bắt đầu');
+  }
+  if (data.startYear < 1945 || data.startYear > 2100 || data.endYear < 1945 || data.endYear > 2100) {
+    throw new BadRequestError('Năm khóa học phải nằm trong khoảng 1945–2100');
+  }
+  const versionCode = data.versionCode?.trim() || await buildVersionCode(programId, name);
   if (data.versionCode?.trim() && await db.curriculumVersion.findOne({ where: { trainingProgramId: programId, versionCode } })) {
     throw new BadRequestError('Mã khóa đã tồn tại trong chương trình này');
   }
@@ -223,8 +229,8 @@ const createVersion = async (programId, data, requester) => {
       trainingProgramId: programId,
       versionCode,
       name,
-      effectiveFrom: data.effectiveFrom || null,
-      effectiveTo: data.effectiveTo || null,
+      startYear: data.startYear,
+      endYear: data.endYear,
       status: 'DRAFT',
     });
   } catch (error) {
@@ -233,10 +239,35 @@ const createVersion = async (programId, data, requester) => {
   }
 };
 
+const updateVersion = async (programId, versionId, data, requester) => {
+  const program = await getOwnedProgram(programId, requester);
+  const system = await db.trainingSystem.findByPk(program.trainingSystemId);
+  if (system?.code === 'HE_5') throw new BadRequestError('Chương trình Hệ 5 không sử dụng khóa');
+  const version = await db.curriculumVersion.findOne({
+    where: { id: versionId, trainingProgramId: programId },
+  });
+  if (!version) throw new NotFoundError('Không tìm thấy khóa đào tạo');
+  if (!Number.isInteger(data.startYear) || !Number.isInteger(data.endYear)) {
+    throw new BadRequestError('Năm bắt đầu và năm kết thúc khóa học là bắt buộc');
+  }
+  if (data.endYear <= data.startYear) {
+    throw new BadRequestError('Năm kết thúc phải sau năm bắt đầu');
+  }
+  if (data.startYear < 1945 || data.startYear > 2100 || data.endYear < 1945 || data.endYear > 2100) {
+    throw new BadRequestError('Năm khóa học phải nằm trong khoảng 1945–2100');
+  }
+  return version.update({
+    name: data.name.trim(),
+    startYear: data.startYear,
+    endYear: data.endYear,
+  });
+};
+
 module.exports = {
   listPrograms,
   createProgram,
   updateProgram,
   updateProgramStatus,
   createVersion,
+  updateVersion,
 };

@@ -51,6 +51,9 @@ try {
   node src/utils/migrateTrainingPrograms.js --apply
   if ($LASTEXITCODE -ne 0) { throw 'The test migration failed.' }
 
+  node src/utils/migrateCurriculumVersionYears.js --apply
+  if ($LASTEXITCODE -ne 0) { throw 'The curriculum year migration failed.' }
+
   Write-Host 'After migration (isolated test database):'
   node src/utils/migrateTrainingPrograms.js --report
   if ($LASTEXITCODE -ne 0) { throw 'The post-migration report failed.' }

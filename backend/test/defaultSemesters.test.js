@@ -40,7 +40,7 @@ test('updating class duration adds missing defaults in the same transaction', as
   });
   t.mock.method(db.trainingSystem, 'findByPk', async () => ({ id: 'system', code: 'HE_1', isActive: true }));
   t.mock.method(db.trainingProgram, 'findByPk', async () => ({ id: 'program', trainingSystemId: 'system', isActive: true }));
-  t.mock.method(db.curriculumVersion, 'findByPk', async () => ({ trainingProgramId: 'program', effectiveFrom: '2025-09-01', effectiveTo: '2030-06-30' }));
+  t.mock.method(db.curriculumVersion, 'findByPk', async () => ({ trainingProgramId: 'program', startYear: 2025, endYear: 2030 }));
   t.mock.method(db.sequelize, 'transaction', async (callback) => callback(transaction));
   t.mock.method(db.trainingClassSemester, 'bulkCreate', async (rows, options) => {
     assert.equal(rows.length, 10);

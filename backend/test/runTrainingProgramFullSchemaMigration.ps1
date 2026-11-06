@@ -93,9 +93,14 @@ try {
   node src/utils/migrateTrainingPrograms.js --apply
   if ($LASTEXITCODE -ne 0) { throw 'Migration failed on the isolated full-schema database.' }
 
+  node src/utils/migrateCurriculumVersionYears.js --apply
+  if ($LASTEXITCODE -ne 0) { throw 'Curriculum year migration failed on the isolated full-schema database.' }
+
   Write-Host 'Applying migration a second time:'
   node src/utils/migrateTrainingPrograms.js --apply
   if ($LASTEXITCODE -ne 0) { throw 'Repeated migration failed on the isolated full-schema database.' }
+  node src/utils/migrateCurriculumVersionYears.js --apply
+  if ($LASTEXITCODE -ne 0) { throw 'Repeated curriculum year migration failed on the isolated full-schema database.' }
 
   Write-Host 'After migration (isolated full-schema database):'
   node src/utils/migrateTrainingPrograms.js --report

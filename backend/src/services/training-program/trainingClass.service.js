@@ -271,14 +271,8 @@ const create = async (data, commander) => {
         throw new BadRequestError('Khóa không thuộc chương trình đã chọn');
       }
       if (!isHe5) {
-        if (version.effectiveFrom) {
-          const fromYear = Number(String(version.effectiveFrom).slice(0, 4));
-          if (!Number.isNaN(fromYear)) startYear = fromYear;
-        }
-        if (version.effectiveTo) {
-          const toYear = Number(String(version.effectiveTo).slice(0, 4));
-          if (!Number.isNaN(toYear)) endYear = toYear;
-        }
+        if (version.startYear != null) startYear = version.startYear;
+        if (version.endYear != null) endYear = version.endYear;
       }
     }
   }
@@ -346,14 +340,8 @@ const updateClass = async (id, data, commander) => {
         throw new BadRequestError('Khóa không thuộc chương trình đã chọn');
       }
       if (!isHe5) {
-        if (version.effectiveFrom) {
-          const fromYear = Number(String(version.effectiveFrom).slice(0, 4));
-          if (!Number.isNaN(fromYear)) startYear = fromYear;
-        }
-        if (version.effectiveTo) {
-          const toYear = Number(String(version.effectiveTo).slice(0, 4));
-          if (!Number.isNaN(toYear)) endYear = toYear;
-        }
+        if (version.startYear != null) startYear = version.startYear;
+        if (version.endYear != null) endYear = version.endYear;
       }
     }
   }

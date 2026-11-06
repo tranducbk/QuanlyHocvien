@@ -36,6 +36,8 @@ export const ENDPOINTS = {
     PROGRAM: (id: string) => `/api/training-programs/${id}`,
     PROGRAM_STATUS: (id: string) => `/api/training-programs/${id}/status`,
     VERSIONS: (id: string) => `/api/training-programs/${id}/versions`,
+    VERSION: (programId: string, versionId: string) =>
+      `/api/training-programs/${programId}/versions/${versionId}`,
   },
   TRAINING_CLASSES: {
     SUBJECT_GRADES: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/subject-grades`,

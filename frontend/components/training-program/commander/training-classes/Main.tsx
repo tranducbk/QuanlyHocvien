@@ -33,12 +33,6 @@ const systemNames: Record<string, string> = {
   HE_7: "Hệ 7",
 };
 
-const extractYear = (dateStr?: string | null): string => {
-  if (!dateStr) return "";
-  const match = String(dateStr).match(/^(\d{4})/);
-  return match ? match[1] : "";
-};
-
 const he5ProgramLabel = (program: TrainingProgram) => [
   program.university?.universityName,
   program.organization?.organizationName,
@@ -197,14 +191,14 @@ export default function Main({ systemCode, view }: { systemCode: string; view: "
                     const val = String(value);
                     setCurriculumVersionId(val);
                     const ver = (selectedProgram?.versions ?? []).find((v) => v.id === val);
-                    setStartYear(extractYear(ver?.effectiveFrom));
-                    setEndYear(extractYear(ver?.effectiveTo));
+                    setStartYear(ver?.startYear == null ? "" : String(ver.startYear));
+                    setEndYear(ver?.endYear == null ? "" : String(ver.endYear));
                   }}
                   disabled={!trainingProgramId}
                   options={(selectedProgram?.versions ?? []).map((version) => {
-                    const from = extractYear(version.effectiveFrom);
-                    const to = extractYear(version.effectiveTo);
-                    const range = from && to ? `${from}–${to}` : from || to || "";
+                    const from = version.startYear;
+                    const to = version.endYear;
+                    const range = from != null && to != null ? `${from}–${to}` : from ?? to ?? "";
                     return {
                       value: version.id,
                       label: range ? `${version.name} (${range})` : version.name,

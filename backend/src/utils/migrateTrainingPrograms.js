@@ -84,13 +84,18 @@ async function main() {
           training_program_id UUID NOT NULL REFERENCES training_programs(id) ON DELETE RESTRICT,
           version_code VARCHAR(50) NOT NULL,
           name VARCHAR(255) NOT NULL,
-          effective_from DATE,
-          effective_to DATE,
+          start_year INTEGER,
+          end_year INTEGER,
           status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-          CONSTRAINT curriculum_versions_date_order_chk
-            CHECK (effective_to IS NULL OR effective_from IS NULL OR effective_to >= effective_from)
+          CONSTRAINT curriculum_versions_year_order_chk
+            CHECK (end_year IS NULL OR start_year IS NULL OR end_year > start_year),
+          CONSTRAINT curriculum_versions_year_range_chk
+            CHECK (
+              (start_year IS NULL OR start_year BETWEEN 1945 AND 2100)
+              AND (end_year IS NULL OR end_year BETWEEN 1945 AND 2100)
+            )
         )
       `);
       await client.query(`

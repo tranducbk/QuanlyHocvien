@@ -97,15 +97,42 @@ const { authMiddleware, requireRole, requireTrainingSystem } = require('../../mi
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name]
+ *             required: [name, startYear, endYear]
  *             properties:
  *               versionCode: { type: string, description: 'Tùy chọn, tự sinh nếu để trống' }
  *               name: { type: string }
- *               effectiveFrom: { type: string, format: date }
- *               effectiveTo: { type: string, format: date }
+ *               startYear: { type: integer, minimum: 1945, maximum: 2100, description: 'Bắt buộc, năm bắt đầu khóa học' }
+ *               endYear: { type: integer, minimum: 1945, maximum: 2100, description: 'Bắt buộc, năm kết thúc khóa học; phải sau startYear' }
  *     responses:
  *       201:
  *         description: Đã tạo khóa
+ * /training-programs/{id}/versions/{versionId}:
+ *   put:
+ *     tags: [Training Programs]
+ *     summary: Chỉ huy cập nhật tên và thời gian khóa trong chương trình thuộc Hệ được giao
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: path
+ *         name: versionId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, startYear, endYear]
+ *             properties:
+ *               name: { type: string, maxLength: 255 }
+ *               startYear: { type: integer, minimum: 1945, maximum: 2100, description: 'Bắt buộc, năm bắt đầu khóa học' }
+ *               endYear: { type: integer, minimum: 1945, maximum: 2100, description: 'Bắt buộc, năm kết thúc khóa học; phải sau startYear' }
+ *     responses:
+ *       200:
+ *         description: Đã cập nhật thông tin khóa
  */
 
 router.use(authMiddleware, requireRole('COMMANDER'), requireTrainingSystem('HE_1', 'HE_3', 'HE_4', 'HE_5', 'HE_7'));
@@ -114,5 +141,6 @@ router.post('/', controller.createProgram);
 router.put('/:id', controller.updateProgram);
 router.patch('/:id/status', controller.updateProgramStatus);
 router.post('/:id/versions', controller.createVersion);
+router.put('/:id/versions/:versionId', controller.updateVersion);
 
 module.exports = router;

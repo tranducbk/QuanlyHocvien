@@ -31,6 +31,9 @@ try {
   Write-Host 'Applying migration a second time to the isolated test database:'
   node src/utils/migrateTrainingPrograms.js --apply
   if ($LASTEXITCODE -ne 0) { throw 'The second migration attempt failed.' }
+
+  node src/utils/migrateCurriculumVersionYears.js --apply
+  if ($LASTEXITCODE -ne 0) { throw 'The curriculum year migration failed.' }
 } finally {
   Set-Location $previousLocation
   [Environment]::SetEnvironmentVariable('DATABASE_URL', $previousDatabaseUrl, 'Process')
@@ -86,9 +89,16 @@ BEGIN
   END;
 
   BEGIN
-    INSERT INTO curriculum_versions (training_program_id, version_code, name, effective_from, effective_to)
-      VALUES (first_program, 'V2', 'Invalid dates', DATE '2025-02-01', DATE '2025-01-01');
-    RAISE EXCEPTION 'End date before start date was accepted';
+    INSERT INTO curriculum_versions (training_program_id, version_code, name, start_year, end_year)
+      VALUES (first_program, 'V2', 'Invalid years', 2025, 2025);
+    RAISE EXCEPTION 'End year not after start year was accepted';
+  EXCEPTION WHEN check_violation THEN NULL;
+  END;
+
+  BEGIN
+    INSERT INTO curriculum_versions (training_program_id, version_code, name, start_year, end_year)
+      VALUES (first_program, 'V3', 'Out-of-range years', 1944, 2025);
+    RAISE EXCEPTION 'Out-of-range start year was accepted';
   EXCEPTION WHEN check_violation THEN NULL;
   END;
 END $$;
