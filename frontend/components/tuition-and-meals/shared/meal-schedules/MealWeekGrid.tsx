@@ -1,13 +1,13 @@
+import {
+  AiOutlineCheckCircle,
+  AiOutlineClockCircle,
+  AiOutlineCloseCircle,
+  AiOutlineMoon,
+  AiOutlineSun,
+} from "@/library/icons";
 import Typography from "@/library/Typography";
 import type { MealDayKey, MealSlotKey, WeeklyCutRice } from "@/types/tuition-and-meals/cut-rice";
 import { getMealSlots, MEAL_DAYS, MEAL_SLOTS } from "@/utils/meal-schedule";
-import {
-  HiOutlineCheckCircle,
-  HiOutlineClock,
-  HiOutlineMoon,
-  HiOutlineSun,
-  HiOutlineXCircle,
-} from "react-icons/hi";
 import styles from "./MealWeekGrid.module.css";
 
 interface MealWeekGridProps {
@@ -18,9 +18,9 @@ interface MealWeekGridProps {
 }
 
 const mealIcons = {
-  morning: HiOutlineSun,
-  noon: HiOutlineClock,
-  evening: HiOutlineMoon,
+  morning: AiOutlineSun,
+  noon: AiOutlineClockCircle,
+  evening: AiOutlineMoon,
 };
 
 export default function MealWeekGrid({
@@ -71,8 +71,8 @@ export default function MealWeekGrid({
                   {MEAL_SLOTS.map((meal) => {
                     const isCut = Boolean(slots[meal.key]);
                     const StatusIcon = isCut
-                      ? HiOutlineXCircle
-                      : HiOutlineCheckCircle;
+                      ? AiOutlineCloseCircle
+                      : AiOutlineCheckCircle;
                     const content = (
                       <>
                         <StatusIcon aria-hidden="true" />

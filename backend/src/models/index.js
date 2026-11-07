@@ -721,4 +721,8 @@ db.gradeRequest.belongsTo(db.user, {
   onDelete: 'SET NULL'
 });
 
+db.he5PlacementYear = require('./training-program/he5PlacementYear')(sequelize, DataTypes);
+db.he5Placement = require('./training-program/he5Placement')(sequelize, DataTypes);
+db.he5PlacementEvent = require('./training-program/he5PlacementEvent')(sequelize, DataTypes);
+
 module.exports = db;

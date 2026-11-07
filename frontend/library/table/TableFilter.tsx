@@ -1,15 +1,16 @@
 "use client";
 
+import {
+  AiOutlineCalendar,
+  AiOutlineNumber,
+  AiOutlineReload,
+  AiOutlineSearch,
+  AiOutlineTag,
+} from "@/library/icons";
+
 import { m, AnimatePresence } from "motion/react";
 import { useForm, Controller } from "react-hook-form";
 import { ColumnFiltersState, Table } from "@tanstack/react-table";
-import {
-  HiOutlineSearch,
-  HiOutlineRefresh,
-  HiOutlineCalendar,
-  HiOutlineTag,
-  HiOutlineHashtag,
-} from "react-icons/hi";
 import Input from "@/library/Input";
 import Select, {
   type SelectFilterConfig,
@@ -125,10 +126,10 @@ const TableFilter = <TData,>({
               {fields.map((field) => {
                 const Icon =
                   field.type === "date"
-                    ? HiOutlineCalendar
+                    ? AiOutlineCalendar
                     : field.type === "number"
-                      ? HiOutlineHashtag
-                      : HiOutlineSearch;
+                      ? AiOutlineNumber
+                      : AiOutlineSearch;
                 return (
                   <div key={field.id}>
                     {field.type === "select" ? (
@@ -142,7 +143,7 @@ const TableFilter = <TData,>({
                             onChange={onChange}
                             options={field.options}
                             placeholder={field.placeholder}
-                            prefixIcon={<HiOutlineTag size={16} />}
+                            prefixIcon={<AiOutlineTag size={16} />}
                             hasNextPage={field.hasNextPage}
                             isFetchingNextPage={field.isFetchingNextPage}
                             onLoadMore={field.onLoadMore}
@@ -199,7 +200,7 @@ const TableFilter = <TData,>({
                 type="button"
                 variant="outline"
                 size="sm"
-                icon={HiOutlineRefresh}
+                icon={AiOutlineReload}
                 onClick={handleReset}
                 className="text-[10px] font-black uppercase tracking-wider"
               >
@@ -209,7 +210,7 @@ const TableFilter = <TData,>({
                 type="submit"
                 variant="primary"
                 size="sm"
-                icon={HiOutlineSearch}
+                icon={AiOutlineSearch}
                 className="text-[10px] font-black uppercase tracking-wider"
               >
                 Tìm kiếm

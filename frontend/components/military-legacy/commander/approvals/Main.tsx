@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineCheck, AiOutlineClose } from "@/library/icons";
+
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HiOutlineCheck, HiOutlineX } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -142,14 +143,14 @@ export default function MilitaryApprovalsPage() {
           <div className="flex items-center gap-1">
             <ActionButton
               tooltipText="Duyệt đề xuất"
-              icon={HiOutlineCheck}
+              icon={AiOutlineCheck}
               color="green"
               disabled={review.isPending}
               onClick={() => openReview(row.original.id, true)}
             />
             <ActionButton
               tooltipText="Từ chối đề xuất"
-              icon={HiOutlineX}
+              icon={AiOutlineClose}
               color="red"
               disabled={review.isPending}
               onClick={() => openReview(row.original.id, false)}

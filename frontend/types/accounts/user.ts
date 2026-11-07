@@ -161,6 +161,7 @@ export interface Student {
   updatedAt: string;
   university?: University;
   militaryClass?: { id: string; className: string; classCode: string };
+  managementClass?: { id: string; name: string; schoolYear: string; status: "ACTIVE" | "GRADUATED" } | null;
   class?: Class;
   organization?: Organization;
   educationLevel?: EducationLevel;

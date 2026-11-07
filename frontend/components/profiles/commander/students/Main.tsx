@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineEdit, AiOutlineEye } from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import ActionButton from "@/library/ActionButton";
@@ -16,7 +18,6 @@ import { useModalStore } from "@/store/useModalStore";
 import { userService } from "@/services/accounts/user";
 import { Student, StudentProfileQueryRequest } from "@/types/accounts/user";
 import { formatDate, textOrDash } from "@/utils/fn-common";
-import { HiOutlineEye, HiOutlinePencil } from "react-icons/hi";
 import ProfileSkeleton from "./ProfileSkeleton";
 import StudentProfileDetail from "./StudentProfileDetail";
 import UpdateStudentProfileForm from "./UpdateStudentProfileForm";
@@ -57,14 +58,14 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
     (student: Student) => {
       openModal({
         title: "Cập nhật hồ sơ học viên",
-        content: <UpdateStudentProfileForm student={student} />,
+        content: <UpdateStudentProfileForm student={student} militaryMode={militaryMode} />,
         size: "lg",
         config: {
           mutationKey: MUTATION_KEYS.UPDATE_STUDENT_PROFILE,
         },
       });
     },
-    [openModal]
+    [openModal, militaryMode]
   );
 
   const columns = useMemo<ColumnDef<Student>[]>(
@@ -72,28 +73,28 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
       {
         id: "student",
         header: "Học viên",
-        meta: { noWrap: true },
+        size: 280,
         cell: (info) => {
           const student = info.row.original;
           return (
-            <div className="flex items-center gap-3 min-w-[220px]">
+            <div className={`flex items-center gap-2 ${militaryMode ? "min-w-[220px]" : "min-w-0"}`}>
               <Avatar
                 src={student.avatar}
                 alt={student.fullName}
-                size={42}
-                iconSize={22}
+                size={militaryMode ? 42 : 32}
+                iconSize={militaryMode ? 22 : 18}
               />
               <div className="flex flex-col gap-0.5 min-w-0">
                 <Typography
                   variant="body"
                   weight="semibold"
                   color="neutral"
-                  className="wrap-break-word"
+                  className={militaryMode ? "wrap-break-word" : "wrap-break-word !text-sm"}
                 >
                   {textOrDash(student.fullName)}
                 </Typography>
                 <Typography variant="caption" color="gray">
-                  Mã học viên: {textOrDash(student.code)}
+                  {militaryMode ? "Mã học viên: " : ""}{textOrDash(student.code)}
                 </Typography>
               </div>
             </div>
@@ -103,6 +104,7 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
       {
         id: "gender",
         header: "Giới tính",
+        size: 85,
         accessorKey: "gender",
         cell: (info) => (
           <Badge variant="neutral">
@@ -117,9 +119,10 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
       }] : [{
         id: "class",
         header: "Lớp",
+        size: 90,
         cell: (info: CellContext<Student, unknown>) => (
           <Typography variant="body" color="neutral">
-            {textOrDash(info.row.original.class?.className)}
+            {info.row.original.managementClass?.status === "GRADUATED" ? "Tốt nghiệp" : info.row.original.managementClass?.name || "Chưa xếp lớp"}
           </Typography>
         ),
       }]),
@@ -128,30 +131,21 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
         header: "Đơn vị",
         accessorKey: "unit",
         cell: (info: CellContext<Student, unknown>) => <Typography variant="body" color="neutral">{textOrDash(info.row.original.unit)}</Typography>,
-      }] : [{
-        id: "organization",
-        header: "Đơn vị",
-        cell: (info: CellContext<Student, unknown>) => (
-          <Typography variant="body" color="neutral">
-            {textOrDash(
-              info.row.original.organization?.organizationName ||
-                info.row.original.unit
-            )}
-          </Typography>
-        ),
-      }]),
+      }] : []),
       ...(!militaryMode ? [{
         id: "university",
-        header: "Trường đào tạo",
+        header: "Mã trường",
+        size: 95,
         cell: (info: CellContext<Student, unknown>) => (
-          <Typography variant="body" color="neutral">
-            {textOrDash(info.row.original.university?.universityName)}
+          <Typography variant="body" color="neutral" className="break-all !text-sm">
+            {textOrDash(info.row.original.university?.universityCode)}
           </Typography>
         ),
       }] : []),
       {
         id: "rank",
         header: "Cấp bậc",
+        size: 110,
         accessorKey: "rank",
         cell: (info) => (
           <Typography variant="body" color="neutral">
@@ -162,13 +156,14 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
       {
         id: "birthday",
         header: "Ngày sinh",
+        size: 110,
         accessorKey: "birthday",
         cell: (info) => (
           <Typography
             variant="caption"
             weight="semibold"
             color="gray"
-            className="whitespace-nowrap"
+            className={militaryMode ? "whitespace-nowrap" : "break-words"}
           >
             {formatDate(info.row.original.birthday)}
           </Typography>
@@ -176,20 +171,21 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
       },
       {
         id: "actions",
-        header: "Hành động",
+        header: militaryMode ? "Hành động" : "Thao tác",
+        size: 90,
         cell: (info) => {
           const student = info.row.original;
           return (
-            <div className="flex items-center justify-start gap-1">
+            <div className="flex flex-wrap items-center justify-start gap-1">
               <ActionButton
                 tooltipText="Xem chi tiết"
-                icon={HiOutlineEye}
+                icon={AiOutlineEye}
                 onClick={() => handleOpenDetailModal(student)}
                 color="green"
               />
               <ActionButton
                 tooltipText="Chỉnh sửa"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 onClick={() => handleOpenUpdateModal(student)}
                 color="blue"
               />
@@ -226,12 +222,12 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
         ],
         placeholder: "Chọn giới tính...",
       },
-      {
+      ...(militaryMode ? [{
         type: "text",
         id: "unit",
         label: "Đơn vị",
         placeholder: "Nhập đơn vị...",
-      },
+      } satisfies FilterField] : []),
       {
         type: "select",
         id: "rank",
@@ -248,7 +244,7 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
         },
       },
     ],
-    []
+    [militaryMode]
   );
 
   return (
@@ -258,14 +254,14 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
         { label: "Hồ sơ học viên" },
       ]}
       title="Hồ sơ học viên"
-      subtitle="Tra cứu, xem chi tiết và cập nhật thông tin học viên trong đơn vị quản lý."
+      className={!militaryMode ? "!min-h-0 !space-y-3 !p-4" : undefined}
       isLoading={isLoading}
       skeleton={<ProfileSkeleton />}
       isError={isError}
       onRetry={refetch}
     >
       <div className="bg-white dark:bg-neutral-950 overflow-hidden relative transition-colors">
-        <div className="px-4">
+        <div className={militaryMode ? "px-4" : ""}>
           <Table
             data={profilesData}
             columns={columns}
@@ -277,6 +273,9 @@ export default function Main({ militaryMode = false }: { militaryMode?: boolean 
             onSortingChange={setSorting}
             filterFields={filterOptions}
             emptyText="Không tìm thấy hồ sơ học viên nào phù hợp"
+            fitToContainer={!militaryMode}
+            compact={!militaryMode}
+            className={!militaryMode ? "[&_thead_th]:!py-3 [&_tbody_td]:!py-2 [&_tbody_td]:break-words [&_th]:!tracking-normal [&_th_span]:!whitespace-normal" : undefined}
           />
         </div>
       </div>

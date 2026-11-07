@@ -1,16 +1,17 @@
 "use client";
 
+import {
+  AiOutlineDown,
+  AiOutlineLock,
+  AiOutlineLogout,
+  AiOutlineMoon,
+  AiOutlineUser,
+} from "@/library/icons";
+
 import { useQuery } from "@tanstack/react-query";
 import { m } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  HiOutlineChevronDown,
-  HiOutlineLockClosed,
-  HiOutlineLogout,
-  HiOutlineMoon,
-  HiOutlineUser,
-} from "react-icons/hi";
 import { DEFAULT_VALUES, ROLES, THEMES } from "@/constants/constants";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Avatar from "@/library/Avatar";
@@ -105,7 +106,7 @@ export default function Header() {
                       }`}
                   />
                   <div className="absolute -bottom-1 -right-1 size-4 bg-white dark:bg-neutral-900 rounded-full flex items-center justify-center shadow-sm border border-neutral-100 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400">
-                    <HiOutlineChevronDown
+                    <AiOutlineDown
                       size={10}
                       className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""
                         }`}
@@ -131,7 +132,7 @@ export default function Header() {
                         damping: 10,
                       }}
                     >
-                      <HiOutlineUser size={18} />
+                      <AiOutlineUser size={18} />
                     </m.div>
                   </div>
                   Thông tin cá nhân
@@ -148,7 +149,7 @@ export default function Header() {
                     variants={{ hover: { y: -2, scale: 1.1 } }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    <HiOutlineLockClosed size={18} />
+                    <AiOutlineLock size={18} />
                   </m.div>
                 </div>
                 Đổi mật khẩu
@@ -167,7 +168,7 @@ export default function Header() {
                     variants={{ hover: { rotate: -20, scale: 1.1 } }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    <HiOutlineMoon size={18} />
+                    <AiOutlineMoon size={18} />
                   </m.div>
                 </div>
                 Chế độ tối
@@ -192,7 +193,7 @@ export default function Header() {
                     variants={{ hover: { x: 3, scale: 1.1 } }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    <HiOutlineLogout size={18} />
+                    <AiOutlineLogout size={18} />
                   </m.div>
                 </div>
                 Đăng xuất

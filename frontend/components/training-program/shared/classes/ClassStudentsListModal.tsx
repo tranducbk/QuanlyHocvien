@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDelete } from "@/library/icons";
+
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
-import { HiOutlineTrash } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Table from "@/library/Table";
 import Typography from "@/library/Typography";
@@ -174,7 +175,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
           return (
             <ActionButton
               tooltipText={"Xóa học viên khỏi lớp"}
-              icon={HiOutlineTrash}
+              icon={AiOutlineDelete}
               color="red"
               disabled={removeMutation.isPending}
               onClick={() => {

@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineDownload } from "@/library/icons";
+
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineDocumentDownload } from "react-icons/hi";
 import Button from "@/library/Button";
 import Badge from "@/library/Badge";
 import Table from "@/library/Table";
@@ -58,5 +59,5 @@ export default function AcademicSummaryTable({ rows, semesterView, onExport, exp
     { type: "select", id: "schoolYear", label: "Năm học", placeholder: "Chọn năm học...", options: [{ value: "", label: "Tất cả" }, ...[...new Set(rows.map((row) => row.schoolYear))].map((value) => ({ value, label: value }))] },
     ...(semesterView ? [{ type: "select", id: "semester", label: "Học kỳ", options: [{ value: "", label: "Tất cả" }, ...[1, 2, 3, 4].map((value) => ({ value: String(value), label: `Học kỳ ${value}` }))] } as FilterField] : []),
   ], [semesterView, rows, classes]);
-  return <Table data={table.data} columns={columns} pagination={table.pagination} onPaginationChange={table.setPagination} columnFilters={table.columnFilters} onColumnFiltersChange={table.onColumnFiltersChange} sorting={table.sorting} onSortingChange={table.onSortingChange} filterFields={filterFields} emptyText="Chưa có kết quả tổng hợp" showIndex={semesterView} showVisibilityToggle={semesterView} enableColumnOrdering={semesterView} actions={onExport ? <Button variant="outline" size="sm" icon={HiOutlineDocumentDownload} onClick={() => onExport(Object.fromEntries(table.columnFilters.map(({ id, value }) => [id, value])))} isLoading={exporting}>Xuất Excel</Button> : undefined} />;
+  return <Table data={table.data} columns={columns} pagination={table.pagination} onPaginationChange={table.setPagination} columnFilters={table.columnFilters} onColumnFiltersChange={table.onColumnFiltersChange} sorting={table.sorting} onSortingChange={table.onSortingChange} filterFields={filterFields} emptyText="Chưa có kết quả tổng hợp" showIndex={semesterView} showVisibilityToggle={semesterView} enableColumnOrdering={semesterView} actions={onExport ? <Button variant="outline" size="sm" icon={AiOutlineDownload} onClick={() => onExport(Object.fromEntries(table.columnFilters.map(({ id, value }) => [id, value])))} isLoading={exporting}>Xuất Excel</Button> : undefined} />;
 }

@@ -1,6 +1,6 @@
+import { AiOutlineRead } from "@/library/icons";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { HiOutlineAcademicCap } from "react-icons/hi";
 import ErrorState from "@/library/ErrorState";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
@@ -53,7 +53,7 @@ export default function OrganizationLevelsList({
             className="flex items-center gap-4 cursor-pointer group flex-1"
           >
             <div className="flex items-center gap-2 group">
-              <HiOutlineAcademicCap size={18} className="text-secondary-500" />
+              <AiOutlineRead size={18} className="text-secondary-500" />
               <Typography
                 variant="body"
                 weight="semibold"

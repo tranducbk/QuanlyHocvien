@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlinePlus } from "@/library/icons";
+
 import { useForm, Controller, SubmitHandler, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@/library/Button";
@@ -11,7 +13,6 @@ import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { universitySchema, UniversityFormValues } from "@/utils/validations";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
-import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 
 export default function CreateUniversityForm() {
   const { closeModal } = useModalStore();
@@ -103,7 +104,7 @@ export default function CreateUniversityForm() {
               variant="outline"
               size="sm"
               onClick={() => append({ organizationName: "" })}
-              icon={HiOutlinePlus}
+              icon={AiOutlinePlus}
               disabled={mutation.isPending}
             >
               Thêm Khoa
@@ -139,7 +140,7 @@ export default function CreateUniversityForm() {
                     onClick={() => remove(index)}
                     disabled={mutation.isPending}
                   >
-                    <HiOutlineTrash size={18} />
+                    <AiOutlineDelete size={18} />
                   </Button>
                 </div>
               ))}

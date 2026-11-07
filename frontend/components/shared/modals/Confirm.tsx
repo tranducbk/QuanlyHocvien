@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineExclamationCircle } from "@/library/icons";
+
 import { useIsMutating } from "@tanstack/react-query";
 import { m, AnimatePresence } from "motion/react";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
 import Button from "@/library/Button";
 import { useConfirmStore } from "@/store/useConfirmStore";
 import { MUTATION_KEYS } from "@/constants/query-keys";
@@ -60,7 +61,7 @@ const Confirm = () => {
                       : "bg-primary-50 dark:bg-primary-950/30 border-primary-100 dark:border-primary-900/60 text-primary-600 dark:text-primary-400"
                     }`}
                 >
-                  <HiOutlineExclamationCircle size={32} />
+                  <AiOutlineExclamationCircle size={32} />
                 </div>
 
                 <div className="space-y-2">

@@ -1,12 +1,13 @@
 "use client";
 
+import { AiOutlineAppstore, AiOutlineClockCircle } from "@/library/icons";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { organizationService } from "@/services/training-program/organizations";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
-import { HiOutlineCollection, HiOutlineClock } from "react-icons/hi";
 import { Organization } from "@/types/training-program/organizations";
 import Divide from "@/library/Divide";
 import useAppMutation from "@/hooks/useAppMutation";
@@ -58,7 +59,7 @@ export default function UpdateOrganizationForm({
       <Input
         label="Tên đơn vị / Chuyên ngành"
         placeholder="VD: Khoa Công nghệ thông tin..."
-        prefixIcon={<HiOutlineCollection />}
+        prefixIcon={<AiOutlineAppstore />}
         error={errors.organizationName?.message}
         isLoading={mutation.isPending}
         {...register("organizationName")}
@@ -68,7 +69,7 @@ export default function UpdateOrganizationForm({
         label="Thời gian di chuyển (phút)"
         type="number"
         placeholder="Thời gian đi từ đơn vị về trường (để tính cắt cơm)..."
-        prefixIcon={<HiOutlineClock />}
+        prefixIcon={<AiOutlineClockCircle />}
         error={errors.travelTime?.message}
         isLoading={mutation.isPending}
         {...register("travelTime", { valueAsNumber: true })}

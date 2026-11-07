@@ -1,14 +1,15 @@
 "use client";
 
+import {
+  AiOutlineCheckCircle,
+  AiOutlineClose,
+  AiOutlineExclamationCircle,
+  AiOutlineInfoCircle,
+  AiOutlineWarning,
+} from "@/library/icons";
+
 import React from "react";
 import { useToastStore, type ToastVariant } from "@/store/useToastStore";
-import {
-  IoCheckmarkCircle,
-  IoAlertCircle,
-  IoInformationCircle,
-  IoWarning,
-  IoClose,
-} from "react-icons/io5";
 import { AnimatePresence, m } from "motion/react";
 import { TOAST_CONFIG } from "@/constants/constants";
 
@@ -25,25 +26,25 @@ const variantConfig: Record<
     bg: "bg-green-50",
     border: "border-green-200/50",
     accent: "text-green-600",
-    icon: <IoCheckmarkCircle className="size-5 shrink-0" />,
+    icon: <AiOutlineCheckCircle className="size-5 shrink-0" />,
   },
   error: {
     bg: "bg-rose-50",
     border: "border-rose-200/50",
     accent: "text-rose-600",
-    icon: <IoAlertCircle className="size-5 shrink-0" />,
+    icon: <AiOutlineExclamationCircle className="size-5 shrink-0" />,
   },
   info: {
     bg: "bg-blue-50",
     border: "border-blue-200/50",
     accent: "text-blue-600",
-    icon: <IoInformationCircle className="size-5 shrink-0" />,
+    icon: <AiOutlineInfoCircle className="size-5 shrink-0" />,
   },
   warning: {
     bg: "bg-amber-50",
     border: "border-amber-200/50",
     accent: "text-amber-600",
-    icon: <IoWarning className="size-5 shrink-0" />,
+    icon: <AiOutlineWarning className="size-5 shrink-0" />,
   },
 };
 
@@ -84,7 +85,7 @@ const Toast = () => {
                 className="shrink-0 p-1 -mr-1 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100/50 transition-all cursor-pointer"
                 aria-label="Close"
               >
-                <IoClose className="size-4" />
+                <AiOutlineClose className="size-4" />
               </button>
 
               {/* Progress bar effect if duration is provided */}

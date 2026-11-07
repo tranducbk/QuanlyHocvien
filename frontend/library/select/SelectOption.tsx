@@ -1,4 +1,4 @@
-import { HiOutlineCheck } from "react-icons/hi";
+import { AiOutlineCheck } from "@/library/icons";
 import Skeleton from "@/library/Skeleton";
 
 export interface SelectOption {
@@ -61,7 +61,7 @@ export default function SelectOptions({
               >
                 <span>{opt.label}</span>
                 {isSelected && (
-                  <HiOutlineCheck
+                  <AiOutlineCheck
                     size={16}
                     className="text-primary-600 dark:text-primary-400 shrink-0 ml-2"
                   />

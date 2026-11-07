@@ -1,15 +1,16 @@
 "use client";
 
+import {
+  AiOutlineCalendar,
+  AiOutlineDollar,
+  AiOutlineProfile,
+  AiOutlineRead,
+} from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import {
-  HiOutlineCash,
-  HiOutlineClipboardList,
-  HiOutlineAcademicCap,
-  HiOutlineCalendar,
-} from "react-icons/hi";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import Select from "@/library/Select";
@@ -142,7 +143,7 @@ export default function CreateTuitionFeeForm() {
           <Select
             label="Học viên"
             placeholder="Chọn học viên"
-            prefixIcon={<HiOutlineAcademicCap />}
+            prefixIcon={<AiOutlineRead />}
             value={value}
             onChange={onChange}
             options={studentOptions}
@@ -170,7 +171,7 @@ export default function CreateTuitionFeeForm() {
             <CurrencyInput
               label="Số tiền cần nộp"
               placeholder="VD: 2.500.000"
-              prefixIcon={<HiOutlineCash />}
+              prefixIcon={<AiOutlineDollar />}
               value={field.value}
               onChange={field.onChange}
               error={errors.totalAmount?.message}
@@ -206,7 +207,7 @@ export default function CreateTuitionFeeForm() {
             <Select
               label="Năm học"
               placeholder="Chọn năm học"
-              prefixIcon={<HiOutlineCalendar />}
+              prefixIcon={<AiOutlineCalendar />}
               value={value}
               onChange={(selectedValue) => {
                 onChange(String(selectedValue));
@@ -228,7 +229,7 @@ export default function CreateTuitionFeeForm() {
             <Select
               label="Học kỳ"
               placeholder="Chọn học kỳ"
-              prefixIcon={<HiOutlineCalendar />}
+              prefixIcon={<AiOutlineCalendar />}
               value={value}
               onChange={(selectedValue) => onChange(String(selectedValue))}
               options={semesterOptions}
@@ -249,7 +250,7 @@ export default function CreateTuitionFeeForm() {
       <Textarea
         label="Nội dung"
         placeholder="VD: Học phí học kỳ 1 năm học 2024-2025"
-        prefixIcon={<HiOutlineClipboardList />}
+        prefixIcon={<AiOutlineProfile />}
         error={errors.content?.message}
         isLoading={mutation.isPending}
         {...register("content")}

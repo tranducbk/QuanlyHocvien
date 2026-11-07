@@ -1,9 +1,10 @@
 "use client";
+
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLock, AiOutlineUser } from "@/library/icons";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
 import { loginSchema, LoginFormValues } from "@/utils/validations";
@@ -149,7 +150,7 @@ export default function Main() {
             placeholder="Nhập tên đăng nhập"
             size="lg"
             floatingLabel={false}
-            prefixIcon={<FiUser size={18} />}
+            prefixIcon={<AiOutlineUser size={18} />}
             isLoading={loginMutation.isPending}
             error={errors.username?.message}
             {...register("username")}
@@ -164,14 +165,14 @@ export default function Main() {
             placeholder="Nhập mật khẩu"
             size="lg"
             isLoading={loginMutation.isPending}
-            prefixIcon={<FiLock size={18} />}
+            prefixIcon={<AiOutlineLock size={18} />}
             suffixIcon={
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="cursor-pointer text-neutral-400 hover:text-neutral-600 transition-colors"
               >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                {showPassword ? <AiOutlineEyeInvisible size={18} /> : <AiOutlineEye size={18} />}
               </button>
             }
             error={errors.password?.message}

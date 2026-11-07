@@ -1,14 +1,15 @@
 "use client";
 
+import {
+  AiOutlineDownload,
+  AiOutlineEdit,
+  AiOutlineReload,
+  AiOutlineUpload,
+} from "@/library/icons";
+
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  HiOutlineDownload,
-  HiOutlinePencil,
-  HiOutlineRefresh,
-  HiOutlineUpload,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Button from "@/library/Button";
 import ErrorState from "@/library/ErrorState";
@@ -196,7 +197,7 @@ export default function CutRiceSchedulesTab() {
             <div className={styles.rowActions}>
               <ActionButton
                 tooltipText="Chỉnh lịch cắt cơm"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 color="blue"
                 onClick={() =>
                   openModal({
@@ -208,7 +209,7 @@ export default function CutRiceSchedulesTab() {
               />
               <ActionButton
                 tooltipText="Tạo lại tự động"
-                icon={HiOutlineRefresh}
+                icon={AiOutlineReload}
                 color="green"
                 onClick={() =>
                   generateOneMutation.mutate({
@@ -300,7 +301,7 @@ export default function CutRiceSchedulesTab() {
             <Button
               type="button"
               onClick={handleImport}
-              icon={HiOutlineUpload}
+              icon={AiOutlineUpload}
               className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-primary-700 hover:border-primary-700 transition-all shadow-lg shadow-primary-500/20 cursor-pointer active:scale-95 h-auto"
             >
               Nhập Excel
@@ -309,7 +310,7 @@ export default function CutRiceSchedulesTab() {
               type="button"
               onClick={() => exportMutation.mutate()}
               isLoading={exportMutation.isPending}
-              icon={HiOutlineDownload}
+              icon={AiOutlineDownload}
               className="flex items-center gap-2 px-4 py-2 bg-secondary-500 border border-secondary-500 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-secondary-600 hover:border-secondary-600 transition-all shadow-lg shadow-secondary-500/20 cursor-pointer active:scale-95 h-auto"
             >
               Xuất Excel
@@ -318,7 +319,7 @@ export default function CutRiceSchedulesTab() {
               type="button"
               onClick={() => generateAllMutation.mutate()}
               isLoading={generateAllMutation.isPending}
-              icon={HiOutlineRefresh}
+              icon={AiOutlineReload}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 border border-emerald-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-emerald-700 hover:border-emerald-700 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95 h-auto"
             >
               Tạo tự động

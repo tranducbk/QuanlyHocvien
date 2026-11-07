@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit } from "@/library/icons";
+
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import PageContainer from "@/library/PageContainer";
 import { QUERY_KEYS } from "@/constants/query-keys";
@@ -113,13 +114,13 @@ export default function MilitarySubjectsPage() {
         <div className="flex items-center gap-1">
           <ActionButton
             tooltipText="Sửa môn học"
-            icon={HiOutlinePencil}
+            icon={AiOutlineEdit}
             color="blue"
             onClick={() => openUpdate(row.original)}
           />
           <ActionButton
             tooltipText="Xóa môn học"
-            icon={HiOutlineTrash}
+            icon={AiOutlineDelete}
             color="red"
             onClick={() =>
               openConfirm({

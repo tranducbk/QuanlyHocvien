@@ -23,10 +23,12 @@ import { getProfileRelationFormDefaults } from "@/utils/profile-relations";
 
 interface UpdateStudentProfileFormProps {
   student: Student;
+  militaryMode?: boolean;
 }
 
 export default function UpdateStudentProfileForm({
   student,
+  militaryMode = false,
 }: UpdateStudentProfileFormProps) {
   const { closeModal } = useModalStore();
 
@@ -78,6 +80,7 @@ export default function UpdateStudentProfileForm({
 
   const onSubmit: SubmitHandler<StudentProfileFormValues> = (data) => {
     const formattedData = { ...data };
+    if (!militaryMode) delete formattedData.unit;
     const dateFields = [
       "birthday",
       "dateOfEnlistment",
@@ -240,13 +243,13 @@ export default function UpdateStudentProfileForm({
                 />
               )}
             />
-            <Input
+            {militaryMode && <Input
               label="Đơn vị"
               placeholder="Nhập đơn vị"
               error={errors.unit?.message}
               isLoading={mutation.isPending}
               {...register("unit")}
-            />
+            />}
             <Controller
               name="dateOfEnlistment"
               control={control}

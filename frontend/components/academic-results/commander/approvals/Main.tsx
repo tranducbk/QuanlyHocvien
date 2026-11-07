@@ -1,12 +1,9 @@
 "use client";
 
+import { AiOutlineCloseCircle, AiOutlineExport, AiOutlineEye } from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  HiOutlineExternalLink,
-  HiOutlineEye,
-  HiOutlineXCircle,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -167,7 +164,7 @@ export default function Main() {
               <ActionButton
                 tooltipText="Xem chi tiết"
                 icon={
-                  request.attachmentUrl ? HiOutlineExternalLink : HiOutlineEye
+                  request.attachmentUrl ? AiOutlineExport : AiOutlineEye
                 }
                 color="blue"
                 onClick={() => openDetailModal(request)}
@@ -176,7 +173,7 @@ export default function Main() {
                 <>
                   <ActionButton
                     tooltipText="Từ chối"
-                    icon={HiOutlineXCircle}
+                    icon={AiOutlineCloseCircle}
                     color="red"
                     disabled={!isPending}
                     onClick={() => openReviewModal(request)}

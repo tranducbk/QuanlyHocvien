@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineFileAdd, AiOutlineRead } from "@/library/icons";
+
 import { useState } from "react";
-import { HiOutlineAcademicCap, HiOutlineDocumentAdd } from "react-icons/hi";
 import PageContainer from "@/library/PageContainer";
 import Tabs from "@/library/Tabs";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -44,13 +45,13 @@ export default function Main() {
           {
             id: "results",
             label: "Kết quả học tập",
-            icon: <HiOutlineAcademicCap />,
+            icon: <AiOutlineRead />,
             content: <AcademicResultsTab />,
           },
           {
             id: "requests",
             label: "Đề xuất chỉnh sửa điểm",
-            icon: <HiOutlineDocumentAdd />,
+            icon: <AiOutlineFileAdd />,
             content: <GradeRequestsTab />,
           },
         ]}

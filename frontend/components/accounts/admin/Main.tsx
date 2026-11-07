@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  AiOutlineDelete,
+  AiOutlineDownload,
+  AiOutlineEdit,
+  AiOutlineEye,
+  AiOutlineLock,
+  AiOutlineReload,
+} from "@/library/icons";
+
 import { useMemo, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { userService } from "@/services/accounts/user";
@@ -9,14 +18,6 @@ import useTableQuery from "@/hooks/useTableQuery";
 import { downloadBlob, formatDateTime } from "@/utils/fn-common";
 import Table from "@/library/Table";
 import Badge, { BadgeVariant } from "@/library/Badge";
-import {
-  HiOutlinePencil,
-  HiOutlineLockClosed,
-  HiOutlineDownload,
-  HiOutlineTrash,
-  HiOutlineRefresh,
-  HiOutlineEye,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Button from "@/library/Button";
 import Typography from "@/library/Typography";
@@ -281,7 +282,7 @@ export default function Main() {
             <div className="flex items-center justify-start">
               <ActionButton
                 tooltipText="Xem chi tiết"
-                icon={HiOutlineEye}
+                icon={AiOutlineEye}
                 onClick={() => handleOpenDetailModal(user)}
                 color="green"
               />
@@ -290,7 +291,7 @@ export default function Main() {
                 <>
                   <ActionButton
                     tooltipText="Chỉnh sửa"
-                    icon={HiOutlinePencil}
+                    icon={AiOutlineEdit}
                     onClick={() => handleOpenUpdateModal(user)}
                     color="blue"
                   />
@@ -299,7 +300,7 @@ export default function Main() {
                     tooltipText={
                       user.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"
                     }
-                    icon={HiOutlineLockClosed}
+                    icon={AiOutlineLock}
                     color="secondary"
                     onClick={() =>
                       openConfirm({
@@ -321,7 +322,7 @@ export default function Main() {
 
                   <ActionButton
                     tooltipText="Xóa tài khoản"
-                    icon={HiOutlineTrash}
+                    icon={AiOutlineDelete}
                     color="red"
                     onClick={() =>
                       openConfirm({
@@ -339,7 +340,7 @@ export default function Main() {
 
               <ActionButton
                 tooltipText="Đặt lại mật khẩu"
-                icon={HiOutlineRefresh}
+                icon={AiOutlineReload}
                 color="amber"
                 onClick={() =>
                   openModal({
@@ -449,7 +450,7 @@ export default function Main() {
                 onClick={() => exportMutation.mutate()}
                 disabled={exportMutation.isPending}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white bg-secondary hover:bg-secondary/80 transition-all shadow-lg shadow-secondary/20 cursor-pointer active:scale-95 h-auto"
-                icon={HiOutlineDownload}
+                icon={AiOutlineDownload}
                 iconClassName="text-white"
               >
                 {exportMutation.isPending ? "Đang xuất..." : "Xuất Excel"}

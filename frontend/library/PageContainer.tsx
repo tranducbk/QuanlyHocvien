@@ -1,9 +1,9 @@
+import { AiOutlineHome, AiOutlineRight } from "@/library/icons";
 import React from "react";
 import Link from "next/link";
 import Typography from "./Typography";
 import AnimatedContainer from "./AnimatedContainer";
 import ErrorState from "./ErrorState";
-import { HiOutlineHome, HiOutlineChevronRight } from "react-icons/hi";
 
 export interface BreadcrumbItem {
   /** Nhãn hiển thị */
@@ -76,7 +76,7 @@ export default function PageContainer({
 
               return (
                 <div key={index} className="flex items-center gap-2">
-                  {index > 0 && <HiOutlineChevronRight size={12} />}
+                  {index > 0 && <AiOutlineRight size={12} />}
 
                   {item.href && item.label && !isLast ? (
                     <Link
@@ -84,7 +84,7 @@ export default function PageContainer({
                       className="flex items-center gap-2 hover:text-primary-600 dark:hover:text-neutral-100 transition-colors group"
                     >
                       {isFirst && (
-                        <HiOutlineHome
+                        <AiOutlineHome
                           size={14}
                           className="mb-0.5 group-hover:scale-110 transition-transform"
                         />

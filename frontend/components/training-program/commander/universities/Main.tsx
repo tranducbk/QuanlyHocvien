@@ -1,9 +1,16 @@
 "use client";
 
+import {
+  AiOutlineArrowRight,
+  AiOutlineBank,
+  AiOutlineEdit,
+  AiOutlinePlus,
+  AiOutlineUserAdd,
+} from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
-import { HiOutlinePencil } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -18,9 +25,28 @@ import { University, UniversityQueryRequest } from "@/types/training-program/uni
 import CreateUniversityForm from "./CreateUniversityForm";
 import UpdateUniversityForm from "./UpdateUniversityForm";
 import UniversitySkeleton from "./UniversitySkeleton";
+import AddUniversityStudents from "./AddUniversityStudents";
+import CreateOrganizationForm from "./[organizations]/CreateOrganizationForm";
+import Button from "@/library/Button";
 
 export default function Main() {
   const { openModal } = useModalStore();
+  const handleCreateMajor = useCallback((university: University) => {
+    openModal({
+      title: `Tạo ngành học · ${university.universityCode}`,
+      content: <CreateOrganizationForm universityId={university.id} />,
+      size: "md",
+      config: { mutationKey: MUTATION_KEYS.CREATE_ORGANIZATION },
+    });
+  }, [openModal]);
+  const handleAddStudents = useCallback((university: University) => {
+    openModal({
+      title: `Thêm học viên · ${university.universityCode}`,
+      content: <AddUniversityStudents university={university} />,
+      size: "2xl",
+      config: { mutationKey: [QUERY_KEYS.UNIVERSITIES, "add-students"] },
+    });
+  }, [openModal]);
   const handleOpenCreateModal = useCallback(() => {
     openModal({
       title: "Thêm trường đại học",
@@ -65,25 +91,31 @@ export default function Main() {
       {
         id: "universityName",
         header: "Trường đại học",
+        size: 330,
         accessorKey: "universityName",
         cell: ({ row }) => {
           const university = row.original;
           return (
             <Link
               href={`/commander/universities/${university.id}`}
-              className="group inline-flex flex-col"
+              className="group flex min-w-0 items-center gap-3"
             >
+              <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300 lg:flex">
+                <AiOutlineBank className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0">
               <Typography
                 variant="body"
                 weight="semibold"
                 color="neutral"
-                className="group-hover:text-primary-600 transition-colors"
+                className="break-words text-sm leading-5 group-hover:text-primary-600 transition-colors"
               >
                 {university.universityName}
               </Typography>
               <Typography variant="caption" color="gray">
-                Xem chuyên ngành / đơn vị
+                <span className="mt-1 inline-flex items-center gap-1 text-xs">Ngành học <AiOutlineArrowRight aria-hidden="true" /></span>
               </Typography>
+              </span>
             </Link>
           );
         },
@@ -91,9 +123,10 @@ export default function Main() {
       {
         id: "universityCode",
         header: "Mã trường",
+        size: 105,
         accessorKey: "universityCode",
         cell: ({ row }) => (
-          <Typography variant="body" weight="semibold" color="neutral" className="whitespace-nowrap">
+          <Typography variant="body" weight="semibold" color="neutral" className="inline-flex rounded-md bg-neutral-100 px-2 py-1 text-xs dark:bg-neutral-800">
             {row.original.universityCode}
           </Typography>
         ),
@@ -101,9 +134,10 @@ export default function Main() {
       {
         id: "totalStudents",
         header: "Số học viên",
+        size: 130,
         accessorKey: "totalStudents",
         cell: ({ row }) => (
-          <Typography variant="body" color="neutral">
+          <Typography variant="body" color="neutral" className="font-semibold tabular-nums">
             {row.original.totalStudents}
           </Typography>
         ),
@@ -111,6 +145,7 @@ export default function Main() {
       {
         id: "status",
         header: "Trạng thái",
+        size: 150,
         accessorKey: "status",
         cell: ({ row }) => (
           <Badge variant={row.original.status === "ACTIVE" ? "success" : "neutral"}>
@@ -120,18 +155,36 @@ export default function Main() {
       },
       {
         id: "actions",
-        header: "Hành động",
+        header: "Thao tác",
+        size: 240,
+        enableSorting: false,
+        enableHiding: false,
         cell: ({ row }) => (
+          <div className="flex flex-wrap items-center gap-1.5">
+          {row.original.status === "ACTIVE" && <button type="button"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-2.5 py-2 text-xs font-semibold text-primary-700 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-primary-800 dark:bg-primary-950 dark:text-primary-300"
+            onClick={() => handleCreateMajor(row.original)}>
+            <AiOutlinePlus className="h-4 w-4" aria-hidden="true" /> Tạo ngành học
+          </button>}
+          {row.original.status === "ACTIVE" && <ActionButton
+            tooltipText="Thêm học viên"
+            icon={AiOutlineUserAdd}
+            color="neutral"
+            className="border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
+            onClick={() => handleAddStudents(row.original)}
+          />}
           <ActionButton
             tooltipText="Chỉnh sửa trường"
-            icon={HiOutlinePencil}
-            color="blue"
+            icon={AiOutlineEdit}
+            color="neutral"
+            className="border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
             onClick={() => handleOpenUpdateModal(row.original)}
           />
+          </div>
         ),
       },
     ],
-    [handleOpenUpdateModal]
+    [handleOpenUpdateModal, handleAddStudents, handleCreateMajor]
   );
 
   const filterOptions = useMemo<FilterField[]>(
@@ -170,14 +223,18 @@ export default function Main() {
         { label: "Cơ sở đào tạo" },
       ]}
       title="Cơ sở đào tạo"
+      actions={<Button type="button" icon={AiOutlinePlus} onClick={handleOpenCreateModal}>Thêm trường đại học</Button>}
       isLoading={isLoading}
       skeleton={<UniversitySkeleton />}
       isError={isError}
       onRetry={refetch}
     >
-      <div className="bg-white dark:bg-neutral-950 overflow-hidden relative transition-colors">
-        <div className="px-4">
+      <div className="min-w-0">
+        <div className="min-w-0">
           <Table
+            compact
+            fitToContainer
+            rowClassName="hover:bg-neutral-50/70 dark:hover:bg-neutral-900/40 transition-colors"
             data={data}
             columns={columns}
             pagination={pagination}
@@ -188,8 +245,6 @@ export default function Main() {
             onSortingChange={setSorting}
             filterFields={filterOptions}
             emptyText="Không tìm thấy cơ sở đào tạo nào phù hợp"
-            onAdd={handleOpenCreateModal}
-            addLabel="Thêm trường đại học"
           />
         </div>
       </div>

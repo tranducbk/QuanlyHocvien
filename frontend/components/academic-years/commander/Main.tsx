@@ -1,12 +1,9 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineDown, AiOutlineEdit } from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  HiOutlineChevronDown,
-  HiOutlinePencil,
-  HiOutlineTrash,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -165,7 +162,7 @@ export default function Main() {
                 onClick={info.row.getToggleExpandedHandler()}
                 className="flex items-center gap-2 text-left"
               >
-                <HiOutlineChevronDown
+                <AiOutlineDown
                   className={`text-neutral-400 transition-transform ${
                     info.row.getIsExpanded() ? "rotate-180" : ""
                   }`}
@@ -252,14 +249,14 @@ export default function Main() {
             <div className="flex items-center justify-start gap-1">
               <ActionButton
                 tooltipText="Chỉnh sửa"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 onClick={() => handleOpenUpdateModal(row)}
                 color="blue"
               />
 
               <ActionButton
                 tooltipText="Xóa học kỳ"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 onClick={() =>
                   openConfirm({

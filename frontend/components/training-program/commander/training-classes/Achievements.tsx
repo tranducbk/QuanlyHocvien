@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit } from "@/library/icons";
+
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -94,7 +95,7 @@ export default function Achievements() {
     { id: "unit", header: "Đơn vị", accessorFn: (row) => row.student?.unit, cell: ({ row }) => row.original.student?.unit || "—" },
     { id: "year", header: "Năm", accessorKey: "year", cell: ({ row }) => row.original.year || "—" },
     { id: "updatedAt", header: "Cập nhật", accessorKey: "updatedAt", cell: ({ row }) => <Typography variant="caption" weight="semibold" color="gray" className="whitespace-nowrap">{formatDateTime(row.original.updatedAt)}</Typography> },
-    { id: "actions", header: "Hành động", enableSorting: false, cell: ({ row }) => <div className="flex gap-1"><ActionButton tooltipText="Cập nhật" icon={HiOutlinePencil} onClick={() => openForm(row.original)} /><ActionButton tooltipText="Xóa thành tích" icon={HiOutlineTrash} color="red" onClick={() => openConfirm({ title: "Xóa thành tích", message: `Xóa thành tích “${row.original.title}”?`, variant: "danger", onConfirm: () => { closeConfirm(); remove.mutate(row.original); } })} /></div> },
+    { id: "actions", header: "Hành động", enableSorting: false, cell: ({ row }) => <div className="flex gap-1"><ActionButton tooltipText="Cập nhật" icon={AiOutlineEdit} onClick={() => openForm(row.original)} /><ActionButton tooltipText="Xóa thành tích" icon={AiOutlineDelete} color="red" onClick={() => openConfirm({ title: "Xóa thành tích", message: `Xóa thành tích “${row.original.title}”?`, variant: "danger", onConfirm: () => { closeConfirm(); remove.mutate(row.original); } })} /></div> },
   ], [openConfirm, closeConfirm, remove, openForm]);
   const filterFields = useMemo<FilterField[]>(() => [
     { type: "select", id: "classId", label: "Lớp", options: [{ value: "", label: "Tất cả lớp" }, ...records.assignedClasses.map((item) => ({ value: item.id, label: item.name }))] },

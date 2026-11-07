@@ -1,15 +1,16 @@
 "use client";
+
+import {
+  AiOutlineArrowLeft,
+  AiOutlineClockCircle,
+  AiOutlineEnvironment,
+  AiOutlineExclamationCircle,
+  AiOutlineMail,
+  AiOutlinePhone,
+} from "@/library/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { m } from "motion/react";
-import {
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiClock,
-  FiAlertCircle,
-  FiArrowLeft,
-} from "react-icons/fi";
 import Button from "@/library/Button";
 import AnimatedContainer from "@/library/AnimatedContainer";
 import Divide from "@/library/Divide";
@@ -18,10 +19,10 @@ import Typography from "@/library/Typography";
 const SUPPORT_EMAIL = "cntt@hvkhqs.edu.vn";
 
 const contactInfo = [
-  { icon: FiMail, label: "Email", value: SUPPORT_EMAIL },
-  { icon: FiPhone, label: "Điện thoại", value: "(024) 1234-5678" },
-  { icon: FiMapPin, label: "Địa chỉ", value: "Phòng 101, Tầng 1, Tòa nhà A" },
-  { icon: FiClock, label: "Giờ làm việc", value: "8:00 - 17:00 (Thứ 2 - Thứ 6)" },
+  { icon: AiOutlineMail, label: "Email", value: SUPPORT_EMAIL },
+  { icon: AiOutlinePhone, label: "Điện thoại", value: "(024) 1234-5678" },
+  { icon: AiOutlineEnvironment, label: "Địa chỉ", value: "Phòng 101, Tầng 1, Tòa nhà A" },
+  { icon: AiOutlineClockCircle, label: "Giờ làm việc", value: "8:00 - 17:00 (Thứ 2 - Thứ 6)" },
 ];
 
 export default function Main() {
@@ -77,7 +78,7 @@ export default function Main() {
         <div className="rounded-xl border border-primary-100 dark:border-neutral-800 bg-primary-50/60 dark:bg-neutral-900/60 p-5">
           <div className="flex items-center gap-3 mb-4">
             <span className="inline-flex items-center justify-center size-10 rounded-full bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400">
-              <FiMail size={18} />
+              <AiOutlineMail size={18} />
             </span>
             <div>
               <Typography variant="h4" color="neutral" weight="bold">
@@ -107,7 +108,7 @@ export default function Main() {
         {/* Important note */}
         <div className="mt-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/80 dark:bg-amber-500/10 p-4">
           <div className="flex items-start gap-2.5">
-            <FiAlertCircle
+            <AiOutlineExclamationCircle
               size={16}
               className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
             />
@@ -135,7 +136,7 @@ export default function Main() {
             size="lg"
             variant="primary"
             fullWidth
-            icon={FiMail}
+            icon={AiOutlineMail}
           >
             Liên hệ ngay với phòng CNTT
           </Button>
@@ -147,7 +148,7 @@ export default function Main() {
             href="/login"
             className="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 transition-colors"
           >
-            <FiArrowLeft size={16} />
+            <AiOutlineArrowLeft size={16} />
             <Typography variant="caption" weight="semibold">
               Quay lại đăng nhập
             </Typography>

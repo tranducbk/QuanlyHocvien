@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineCheck, AiOutlineMinus } from "@/library/icons";
+
 import type { ReactNode } from "react";
-import { HiOutlineCheck, HiOutlineMinus } from "react-icons/hi";
 import Typography from "./Typography";
 
 type CheckboxSize = "sm" | "md" | "lg";
@@ -59,9 +60,9 @@ export default function Checkbox({
         } group-focus-visible:ring-2 group-focus-visible:ring-primary-500 group-focus-visible:ring-offset-2`}
       >
         {indeterminate ? (
-          <HiOutlineMinus size={styles.icon} className="stroke-3" />
+          <AiOutlineMinus size={styles.icon} className="stroke-3" />
         ) : checked ? (
-          <HiOutlineCheck size={styles.icon} className="stroke-3" />
+          <AiOutlineCheck size={styles.icon} className="stroke-3" />
         ) : null}
       </span>
       {label != null && (

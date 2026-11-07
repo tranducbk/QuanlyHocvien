@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineClose } from "@/library/icons";
+
 import React, { useEffect, useRef } from "react";
 import { useIsMutating } from "@tanstack/react-query";
 import { m, AnimatePresence } from "motion/react";
-import { HiOutlineX } from "react-icons/hi";
 import Divide from "@/library/Divide";
 import { MUTATION_KEYS } from "@/constants/query-keys";
 import { useModalStore } from "@/store/useModalStore";
@@ -99,7 +100,7 @@ export default function Modal() {
                           : "cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-neutral-800"
                         }`}
                     >
-                      <HiOutlineX
+                      <AiOutlineClose
                         size={20}
                         className="group-hover:rotate-90 transition-transform duration-300"
                       />
@@ -119,7 +120,7 @@ export default function Modal() {
                     : "cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-neutral-800"
                   }`}
               >
-                <HiOutlineX
+                <AiOutlineClose
                   size={20}
                   className="group-hover:rotate-90 transition-transform duration-300"
                 />

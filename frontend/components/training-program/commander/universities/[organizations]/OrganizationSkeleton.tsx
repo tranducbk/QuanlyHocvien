@@ -1,8 +1,8 @@
+import { AiOutlineHome, AiOutlinePlus, AiOutlineRight } from "@/library/icons";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import Button from "@/library/Button";
 import Link from "next/link";
-import { HiOutlineHome, HiOutlineChevronRight, HiOutlinePlus } from "react-icons/hi";
 
 export default function OrganizationSkeleton() {
   return (
@@ -10,14 +10,14 @@ export default function OrganizationSkeleton() {
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-neutral-400">
         <Link href="/commander" className="flex items-center gap-2">
-          <HiOutlineHome size={14} />
+          <AiOutlineHome size={14} />
           <Typography variant="label" tracking="wide">Tổng quan</Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Link href="/commander/universities">
           <Typography variant="label" tracking="wide">Cơ sở đào tạo</Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Skeleton width={120} height={16} />
       </div>
 
@@ -29,7 +29,7 @@ export default function OrganizationSkeleton() {
             Quản lý các chuyên ngành và đơn vị trực thuộc trường
           </Typography>
         </div>
-        <Button disabled className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white opacity-50 cursor-not-allowed h-auto" icon={HiOutlinePlus}>
+        <Button disabled className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white opacity-50 cursor-not-allowed h-auto" icon={AiOutlinePlus}>
           Thêm chuyên ngành / Đơn vị
         </Button>
       </div>

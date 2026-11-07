@@ -1,12 +1,10 @@
 "use client";
 
+import { AiOutlineCheckCircle, AiOutlineExclamationCircle } from "@/library/icons";
+
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { IconType } from "react-icons";
-import {
-  HiOutlineCheckCircle,
-  HiOutlineExclamationCircle,
-} from "react-icons/hi";
 import Badge, { BadgeVariant } from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
 import Table from "@/library/Table";
@@ -30,12 +28,12 @@ const statusConfig: Record<
   PAID: {
     label: "Đã thanh toán",
     variant: "success",
-    icon: HiOutlineCheckCircle,
+    icon: AiOutlineCheckCircle,
   },
   UNPAID: {
     label: "Chưa thanh toán",
     variant: "warning",
-    icon: HiOutlineExclamationCircle,
+    icon: AiOutlineExclamationCircle,
   },
 };
 

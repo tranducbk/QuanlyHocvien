@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineClose, AiOutlineTeam, AiOutlineUserAdd } from "@/library/icons";
+
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HiOutlineUserAdd, HiOutlineUserGroup, HiOutlineX } from "react-icons/hi";
 import Button from "@/library/Button";
 import Typography from "@/library/Typography";
 import { QUERY_KEYS } from "@/constants/query-keys";
@@ -142,7 +143,7 @@ export default function TrainingClassStudentsModal({ trainingClass }: Props) {
       {/* Phần 1: Tìm và thêm học viên */}
       <section className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 dark:border-neutral-800 dark:bg-neutral-900/40">
         <div className="flex items-center gap-2 mb-3">
-          <HiOutlineUserAdd className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+          <AiOutlineUserAdd className="h-5 w-5 text-primary-600 dark:text-primary-400" />
           <Typography variant="body" weight="semibold">
             Thêm học viên vào lớp
           </Typography>
@@ -175,7 +176,7 @@ export default function TrainingClassStudentsModal({ trainingClass }: Props) {
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                 aria-label="Xóa tìm kiếm"
               >
-                <HiOutlineX className="h-4 w-4" />
+                <AiOutlineClose className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -246,7 +247,7 @@ export default function TrainingClassStudentsModal({ trainingClass }: Props) {
               className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 flex-shrink-0"
               aria-label="Bỏ chọn"
             >
-              <HiOutlineX className="h-4 w-4" />
+              <AiOutlineClose className="h-4 w-4" />
             </button>
           </div>
         )}
@@ -256,7 +257,7 @@ export default function TrainingClassStudentsModal({ trainingClass }: Props) {
       <section className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <HiOutlineUserGroup className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+            <AiOutlineTeam className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
             <Typography variant="body" weight="semibold">
               Danh sách học viên trong lớp
             </Typography>

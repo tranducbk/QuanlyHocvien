@@ -1,7 +1,7 @@
+import { AiOutlineHome, AiOutlineRight } from "@/library/icons";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import Link from "next/link";
-import { HiOutlineChevronRight, HiOutlineHome } from "react-icons/hi";
 
 export default function NotificationSkeleton() {
   const columns = [180, 90, 280, 100, 150, 90];
@@ -14,12 +14,12 @@ export default function NotificationSkeleton() {
           href="/admin"
           className="flex items-center gap-2 hover:text-primary-600 dark:hover:text-neutral-100 transition-colors"
         >
-          <HiOutlineHome size={14} className="mb-0.5" />
+          <AiOutlineHome size={14} className="mb-0.5" />
           <Typography variant="label" tracking="wide">
             Tổng quan
           </Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Typography variant="label" color="primary" tracking="wide">
           Thông báo
         </Typography>

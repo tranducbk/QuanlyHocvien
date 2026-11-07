@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
-  HiOutlineCalendar,
-  HiOutlineChevronLeft,
-  HiOutlineChevronRight,
-  HiOutlineClock,
-  HiOutlineLocationMarker,
-} from "react-icons/hi";
+  AiOutlineCalendar,
+  AiOutlineClockCircle,
+  AiOutlineEnvironment,
+  AiOutlineLeft,
+  AiOutlineRight,
+} from "@/library/icons";
+
+import { useMemo, useState } from "react";
 import Badge from "@/library/Badge";
 import Typography from "@/library/Typography";
 import { ScheduleItem, TimeTable } from "@/types/schedules/time-tables";
@@ -144,7 +145,7 @@ export default function TimeTableCalendar({
               onClick={() => selectMonth(-1)}
               className="flex size-10 items-center justify-center rounded-full border border-primary-400 text-primary-600 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-30 dark:border-primary-600 dark:text-primary-300 dark:hover:bg-primary-900/40"
             >
-              <HiOutlineChevronLeft size={20} />
+              <AiOutlineLeft size={20} />
             </button>
 
             <div className="text-center">
@@ -170,7 +171,7 @@ export default function TimeTableCalendar({
               onClick={() => selectMonth(1)}
               className="flex size-10 items-center justify-center rounded-full border border-primary-400 text-primary-600 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-30 dark:border-primary-600 dark:text-primary-300 dark:hover:bg-primary-900/40"
             >
-              <HiOutlineChevronRight size={20} />
+              <AiOutlineRight size={20} />
             </button>
           </div>
 
@@ -278,14 +279,14 @@ export default function TimeTableCalendar({
 
                     <div className="mt-3 space-y-2 text-neutral-600 dark:text-neutral-300">
                       <div className="flex items-center gap-2">
-                        <HiOutlineClock className="shrink-0 text-neutral-400" />
+                        <AiOutlineClockCircle className="shrink-0 text-neutral-400" />
                         <Typography variant="body">
                           {schedule.day}, {schedule.startTime} -{" "}
                           {schedule.endTime}
                         </Typography>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiOutlineLocationMarker className="shrink-0 text-neutral-400" />
+                        <AiOutlineEnvironment className="shrink-0 text-neutral-400" />
                         <Typography variant="body">
                           Phòng {schedule.room}
                         </Typography>
@@ -304,7 +305,7 @@ export default function TimeTableCalendar({
           ) : (
             <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-white/70 px-6 text-center dark:border-neutral-700 dark:bg-neutral-950/60">
               <div className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-400 dark:bg-neutral-800">
-                <HiOutlineCalendar size={24} />
+                <AiOutlineCalendar size={24} />
               </div>
               <Typography
                 variant="body"

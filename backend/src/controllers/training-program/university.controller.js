@@ -35,4 +35,17 @@ const deleteRecord = asyncHandler(async (req, res) => {
   return success(res, null, 'Xóa thành công');
 });
 
-module.exports = { create, getAll, getDetail, getHierarchy, update, delete: deleteRecord };
+const availableStudents = asyncHandler(async (req, res) => {
+  await validateOrThrow(s.params, req.params);
+  await validateOrThrow(s.availableStudents, req.query);
+  const query = s.availableStudents.cast(req.query, { stripUnknown: true });
+  const result = await service.availableStudents(req.params.id, query, req.user);
+  return paginated(res, result.rows, result.pagination);
+});
+const addStudents = asyncHandler(async (req, res) => {
+  await validateOrThrow(s.params, req.params);
+  await validateOrThrow(s.addStudents, req.body);
+  return success(res, await service.addStudents(req.params.id, req.body.profileIds, req.user), 'Đã thêm học viên vào trường');
+});
+
+module.exports = { create, getAll, getDetail, getHierarchy, update, delete: deleteRecord, availableStudents, addStudents };

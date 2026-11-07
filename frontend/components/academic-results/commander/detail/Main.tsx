@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDownload, AiOutlinePlus, AiOutlineUpload } from "@/library/icons";
+
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiPlus, HiOutlineUpload, HiOutlineDownload } from "react-icons/hi";
 import { useToastStore } from "@/store/useToastStore";
 import Table from "@/library/Table";
 import Typography from "@/library/Typography";
@@ -158,7 +159,7 @@ export default function Main({
             </Typography>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleDownloadTemplate} icon={HiOutlineDownload} variant="outline" isLoading={isDownloading}>
+            <Button onClick={handleDownloadTemplate} icon={AiOutlineDownload} variant="outline" isLoading={isDownloading}>
               Tải file mẫu
             </Button>
             <input
@@ -170,13 +171,13 @@ export default function Main({
             />
             <Button 
               onClick={() => fileInputRef.current?.click()} 
-              icon={HiOutlineUpload} 
+              icon={AiOutlineUpload}
               variant="outline"
               isLoading={isUploading}
             >
               Nhập từ Excel
             </Button>
-            <Button onClick={handleOpenForm} icon={HiPlus}>
+            <Button onClick={handleOpenForm} icon={AiOutlinePlus}>
               Thêm môn học
             </Button>
           </div>

@@ -1,15 +1,16 @@
 "use client";
 
+import {
+  AiOutlineCalendar,
+  AiOutlineCheckSquare,
+  AiOutlineProfile,
+  AiOutlineRead,
+} from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineBadgeCheck,
-  HiOutlineCalendar,
-  HiOutlineClipboardList,
-} from "react-icons/hi";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import Input from "@/library/Input";
@@ -211,7 +212,7 @@ export default function AchievementForm({ achievement, classAchievement, classCo
             <Select
               label="Học viên"
               placeholder="Chọn học viên"
-              prefixIcon={<HiOutlineAcademicCap />}
+              prefixIcon={<AiOutlineRead />}
               value={value}
               onChange={(selectedValue) => onChange(selectedValue)}
               options={studentOptions}
@@ -249,7 +250,7 @@ export default function AchievementForm({ achievement, classAchievement, classCo
         <Input
           label="Tên thành tích"
           placeholder="Nhập tên thành tích"
-          prefixIcon={<HiOutlineBadgeCheck />}
+          prefixIcon={<AiOutlineCheckSquare />}
           error={errors.title?.message}
           isLoading={mutation.isPending}
           {...register("title")}
@@ -259,7 +260,7 @@ export default function AchievementForm({ achievement, classAchievement, classCo
         <Input
           label="Danh hiệu / giải thưởng"
           placeholder="Ví dụ: Chiến sĩ tiên tiến"
-          prefixIcon={<HiOutlineClipboardList />}
+          prefixIcon={<AiOutlineProfile />}
           error={errors.award?.message}
           isLoading={mutation.isPending}
           {...register("award")}
@@ -273,7 +274,7 @@ export default function AchievementForm({ achievement, classAchievement, classCo
               <Select
                 label="Năm học"
                 placeholder="Chọn năm học"
-                prefixIcon={<HiOutlineCalendar />}
+                prefixIcon={<AiOutlineCalendar />}
                 value={value ?? ""}
                 onChange={(selectedValue) => {
                   onChange(String(selectedValue));
@@ -294,7 +295,7 @@ export default function AchievementForm({ achievement, classAchievement, classCo
               <Select
                 label="Học kỳ"
                 placeholder="Chọn học kỳ"
-                prefixIcon={<HiOutlineCalendar />}
+                prefixIcon={<AiOutlineCalendar />}
                 value={value ?? ""}
                 onChange={(selectedValue) => onChange(String(selectedValue))}
                 options={semesterOptions}
@@ -313,7 +314,7 @@ export default function AchievementForm({ achievement, classAchievement, classCo
             label="Năm"
             type="number"
             placeholder="VD: 2024"
-            prefixIcon={<HiOutlineCalendar />}
+            prefixIcon={<AiOutlineCalendar />}
             error={errors.year?.message}
             isLoading={mutation.isPending}
             {...register("year", { setValueAs: parseNumber })}

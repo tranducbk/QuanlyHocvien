@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineTeam, AiOutlineUserAdd } from "@/library/icons";
+
 import { useMemo, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -8,12 +10,6 @@ import { universityService } from "@/services/training-program/universities";
 import { Class } from "@/types/training-program/classes";
 import { formatDateTime, textOrDash } from "@/utils/fn-common";
 import Table from "@/library/Table";
-import {
-  HiOutlinePencil,
-  HiOutlineTrash,
-  HiOutlineUserAdd,
-  HiOutlineUserGroup,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Typography from "@/library/Typography";
 import PageContainer from "@/library/PageContainer";
@@ -216,26 +212,26 @@ export default function Main() {
             <div className="flex items-center justify-start gap-1">
               <ActionButton
                 tooltipText="Thêm học viên"
-                icon={HiOutlineUserAdd}
+                icon={AiOutlineUserAdd}
                 onClick={() => handleOpenAddStudentsModal(cls)}
                 color="green"
               />
               <ActionButton
                 tooltipText="Danh sách học viên"
-                icon={HiOutlineUserGroup}
+                icon={AiOutlineTeam}
                 onClick={() => handleOpenStudentsListModal(cls)}
                 color="secondary"
               />
               <ActionButton
                 tooltipText="Chỉnh sửa"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 onClick={() => handleOpenUpdateModal(cls)}
                 color="blue"
               />
 
               <ActionButton
                 tooltipText="Xóa lớp"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 onClick={() =>
                   openConfirm({

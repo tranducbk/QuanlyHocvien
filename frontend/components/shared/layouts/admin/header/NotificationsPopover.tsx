@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  AiOutlineBell,
+  AiOutlineCalendar,
+  AiOutlineCheckCircle,
+  AiOutlineCheckSquare,
+  AiOutlineDollar,
+  AiOutlineInfoCircle,
+  AiOutlineRead,
+  AiOutlineReload,
+} from "@/library/icons";
+
 import { useCallback } from "react";
 import {
   useInfiniteQuery,
@@ -10,16 +21,6 @@ import {
 import { useRouter } from "next/navigation";
 import { m } from "motion/react";
 import type { IconType } from "react-icons";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineBadgeCheck,
-  HiOutlineBell,
-  HiOutlineCalendar,
-  HiOutlineCash,
-  HiOutlineCheckCircle,
-  HiOutlineInformationCircle,
-  HiOutlineRefresh,
-} from "react-icons/hi";
 import { DEFAULT_PAGE } from "@/constants/constants";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
@@ -40,30 +41,30 @@ const notificationTypeConfig: Record<
 > = {
   GRADE: {
     label: "Điểm",
-    icon: HiOutlineAcademicCap,
+    icon: AiOutlineRead,
     className: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-200",
   },
   CUT_RICE: {
     label: "Cắt cơm",
-    icon: HiOutlineCalendar,
+    icon: AiOutlineCalendar,
     className:
       "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-200",
   },
   ACHIEVEMENT: {
     label: "Khen thưởng",
-    icon: HiOutlineBadgeCheck,
+    icon: AiOutlineCheckSquare,
     className:
       "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200",
   },
   TUITION: {
     label: "Học phí",
-    icon: HiOutlineCash,
+    icon: AiOutlineDollar,
     className:
       "bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-200",
   },
   GENERAL: {
     label: "Chung",
-    icon: HiOutlineInformationCircle,
+    icon: AiOutlineInfoCircle,
     className:
       "bg-neutral-100 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300",
   },
@@ -172,7 +173,7 @@ export default function NotificationsPopover() {
           }`}
         >
           <m.div whileHover={{ rotate: 15, scale: 1.1 }}>
-            <HiOutlineBell size={20} />
+            <AiOutlineBell size={20} />
           </m.div>
           {unreadCount > 0 && (
             <span className="absolute -right-1 -top-1 min-w-5 h-5 px-1 rounded-full bg-error-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-white dark:border-neutral-950">
@@ -204,7 +205,7 @@ export default function NotificationsPopover() {
                 onClick={() => markAllReadMutation.mutate()}
                 className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 px-3 text-[10px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400 transition-colors hover:bg-neutral-50 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-900 dark:hover:text-neutral-100"
               >
-                <HiOutlineCheckCircle size={14} />
+                <AiOutlineCheckCircle size={14} />
                 Đọc tất cả
               </button>
             </div>
@@ -242,14 +243,14 @@ export default function NotificationsPopover() {
                     ref={setLoadMoreRef}
                     className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 text-xs font-black uppercase tracking-wider text-neutral-500 dark:border-neutral-800 dark:text-neutral-400"
                   >
-                    <HiOutlineRefresh size={16} />
+                    <AiOutlineReload size={16} />
                     Cuộn để tải thêm
                   </div>
                 )}
               </div>
             ) : (
               <div className="flex min-h-36 flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/70 dark:bg-neutral-900/50 p-6 text-center">
-                <HiOutlineBell
+                <AiOutlineBell
                   size={28}
                   className="text-neutral-300 dark:text-neutral-600"
                 />

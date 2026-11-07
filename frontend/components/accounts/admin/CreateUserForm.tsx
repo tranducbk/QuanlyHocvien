@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineAppstore, AiOutlineUserAdd } from "@/library/icons";
+
 import React, { useState } from "react";
-import { HiOutlineUserAdd, HiOutlineCollection } from "react-icons/hi";
 import Tabs, { TabItem } from "@/library/Tabs";
 import CreateSingleUser from "./CreateSingleUser";
 import CreateBatchUsers from "./CreateBatchUsers";
@@ -13,7 +14,7 @@ const CreateUserForm: React.FC = () => {
     {
       id: "single",
       label: "Thêm một người",
-      icon: <HiOutlineUserAdd size={18} />,
+      icon: <AiOutlineUserAdd size={18} />,
       content: (
         <CreateSingleUser/>
       ),
@@ -21,7 +22,7 @@ const CreateUserForm: React.FC = () => {
     {
       id: "batch",
       label: "Thêm hàng loạt (Excel)",
-      icon: <HiOutlineCollection size={18} />,
+      icon: <AiOutlineAppstore size={18} />,
       content: (
         <CreateBatchUsers/>
       ),

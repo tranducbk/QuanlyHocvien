@@ -151,6 +151,44 @@ router.use(requireRole('COMMANDER'));
 router.use(requireTrainingSystem('HE_5'));
 
 router.get('/hierarchy', controller.getHierarchy);
+/**
+ * @swagger
+ * /universities/{id}/available-students:
+ *   get:
+ *     summary: Tìm học viên Hệ 5 chưa có trường
+ *     tags: [Universities]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200: { description: Danh sách học viên chưa có trường }
+ * /universities/{id}/students:
+ *   post:
+ *     summary: Thêm học viên Hệ 5 chưa có trường vào trường
+ *     tags: [Universities]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [profileIds]
+ *             properties:
+ *               profileIds:
+ *                 type: array
+ *                 items: { type: string, format: uuid }
+ *     responses:
+ *       200: { description: Đã thêm học viên }
+ */
+router.get('/:id/available-students', controller.availableStudents);
+router.post('/:id/students', controller.addStudents);
 router.post('/', controller.create);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);

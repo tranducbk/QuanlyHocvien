@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineHome, AiOutlineRight } from "@/library/icons";
+
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import Link from "next/link";
-import { HiOutlineChevronRight, HiOutlineHome } from "react-icons/hi";
 
 export default function TuitionSkeleton() {
   const columnCount = 7;
@@ -12,12 +13,12 @@ export default function TuitionSkeleton() {
     <div className="min-h-screen space-y-8 rounded-2xl bg-white p-6 text-neutral-900 transition-colors dark:bg-neutral-950 dark:text-neutral-100">
       <div className="flex items-center gap-2 text-neutral-400 dark:text-neutral-500">
         <Link href="/commander" className="flex items-center gap-2 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300">
-          <HiOutlineHome size={14} />
+          <AiOutlineHome size={14} />
           <Typography variant="label" tracking="wide">
             Tổng quan
           </Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Typography variant="label" color="primary" tracking="wide">
           Quản lý học phí
         </Typography>

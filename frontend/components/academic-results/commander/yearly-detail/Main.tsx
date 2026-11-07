@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineEye } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineEye } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import ActionButton from "@/library/ActionButton";
 import PageContainer from "@/library/PageContainer";
@@ -80,7 +81,7 @@ export default function Main({ yearlyResultId }: YearlyDetailMainProps) {
         cell: (info) => (
           <ActionButton
             tooltipText="Xem chi tiết học kỳ"
-            icon={HiOutlineEye}
+            icon={AiOutlineEye}
             color="blue"
             onClick={() =>
               router.push(`/commander/academic-results/${info.row.original.id}`)

@@ -1,17 +1,17 @@
 "use client";
 
+import {
+  AiOutlineAppstore,
+  AiOutlineBank,
+  AiOutlineCheckCircle,
+  AiOutlineIdcard,
+  AiOutlineRead,
+  AiOutlineTeam,
+  AiOutlineWarning,
+} from "@/library/icons";
+
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineCheckCircle,
-  HiOutlineCollection,
-  HiOutlineExclamation,
-  HiOutlineIdentification,
-  HiOutlineOfficeBuilding,
-  HiOutlineShieldCheck,
-  HiOutlineUserGroup,
-} from "react-icons/hi";
 import type { IconType } from "react-icons";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -52,49 +52,49 @@ export default function Main() {
       label: "Tài khoản",
       value: formatNumber(overview?.totalUsers),
       helper: "Tổng người dùng",
-      icon: HiOutlineUserGroup,
+      icon: AiOutlineTeam,
       tone: "primary",
     },
     {
       label: "Đang hoạt động",
       value: formatNumber(overview?.activeUsers),
       helper: "Tài khoản khả dụng",
-      icon: HiOutlineCheckCircle,
+      icon: AiOutlineCheckCircle,
       tone: "success",
     },
     {
       label: "Bị khóa",
       value: formatNumber(overview?.inactiveUsers),
       helper: "Cần rà soát",
-      icon: HiOutlineExclamation,
+      icon: AiOutlineWarning,
       tone: "warning",
     },
     {
       label: "Cơ sở đào tạo",
       value: formatNumber(overview?.totalUniversities),
       helper: "Trường/đơn vị cấp trường",
-      icon: HiOutlineOfficeBuilding,
+      icon: AiOutlineBank,
       tone: "primary",
     },
     {
       label: "Khoa/Đơn vị",
       value: formatNumber(overview?.totalOrganizations),
       helper: "Đơn vị trực thuộc",
-      icon: HiOutlineCollection,
+      icon: AiOutlineAppstore,
       tone: "sky",
     },
     {
       label: "Lớp học",
       value: formatNumber(overview?.totalClasses),
       helper: "Lớp đang quản lý",
-      icon: HiOutlineAcademicCap,
+      icon: AiOutlineRead,
       tone: "success",
     },
     {
       label: "Học viên",
       value: formatNumber(overview?.totalStudents),
       helper: "Tài khoản học viên",
-      icon: HiOutlineIdentification,
+      icon: AiOutlineIdcard,
       tone: "warning",
       href: "/admin/accounts",
     },

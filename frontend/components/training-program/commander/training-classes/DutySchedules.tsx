@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import Button from "@/library/Button";
@@ -59,7 +60,7 @@ export default function DutySchedules() {
     { id: "student", header: "Học viên", accessorFn: (row) => row.student.fullName, cell: ({ row }) => <div><Typography variant="body" weight="semibold">{row.original.student.fullName}</Typography><Typography variant="caption" color="gray" className="block">{row.original.student.code}</Typography></div> },
     { id: "position", header: "Nhiệm vụ", accessorKey: "position", cell: ({ row }) => <Badge variant="primary">{row.original.position}</Badge> },
     { id: "workDay", header: "Ngày trực", accessorKey: "workDay", cell: ({ row }) => row.original.workDay.slice(0, 10) },
-    { id: "actions", header: "Hành động", enableSorting: false, cell: ({ row }) => <div className="flex gap-1"><ActionButton tooltipText="Sửa lịch trực" icon={HiOutlinePencil} onClick={() => { const item = row.original; setEditing(item); setStudentUserId(item.studentUserId); setPosition(item.position); setWorkDay(item.workDay.slice(0, 10)); setMessage(""); }} /><ActionButton tooltipText="Xóa lịch trực" icon={HiOutlineTrash} color="red" onClick={() => openConfirm({ title: "Xóa lịch trực", message: `Xóa lịch trực ngày ${row.original.workDay} của ${row.original.student.fullName}?`, variant: "danger", onConfirm: () => remove.mutate(row.original) })} /></div> },
+    { id: "actions", header: "Hành động", enableSorting: false, cell: ({ row }) => <div className="flex gap-1"><ActionButton tooltipText="Sửa lịch trực" icon={AiOutlineEdit} onClick={() => { const item = row.original; setEditing(item); setStudentUserId(item.studentUserId); setPosition(item.position); setWorkDay(item.workDay.slice(0, 10)); setMessage(""); }} /><ActionButton tooltipText="Xóa lịch trực" icon={AiOutlineDelete} color="red" onClick={() => openConfirm({ title: "Xóa lịch trực", message: `Xóa lịch trực ngày ${row.original.workDay} của ${row.original.student.fullName}?`, variant: "danger", onConfirm: () => remove.mutate(row.original) })} /></div> },
   ], [openConfirm, remove]);
   const filterFields = useMemo<FilterField[]>(() => [
     { type: "select", id: "classId", label: "Lớp", options: [{ value: "", label: "Tất cả lớp" }, ...duties.assignedClasses.map((item) => ({ value: item.id, label: item.name }))] },

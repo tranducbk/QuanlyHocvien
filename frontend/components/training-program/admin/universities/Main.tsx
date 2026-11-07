@@ -1,14 +1,10 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineLock, AiOutlineUnlock } from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  HiOutlineLockClosed,
-  HiOutlineLockOpen,
-  HiOutlinePencil,
-  HiOutlineTrash,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -171,7 +167,7 @@ export default function Main() {
                 tooltipText={
                   isActive ? "Tạm dừng hoạt động" : "Kích hoạt hoạt động"
                 }
-                icon={isActive ? HiOutlineLockOpen : HiOutlineLockClosed}
+                icon={isActive ? AiOutlineUnlock : AiOutlineLock}
                 color={isActive ? "amber" : "green"}
                 onClick={() =>
                   openConfirm({
@@ -193,14 +189,14 @@ export default function Main() {
 
               <ActionButton
                 tooltipText="Chỉnh sửa"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 color="blue"
                 onClick={() => handleOpenUpdateModal(university)}
               />
 
               <ActionButton
                 tooltipText="Xóa trường"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 onClick={() =>
                   openConfirm({

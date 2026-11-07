@@ -27,7 +27,7 @@ export const organizationService = {
 
   createOrganization: async (
     data: CreateOrganizationRequest
-  ) => {
+  ): Promise<ApiResponse<Organization>> => {
     return apiClient.post(ENDPOINTS.ORGANIZATIONS.BASE, data);
   },
 

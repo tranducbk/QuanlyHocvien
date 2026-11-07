@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDelete } from "@/library/icons";
+
 import { useCallback, useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HiOutlineTrash } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import PageContainer from "@/library/PageContainer";
 import { QUERY_KEYS } from "@/constants/query-keys";
@@ -158,7 +159,7 @@ export default function MilitaryTimeTablePage() {
         cell: ({ row }) => (
           <ActionButton
             tooltipText="Bỏ tiết học"
-            icon={HiOutlineTrash}
+            icon={AiOutlineDelete}
             color="red"
             onClick={() =>
               setSchedules((items) =>

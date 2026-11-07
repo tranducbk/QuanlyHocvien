@@ -133,6 +133,36 @@ const resolveField = (obj, path) => {
 // ===================== CRUD Cơ bản =====================
 
 const create = async (data) => Student.create(data);
+// Hệ 5 displays the same annual management roster as the six-class screen.
+// Keep the legacy class/university relationship intact for academic data.
+const attachManagementClasses = async (records, requester) => {
+  if (requester?.trainingSystemCode !== 'HE_5' || !records.length) return records;
+  const year = await db.he5PlacementYear.findOne({
+    where: { trainingSystemId: requester.trainingSystemId }, order: [['startYear', 'DESC']],
+  });
+  const placements = year ? await db.he5Placement.findAll({
+    where: { yearId: year.id, profileId: { [db.Sequelize.Op.in]: records.map(row => row.id) } },
+    attributes: ['profileId', 'trainingClassId', 'status'],
+  }) : [];
+  const classIds = [...new Set(placements.map(row => row.trainingClassId))];
+  const classes = classIds.length ? await db.trainingClass.findAll({
+    where: { trainingSystemId: requester.trainingSystemId, id: { [db.Sequelize.Op.in]: classIds } },
+    attributes: ['id', 'name'],
+  }) : [];
+  const classesById = new Map(classes.map(row => [row.id, row]));
+  const placementsByProfile = new Map(placements.map(row => [row.profileId, row]));
+  return records.map(row => {
+    const placement = placementsByProfile.get(row.id);
+    const trainingClass = classesById.get(placement?.trainingClassId);
+    return {
+      ...(typeof row.get === 'function' ? row.get({ plain: true }) : row),
+      managementClass: trainingClass ? {
+        id: trainingClass.id, name: trainingClass.name, schoolYear: year.schoolYear, status: placement.status,
+      } : null,
+    };
+  });
+};
+
 const getAll = async (query, requester) => {
   const where = {};
   const exactFilterFields = ['gender', 'enrollment', 'unit', 'rank', 'classId', 'organizationId', 'universityId', 'educationLevelId', 'commanderId'];
@@ -172,7 +202,9 @@ const getAll = async (query, requester) => {
   }
 
   if (requester?.role === 'ADMIN') opts.attributes = { exclude: ['currentCpa4', 'currentCpa10'] };
-  return paginateQuery(Student, query, opts);
+  const result = await paginateQuery(Student, query, opts);
+  result.rows = await attachManagementClasses(result.rows, requester);
+  return result;
 };
 
 const getDetail = async (id, requester) => {
@@ -192,6 +224,7 @@ const getDetail = async (id, requester) => {
     delete plain.currentCpa10;
     return plain;
   }
+  if (requester?.trainingSystemCode === 'HE_5') return (await attachManagementClasses([record], requester))[0];
   return record;
 };
 

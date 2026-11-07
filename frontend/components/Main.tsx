@@ -1,5 +1,24 @@
 "use client";
 
+import {
+  AiOutlineAppstore,
+  AiOutlineArrowRight,
+  AiOutlineBarChart,
+  AiOutlineBell,
+  AiOutlineCalendar,
+  AiOutlineCheckCircle,
+  AiOutlineClockCircle,
+  AiOutlineCreditCard,
+  AiOutlineEnvironment,
+  AiOutlineLogin,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineSafetyCertificate,
+  AiOutlineTeam,
+  AiOutlineThunderbolt,
+  AiOutlineTrophy,
+} from "@/library/icons";
+
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,24 +28,6 @@ import {
   useMotionValueEvent,
   type Variants,
 } from "motion/react";
-import {
-  FiUsers,
-  FiCreditCard,
-  FiCalendar,
-  FiAward,
-  FiBell,
-  FiLayers,
-  FiCheckCircle,
-  FiBarChart2,
-  FiArrowRight,
-  FiLogIn,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiShield,
-  FiZap,
-  FiClock,
-} from "react-icons/fi";
 import Button from "@/library/Button";
 
 /* ----------------------------- Animation presets ---------------------------- */
@@ -51,49 +52,49 @@ const navLinks = [
 
 const features = [
   {
-    icon: FiUsers,
+    icon: AiOutlineTeam,
     title: "Quản lý tài khoản",
     description:
       "Tạo, phân quyền và quản lý tài khoản học viên, chỉ huy và quản trị viên theo từng đơn vị.",
   },
   {
-    icon: FiCreditCard,
+    icon: AiOutlineCreditCard,
     title: "Quản lý học phí",
     description:
       "Nhập, theo dõi và xuất báo cáo học phí theo từng học kỳ với thống kê trực quan.",
   },
   {
-    icon: FiCalendar,
+    icon: AiOutlineCalendar,
     title: "Thời khóa biểu & Lịch",
     description:
       "Xây dựng thời khóa biểu, lịch trực và lịch ăn cho từng lớp và học viên.",
   },
   {
-    icon: FiBarChart2,
+    icon: AiOutlineBarChart,
     title: "Kết quả học tập",
     description:
       "Theo dõi điểm số, kết quả đào tạo và tiến độ rèn luyện của từng học viên.",
   },
   {
-    icon: FiAward,
+    icon: AiOutlineTrophy,
     title: "Thành tích & Khen thưởng",
     description:
       "Ghi nhận và quản lý thành tích, khen thưởng trong suốt quá trình học tập, rèn luyện.",
   },
   {
-    icon: FiBell,
+    icon: AiOutlineBell,
     title: "Thông báo tức thời",
     description:
       "Gửi và nhận thông báo theo thời gian thực giữa nhà trường, chỉ huy và học viên.",
   },
   {
-    icon: FiLayers,
+    icon: AiOutlineAppstore,
     title: "Đơn vị, lớp & học kỳ",
     description:
       "Tổ chức cơ cấu đơn vị, lớp học và quản lý các học kỳ một cách linh hoạt.",
   },
   {
-    icon: FiCheckCircle,
+    icon: AiOutlineCheckCircle,
     title: "Phê duyệt & Báo cáo",
     description:
       "Phê duyệt yêu cầu và xem báo cáo thống kê tổng quan ngay trên bảng điều khiển.",
@@ -109,19 +110,19 @@ const stats = [
 
 const highlights = [
   {
-    icon: FiShield,
+    icon: AiOutlineSafetyCertificate,
     title: "Bảo mật & Phân quyền",
     description:
       "Kiểm soát truy cập chặt chẽ theo vai trò: học viên, chỉ huy và quản trị viên.",
   },
   {
-    icon: FiZap,
+    icon: AiOutlineThunderbolt,
     title: "Vận hành nhanh chóng",
     description:
       "Giao diện hiện đại, thao tác mượt mà giúp tối ưu hóa toàn bộ quy trình hành chính.",
   },
   {
-    icon: FiClock,
+    icon: AiOutlineClockCircle,
     title: "Cập nhật thời gian thực",
     description:
       "Dữ liệu học tập, lịch trình và thông báo luôn được đồng bộ tức thời.",
@@ -184,7 +185,7 @@ export default function Main() {
               ))}
             </ul>
             <Link href="/login">
-              <Button size="md" variant="primary" icon={FiLogIn}>
+              <Button size="md" variant="primary" icon={AiOutlineLogin}>
                 Đăng nhập
               </Button>
             </Link>
@@ -226,7 +227,7 @@ export default function Main() {
         >
           <m.div variants={fadeUp} className="mb-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-              <FiShield size={14} />
+              <AiOutlineSafetyCertificate size={14} />
               Học viện Khoa học Quân sự — HVKHQS
             </span>
           </m.div>
@@ -255,7 +256,7 @@ export default function Main() {
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
             <Link href="/login">
-              <Button size="lg" variant="primary" icon={FiArrowRight} iconPlacement="right">
+              <Button size="lg" variant="primary" icon={AiOutlineArrowRight} iconPlacement="right">
                 Bắt đầu ngay
               </Button>
             </Link>
@@ -388,7 +389,7 @@ export default function Main() {
 
             <m.div variants={fadeUp} className="mt-8">
               <Link href="/login">
-                <Button size="lg" variant="primary" icon={FiArrowRight} iconPlacement="right">
+                <Button size="lg" variant="primary" icon={AiOutlineArrowRight} iconPlacement="right">
                   Đăng nhập hệ thống
                 </Button>
               </Link>
@@ -448,7 +449,7 @@ export default function Main() {
                 <Button
                   size="lg"
                   variant="ghost"
-                  icon={FiLogIn}
+                  icon={AiOutlineLogin}
                   className="border-white bg-white text-primary-700 hover:bg-white/90"
                 >
                   Đăng nhập ngay
@@ -508,15 +509,15 @@ export default function Main() {
               </p>
               <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                 <li className="flex items-center gap-2">
-                  <FiMail size={15} className="shrink-0 text-primary-300" />
+                  <AiOutlineMail size={15} className="shrink-0 text-primary-300" />
                   cntt@hvkhqs.edu.vn
                 </li>
                 <li className="flex items-center gap-2">
-                  <FiPhone size={15} className="shrink-0 text-primary-300" />
+                  <AiOutlinePhone size={15} className="shrink-0 text-primary-300" />
                   (024) 1234-5678
                 </li>
                 <li className="flex items-center gap-2">
-                  <FiMapPin size={15} className="shrink-0 text-primary-300" />
+                  <AiOutlineEnvironment size={15} className="shrink-0 text-primary-300" />
                   Phòng 101, Tầng 1, Tòa nhà A
                 </li>
               </ul>

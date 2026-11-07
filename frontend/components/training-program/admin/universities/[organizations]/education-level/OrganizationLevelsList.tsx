@@ -1,3 +1,4 @@
+import { AiOutlineDelete, AiOutlineEdit, AiOutlinePlus, AiOutlineRead } from "@/library/icons";
 import { useQuery } from "@tanstack/react-query";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import { organizationService } from "@/services/training-program/organizations";
@@ -9,12 +10,6 @@ import UpdateEducationLevelForm from "./UpdateEducationLevelForm";
 import { useConfirmStore } from "@/store/useConfirmStore";
 import { useModalStore } from "@/store/useModalStore";
 import Typography from "@/library/Typography";
-import {
-  HiOutlineAcademicCap,
-  HiOutlinePencil,
-  HiOutlinePlus,
-  HiOutlineTrash,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Link from "next/link";
 import useAppMutation from "@/hooks/useAppMutation";
@@ -105,7 +100,7 @@ export default function OrganizationLevelsList({
               className="flex items-center gap-4 cursor-pointer group flex-1"
             >
               <div className="flex items-center gap-2 group">
-                <HiOutlineAcademicCap
+                <AiOutlineRead
                   size={18}
                   className="text-secondary-500"
                 />
@@ -121,7 +116,7 @@ export default function OrganizationLevelsList({
             <div className="flex gap-2">
               <ActionButton
                 tooltipText="Chỉnh sửa"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 color="blue"
                 iconSize={14}
                 className="size-8 rounded-lg"
@@ -129,7 +124,7 @@ export default function OrganizationLevelsList({
               />
               <ActionButton
                 tooltipText="Xóa trình độ"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 iconSize={14}
                 className="size-8 rounded-lg"
@@ -152,7 +147,7 @@ export default function OrganizationLevelsList({
         className="ml-6 mt-2 flex items-center gap-2 text-neutral-500 dark:text-neutral-400 hover:text-secondary-600 dark:hover:text-secondary-400 transition-colors cursor-pointer group"
       >
         <div className="size-6 rounded-lg bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center text-neutral-400 dark:text-neutral-500 group-hover:bg-secondary-50 dark:group-hover:bg-secondary-950/30 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition-all">
-          <HiOutlinePlus size={12} />
+          <AiOutlinePlus size={12} />
         </div>
         <Typography variant="caption" weight="semibold">
           Thêm trình độ

@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineUserAdd } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineUserAdd } from "react-icons/hi";
 import Button from "@/library/Button";
 import Checkbox from "@/library/Checkbox";
 import Table from "@/library/Table";
@@ -279,7 +280,7 @@ export default function AddClassStudentsModal({ cls }: Props) {
         </button>
         <Button
           type="button"
-          icon={HiOutlineUserAdd}
+          icon={AiOutlineUserAdd}
           iconClassName="text-white"
           className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-primary-700 hover:border-primary-700 transition-all shadow-lg shadow-primary-600/20 cursor-pointer active:scale-95 h-auto"
           disabled={!selectedIds.length}

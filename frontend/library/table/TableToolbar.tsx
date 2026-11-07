@@ -1,15 +1,17 @@
 "use client";
 
+import { AiOutlineControl, AiOutlineFilter, AiOutlinePlus, AiOutlineUpload } from "@/library/icons";
+
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Table } from "@tanstack/react-table";
-import { HiOutlineAdjustments, HiOutlineFilter, HiOutlinePlus, HiOutlineUpload } from "react-icons/hi";
 import TableFilter, { FilterField } from "./TableFilter";
 import Button from "@/library/Button";
 
 interface TableToolbarProps<TData> {
   /** Thao tác với bảng từ TanStack table */
   table: Table<TData>;
+  compact?: boolean;
   /** Cấu hình các trường lọc */
   filterFields?: FilterField[];
   /** Hiển thị bộ lọc (mặc định: true nếu có filterFields) */
@@ -32,6 +34,7 @@ interface TableToolbarProps<TData> {
 
 const TableToolbar = <TData,>({
   table,
+  compact = false,
   filterFields,
   showFilter = true,
   defaultFilterOpen = false,
@@ -45,8 +48,8 @@ const TableToolbar = <TData,>({
   const [isFilterOpen, setIsFilterOpen] = useState(defaultFilterOpen);
 
   return (
-    <div className="flex flex-col px-2">
-      <div className="flex flex-row items-center justify-end gap-2 mb-4 flex-wrap">
+    <div className={compact ? "flex flex-col" : "flex flex-col px-2"}>
+      <div className={`flex flex-row items-center justify-end gap-2 flex-wrap ${compact ? "" : "mb-4"}`}>
         {actions}
 
         {onBulkUpdate && (
@@ -54,7 +57,7 @@ const TableToolbar = <TData,>({
             type="button"
             onClick={onBulkUpdate}
             className="flex items-center gap-2 px-4 py-2 bg-secondary-500 border border-secondary-500 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-secondary-600 hover:border-secondary-600 transition-all shadow-lg shadow-secondary-500/20 cursor-pointer active:scale-95 h-auto"
-            icon={HiOutlineUpload}
+            icon={AiOutlineUpload}
             iconClassName="text-white"
           >
             {bulkUpdateLabel || "Cập nhật hàng loạt"}
@@ -66,7 +69,7 @@ const TableToolbar = <TData,>({
             type="button"
             onClick={onAdd}
             className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-primary-700 hover:border-primary-700 transition-all shadow-lg shadow-primary-600/20 cursor-pointer active:scale-95 h-auto"
-            icon={HiOutlinePlus}
+            icon={AiOutlinePlus}
           >
             {addLabel || "Thêm mới"}
           </Button>
@@ -81,7 +84,7 @@ const TableToolbar = <TData,>({
               : "bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900"
               }`}
           >
-            <HiOutlineFilter
+            <AiOutlineFilter
               size={16}
               className={isFilterOpen ? "text-primary-500 dark:text-primary-300" : "text-neutral-400 dark:text-neutral-500"}
             />
@@ -92,7 +95,7 @@ const TableToolbar = <TData,>({
         {showVisibilityToggle && (
         <div className="relative group/visibility self-start">
           <button className=" cursor-pointer flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl text-[11px] font-black uppercase tracking-wider text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700 transition-all shadow-sm dark:shadow-none">
-            <HiOutlineAdjustments size={16} className="text-neutral-400 dark:text-neutral-500" />
+            <AiOutlineControl size={16} className="text-neutral-400 dark:text-neutral-500" />
             Cột hiển thị
           </button>
 

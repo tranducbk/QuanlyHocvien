@@ -1,5 +1,18 @@
 "use client";
 
+import {
+  AiOutlineBank,
+  AiOutlineBarChart,
+  AiOutlineCalendar,
+  AiOutlineCheckSquare,
+  AiOutlineEnvironment,
+  AiOutlineIdcard,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineRead,
+  AiOutlineTeam,
+} from "@/library/icons";
+
 import { useQuery } from "@tanstack/react-query";
 import Avatar from "@/library/Avatar";
 import Badge from "@/library/Badge";
@@ -8,19 +21,6 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { userService } from "@/services/accounts/user";
 import { Student } from "@/types/accounts/user";
 import { formatDate, formatDateTime } from "@/utils/fn-common";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineBadgeCheck,
-  HiOutlineCalendar,
-  HiOutlineChartBar,
-  HiOutlineIdentification,
-  HiOutlineLibrary,
-  HiOutlineLocationMarker,
-  HiOutlineMail,
-  HiOutlineOfficeBuilding,
-  HiOutlinePhone,
-  HiOutlineUserGroup,
-} from "react-icons/hi";
 import {
   FamilyMembersView,
   ForeignRelationsView,
@@ -77,7 +77,7 @@ export default function StudentProfileDetail({
             <Badge variant="primary">{student.code || "Chưa có mã"}</Badge>
             <Badge variant="neutral">{student.rank || "Học viên"}</Badge>
             <Badge variant="secondary">
-              {(militaryMode ? student.militaryClass?.className : student.class?.className) || "Chưa phân lớp"}
+              {(militaryMode ? student.militaryClass?.className : student.managementClass?.status === "GRADUATED" ? "Tốt nghiệp" : student.managementClass?.name) || "Chưa phân lớp"}
             </Badge>
           </div>
         </div>
@@ -86,88 +86,83 @@ export default function StudentProfileDetail({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DetailSection title="Thông tin cơ bản">
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Ngày sinh"
             value={formatDate(student.birthday)}
           />
           <DetailItem
-            icon={<HiOutlineUserGroup />}
+            icon={<AiOutlineTeam />}
             label="Giới tính"
             value={student.gender === "MALE" ? "Nam" : "Nữ"}
           />
           <DetailItem
-            icon={<HiOutlineIdentification />}
+            icon={<AiOutlineIdcard />}
             label="Số CCCD"
             value={student.cccd}
           />
           <DetailItem
-            icon={<HiOutlinePhone />}
+            icon={<AiOutlinePhone />}
             label="Số điện thoại"
             value={student.phoneNumber}
           />
           <DetailItem
-            icon={<HiOutlineMail />}
+            icon={<AiOutlineMail />}
             label="Email"
             value={student.email}
           />
           <DetailItem
-            icon={<HiOutlineLocationMarker />}
+            icon={<AiOutlineEnvironment />}
             label="Địa chỉ hiện tại"
             value={student.currentAddress}
           />
           <DetailItem
-            icon={<HiOutlineLocationMarker />}
+            icon={<AiOutlineEnvironment />}
             label="Quê quán"
             value={student.hometown}
           />
           <DetailItem
-            icon={<HiOutlineLocationMarker />}
+            icon={<AiOutlineEnvironment />}
             label="Nơi sinh"
             value={student.placeOfBirth}
           />
         </DetailSection>
 
         <DetailSection title="Thông tin học tập">
-          {militaryMode && <DetailItem icon={<HiOutlineAcademicCap />} label="Lớp quân sự" value={student.militaryClass?.className || student.militaryClass?.classCode} />}
+          {militaryMode && <DetailItem icon={<AiOutlineRead />} label="Lớp quân sự" value={student.militaryClass?.className || student.militaryClass?.classCode} />}
           {!militaryMode && <>
           <DetailItem
-            icon={<HiOutlineLibrary />}
-            label="Trường đào tạo"
-            value={student.university?.universityName}
+            icon={<AiOutlineBank />}
+            label="Mã trường"
+            value={student.university?.universityCode}
           />
           <DetailItem
-            icon={<HiOutlineOfficeBuilding />}
-            label="Đơn vị"
-            value={student.organization?.organizationName}
-          />
-          <DetailItem
-            icon={<HiOutlineAcademicCap />}
+            icon={<AiOutlineRead />}
             label="Lớp học"
-            value={student.class?.className}
+            value={student.managementClass?.status === "GRADUATED" ? "Tốt nghiệp" : student.managementClass?.name}
           />
           <DetailItem
-            icon={<HiOutlineAcademicCap />}
+            icon={<AiOutlineRead />}
             label="Trình độ"
             value={student.educationLevel?.levelName}
           />
           </>}
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Khóa nhập học"
             value={student.enrollment}
           />
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Ngày tốt nghiệp"
             value={formatDate(student.graduationDate)}
           />
           <DetailItem
-            icon={<HiOutlineChartBar />}
+            icon={<AiOutlineBarChart />}
             label="CPA hệ 4"
             value={student.currentCpa4}
           />
           <DetailItem
-            icon={<HiOutlineChartBar />}
+            icon={<AiOutlineBarChart />}
             label="CPA hệ 10"
             value={student.currentCpa10}
           />
@@ -175,42 +170,42 @@ export default function StudentProfileDetail({
 
         <DetailSection title="Quân nhân & chính trị">
           <DetailItem
-            icon={<HiOutlineBadgeCheck />}
+            icon={<AiOutlineCheckSquare />}
             label="Cấp bậc"
             value={student.rank}
           />
-          <DetailItem
-            icon={<HiOutlineOfficeBuilding />}
+          {militaryMode && <DetailItem
+            icon={<AiOutlineBank />}
             label="Đơn vị quân nhân"
             value={student.unit}
-          />
+          />}
           <DetailItem
-            icon={<HiOutlineAcademicCap />}
+            icon={<AiOutlineRead />}
             label="Chức vụ chính quyền"
             value={student.positionGovernment}
           />
           <DetailItem
-            icon={<HiOutlineAcademicCap />}
+            icon={<AiOutlineRead />}
             label="Chức vụ Đảng"
             value={student.positionParty}
           />
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Ngày nhập ngũ"
             value={formatDate(student.dateOfEnlistment)}
           />
           <DetailItem
-            icon={<HiOutlineIdentification />}
+            icon={<AiOutlineIdcard />}
             label="Số thẻ Đảng"
             value={student.partyMemberCardNumber}
           />
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Vào Đảng dự bị"
             value={formatDate(student.probationaryPartyMember)}
           />
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Vào Đảng chính thức"
             value={formatDate(student.fullPartyMember)}
           />
@@ -233,12 +228,12 @@ export default function StudentProfileDetail({
 
         <DetailSection title="Thông tin hệ thống">
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Ngày tạo hồ sơ"
             value={formatDateTime(student.createdAt)}
           />
           <DetailItem
-            icon={<HiOutlineCalendar />}
+            icon={<AiOutlineCalendar />}
             label="Cập nhật cuối"
             value={formatDateTime(student.updatedAt)}
           />

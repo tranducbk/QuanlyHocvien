@@ -1,5 +1,12 @@
 # Đặc tả hệ thống Quản lý Học viên
 
+> Quyết định lớp Hệ 5 (TASK-010): dùng chung 6 lớp cố định Lớp 1–6, không tạo/sửa/xóa/ngừng lớp.
+> Chỉ huy Hệ 5 xem và xếp lớp toàn bộ học viên Hệ 5 theo năm học, bắt đầu 2026–2027.
+> Đầu năm kế thừa danh sách năm trước, điều chỉnh lớp, thêm học viên và đánh dấu tốt nghiệp;
+> sau Chỉ huy chốt danh sách thì khóa thay đổi trong năm. Giữ nguyên hồ sơ, điểm và danh sách các năm trước.
+> Quyết định này thay phần mô tả lớp Hệ 5 gắn chương trình/cơ sở và giới hạn Chỉ huy theo từng học viên trong chức năng xếp lớp;
+> không mở rộng quyền ở các chức năng khác. Chi tiết trong `docs/tasks/TASK-010-he5-annual-class-placement.md`.
+
 > Quyết định mới về điểm (TASK-008): Hệ 1/3/4/7 cho Chỉ huy sửa điểm trong lớp được giao;
 > mọi lần sửa lưu người, thời gian, điểm trước/sau. Sau chốt điểm lớp/học kỳ, sửa hoặc bổ sung
 > bắt buộc lý do. Không xóa điểm/lịch sử, không mở lại học kỳ. Các mô tả điểm bất biến bên dưới

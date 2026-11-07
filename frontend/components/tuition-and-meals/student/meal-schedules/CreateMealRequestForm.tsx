@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineSend } from "@/library/icons";
+
 import { useState } from "react";
-import { HiOutlinePaperAirplane } from "react-icons/hi";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import Textarea from "@/library/Textarea";
@@ -119,7 +120,7 @@ export default function CreateMealRequestForm({
           <Button
             type="submit"
             variant="primary"
-            icon={HiOutlinePaperAirplane}
+            icon={AiOutlineSend}
             isLoading={createRequestMutation.isPending}
           >
             Gửi yêu cầu

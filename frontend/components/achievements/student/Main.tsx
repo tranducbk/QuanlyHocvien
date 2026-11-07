@@ -1,13 +1,14 @@
 "use client";
 
+import {
+  AiOutlineCalendar,
+  AiOutlineCheckSquare,
+  AiOutlineFlag,
+  AiOutlineThunderbolt,
+} from "@/library/icons";
+
 import { useMemo } from "react";
 import type { IconType } from "react-icons";
-import {
-  HiOutlineBadgeCheck,
-  HiOutlineCalendar,
-  HiOutlineFlag,
-  HiOutlineSparkles,
-} from "react-icons/hi";
 import { useQuery } from "@tanstack/react-query";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -62,28 +63,28 @@ export default function Main() {
       label: "Năm ghi nhận",
       value: formatNumber(summary.totalYears),
       helper: "Năm có thành tích",
-      icon: HiOutlineCalendar,
+      icon: AiOutlineCalendar,
       tone: "primary",
     },
     {
       label: "Khen thưởng",
       value: formatNumber(summary.totalAchievements),
       helper: "Thành tích đã lưu",
-      icon: HiOutlineBadgeCheck,
+      icon: AiOutlineCheckSquare,
       tone: "success",
     },
     {
       label: "Chiến sĩ tiên tiến",
       value: formatNumber(summary.totalAdvancedSoldier),
       helper: "Số lần được ghi nhận",
-      icon: HiOutlineFlag,
+      icon: AiOutlineFlag,
       tone: "secondary",
     },
     {
       label: "Chiến sĩ thi đua",
       value: formatNumber(summary.totalCompetitiveSoldier),
       helper: "Số lần được ghi nhận",
-      icon: HiOutlineSparkles,
+      icon: AiOutlineThunderbolt,
       tone: "warning",
     },
   ] satisfies Array<{
@@ -131,7 +132,7 @@ export default function Main() {
             </div>
           ) : (
             <EmptyState
-              icon={HiOutlineBadgeCheck}
+              icon={AiOutlineCheckSquare}
               title="Chưa có khen thưởng"
               description="Các thành tích được phê duyệt sẽ hiển thị tại đây."
             />
@@ -196,7 +197,7 @@ const AchievementCard = ({ achievement }: { achievement: Achievement }) => {
     <article className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm transition-colors hover:border-primary-100 hover:bg-primary-50/30 dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none dark:hover:border-primary-700/60 dark:hover:bg-primary-950/20">
       <div className="flex gap-4">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-200">
-          <HiOutlineBadgeCheck size={22} />
+          <AiOutlineCheckSquare size={22} />
         </div>
         <div className="min-w-0 flex-1">
           <Typography variant="body" weight="black" className="text-neutral-900 dark:text-neutral-100">

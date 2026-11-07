@@ -1,14 +1,15 @@
 "use client";
 
+import {
+  AiOutlineClockCircle,
+  AiOutlineDelete,
+  AiOutlineDownload,
+  AiOutlineEdit,
+  AiOutlineUpload,
+} from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  HiOutlineDocumentDownload,
-  HiOutlinePencil,
-  HiOutlineTrash,
-  HiOutlineUpload,
-  HiOutlineClock,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Button from "@/library/Button";
 import PageContainer from "@/library/PageContainer";
@@ -210,19 +211,19 @@ export default function Main() {
             <div className="flex items-center gap-1">
               <ActionButton
                 tooltipText="Lịch sử cập nhật"
-                icon={HiOutlineClock}
+                icon={AiOutlineClockCircle}
                 color="amber"
                 onClick={() => handleViewHistory(tuitionFee)}
               />
               <ActionButton
                 tooltipText="Cập nhật"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 color="blue"
                 onClick={() => handleUpdate(tuitionFee)}
               />
               <ActionButton
                 tooltipText="Xóa học phí"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 onClick={() =>
                   openConfirm({
@@ -319,7 +320,7 @@ export default function Main() {
                 <Button
                   type="button"
                   onClick={handleImport}
-                  icon={HiOutlineUpload}
+                  icon={AiOutlineUpload}
                   className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-primary-700 hover:border-primary-700 transition-all shadow-lg shadow-primary-500/20 cursor-pointer active:scale-95 h-auto"
                 >
                   Nhập Excel
@@ -328,7 +329,7 @@ export default function Main() {
                   type="button"
                   onClick={() => exportMutation.mutate()}
                   isLoading={exportMutation.isPending}
-                  icon={HiOutlineDocumentDownload}
+                  icon={AiOutlineDownload}
                   className="flex items-center gap-2 px-4 py-2 bg-secondary-500 border border-secondary-500 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-secondary-600 hover:border-secondary-600 transition-all shadow-lg shadow-secondary-500/20 cursor-pointer active:scale-95 h-auto"
                 >
                   Xuất báo cáo

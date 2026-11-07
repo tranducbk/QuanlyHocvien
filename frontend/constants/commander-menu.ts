@@ -1,17 +1,17 @@
-import React from "react";
 import {
-  HiOutlineOfficeBuilding,
-  HiOutlineIdentification,
-  HiOutlineCheckCircle,
-  HiOutlineStop,
-  HiOutlineCalendar,
-  HiOutlineCash,
-  HiOutlineAcademicCap,
-  HiOutlineClipboardList,
-  HiOutlineViewGrid,
-  HiOutlineHome,
-  HiOutlineRefresh,
-} from "react-icons/hi";
+  AiOutlineAppstore,
+  AiOutlineBank,
+  AiOutlineCalendar,
+  AiOutlineCheckCircle,
+  AiOutlineDollar,
+  AiOutlineHome,
+  AiOutlineIdcard,
+  AiOutlineProfile,
+  AiOutlineRead,
+  AiOutlineReload,
+  AiOutlineStop,
+} from "@/library/icons";
+import React from "react";
 
 export type MenuItem = {
   title: string;
@@ -21,77 +21,77 @@ export type MenuItem = {
 };
 
 export const COHORT_COMMANDER_MENU: MenuItem[] = [
-  { title: "Tổng quan", path: "/commander", icon: HiOutlineHome },
-  { title: "Chương trình đào tạo", path: "/commander/training-programs", icon: HiOutlineAcademicCap },
-  { title: "Quản lý lớp học", path: "/commander/training-classes", icon: HiOutlineViewGrid },
-  { title: "Hồ sơ học viên", path: "/commander/profiles", icon: HiOutlineIdentification },
-  { title: "Phê duyệt đề xuất", path: "/commander/approvals", icon: HiOutlineCheckCircle },
-  { title: "Quản lý thành tích", path: "/commander/achievements", icon: HiOutlineStop },
-  { title: "Lịch học", path: "/commander/time-tables", icon: HiOutlineCalendar },
-  { title: "Quản lý học tập", path: "/commander/academic-results", icon: HiOutlineAcademicCap },
-  { title: "Môn học", path: "/commander/subjects", icon: HiOutlineAcademicCap },
-  { title: "Phân công lịch trực", path: "/commander/duty-schedules", icon: HiOutlineClipboardList },
+  { title: "Tổng quan", path: "/commander", icon: AiOutlineHome },
+  { title: "Chương trình đào tạo", path: "/commander/training-programs", icon: AiOutlineRead },
+  { title: "Quản lý lớp học", path: "/commander/training-classes", icon: AiOutlineAppstore },
+  { title: "Hồ sơ học viên", path: "/commander/profiles", icon: AiOutlineIdcard },
+  { title: "Phê duyệt đề xuất", path: "/commander/approvals", icon: AiOutlineCheckCircle },
+  { title: "Quản lý thành tích", path: "/commander/achievements", icon: AiOutlineStop },
+  { title: "Lịch học", path: "/commander/time-tables", icon: AiOutlineCalendar },
+  { title: "Quản lý học tập", path: "/commander/academic-results", icon: AiOutlineRead },
+  { title: "Môn học", path: "/commander/subjects", icon: AiOutlineRead },
+  { title: "Phân công lịch trực", path: "/commander/duty-schedules", icon: AiOutlineProfile },
 ];
 
 export const COMMANDER_MENU = [
   {
     title: "Tổng quan",
     path: "/commander",
-    icon: HiOutlineHome,
+    icon: AiOutlineHome,
   },
   {
     title: "Chương trình đào tạo",
     path: "/commander/training-programs",
-    icon: HiOutlineAcademicCap,
+    icon: AiOutlineRead,
   },
   {
     title: "Cơ sở đào tạo",
     path: "/commander/universities",
-    icon: HiOutlineOfficeBuilding,
+    icon: AiOutlineBank,
   },
   {
     title: "Quản lý lớp học",
     path: "/commander/training-classes",
-    icon: HiOutlineViewGrid,
+    icon: AiOutlineAppstore,
   },
   {
     title: "Hồ sơ học viên",
     path: "/commander/profiles",
-    icon: HiOutlineIdentification,
+    icon: AiOutlineIdcard,
   },
   {
     title: "Phê duyệt đề xuất",
     path: "/commander/approvals",
-    icon: HiOutlineCheckCircle,
+    icon: AiOutlineCheckCircle,
   },
   {
     title: "Quản lý thành tích",
     path: "/commander/achievements",
-    icon: HiOutlineStop,
+    icon: AiOutlineStop,
   },
   {
     title: "Lịch học",
     path: "/commander/time-tables",
-    icon: HiOutlineCalendar,
+    icon: AiOutlineCalendar,
   },
   {
     title: "Cắt cơm",
     path: "/commander/cut-rice",
-    icon: HiOutlineRefresh,
+    icon: AiOutlineReload,
   },
   {
     title: "Quản lý học phí",
     path: "/commander/tuition",
-    icon: HiOutlineCash,
+    icon: AiOutlineDollar,
   },
   {
     title: "Quản lý học tập",
     path: "/commander/academic-results",
-    icon: HiOutlineAcademicCap,
+    icon: AiOutlineRead,
   },
   {
     title: "Phân công lịch trực",
     path: "/commander/duty-schedules",
-    icon: HiOutlineClipboardList,
+    icon: AiOutlineProfile,
   },
 ] as const satisfies readonly MenuItem[];

@@ -1,10 +1,17 @@
 "use client";
 
+import {
+  AiOutlineArrowRight,
+  AiOutlineClose,
+  AiOutlineEdit,
+  AiOutlinePlus,
+  AiOutlineRead,
+} from "@/library/icons";
+
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { HiOutlinePencil, HiOutlinePlus, HiOutlineX } from "react-icons/hi";
 import Button from "@/library/Button";
 import Input from "@/library/Input";
 import Select from "@/library/Select";
@@ -15,6 +22,23 @@ import { trainingProgramService } from "@/services/training-program/training-pro
 import { universityService } from "@/services/training-program/universities";
 import { organizationService } from "@/services/training-program/organizations";
 import type { TrainingProgram } from "@/types/training-program/training-programs";
+import { useModalStore } from "@/store/useModalStore";
+import CreateOrganizationForm from "../universities/[organizations]/CreateOrganizationForm";
+import type { Organization } from "@/types/training-program/organizations";
+
+// Keep the selected ID when editing an existing program: old duplicate records
+// can have their own education levels and must not be silently reassigned.
+function uniqueMajorOptions(records: Organization[], selectedId: string) {
+  const grouped = new Map<string, Organization>();
+  for (const record of [...records].sort((left, right) => left.id.localeCompare(right.id))) {
+    const label = record.organizationName.normalize("NFC").trim().replace(/\s+/gu, " ");
+    const key = `${record.universityId}:${label.toLocaleLowerCase("vi")}`;
+    if (!grouped.has(key) || record.id === selectedId) {
+      grouped.set(key, { ...record, organizationName: label });
+    }
+  }
+  return Array.from(grouped.values());
+}
 
 const he5ProgramLabel = (program: TrainingProgram) =>
   [
@@ -83,6 +107,19 @@ export default function Main({ systemCode }: { systemCode: string }) {
   const [universityId, setUniversityId] = useState("");
   const [organizationId, setOrganizationId] = useState("");
   const [educationLevelId, setEducationLevelId] = useState("");
+  const openModal = useModalStore((state) => state.openModal);
+  const handleCreateMajor = () => {
+    if (!universityId) return;
+    openModal({
+      title: `Tạo ngành học · ${universities.find((item) => item.id === universityId)?.universityCode ?? ""}`,
+      content: <CreateOrganizationForm universityId={universityId} onCreated={(organization) => {
+        setOrganizationId(organization.id);
+        setEducationLevelId("");
+      }} />,
+      size: "md",
+      config: { mutationKey: MUTATION_KEYS.CREATE_ORGANIZATION },
+    });
+  };
   const [filterUniversityId, setFilterUniversityId] = useState("");
   const [selectedProgramId, setSelectedProgramId] = useState("");
   const [editingProgramId, setEditingProgramId] = useState("");
@@ -161,9 +198,9 @@ export default function Main({ systemCode }: { systemCode: string }) {
 
   const programs = programsQuery.data?.data ?? EMPTY_PROGRAMS;
   const universities = universitiesQuery.data?.data ?? [];
-  const organizations = organizationsQuery.data?.data ?? [];
+  const organizations = uniqueMajorOptions(organizationsQuery.data?.data ?? [], organizationId);
   const educationLevels = educationLevelsQuery.data?.data ?? [];
-  const editingOrganizations = editingOrganizationsQuery.data?.data ?? [];
+  const editingOrganizations = uniqueMajorOptions(editingOrganizationsQuery.data?.data ?? [], editingOrganizationId);
   const editingEducationLevels = editingEducationLevelsQuery.data?.data ?? [];
   const visiblePrograms = useMemo(
     () =>
@@ -361,14 +398,14 @@ export default function Main({ systemCode }: { systemCode: string }) {
       title="Chương trình đào tạo"
       subtitle={
         isHe5
-          ? "Chương trình đào tạo Hệ 5 được xác định theo trường, ngành và trình độ."
+          ? undefined
           : `Quản lý chương trình đào tạo thuộc ${systemCode.replace("HE_", "Hệ ")}. Khóa mới được lưu ở trạng thái nháp.`
       }
       actions={
         <Button
           type="button"
           variant={isCreatingProgram ? "secondary" : "primary"}
-          icon={isCreatingProgram ? undefined : HiOutlinePlus}
+          icon={isCreatingProgram ? undefined : AiOutlinePlus}
           onClick={() => {
             setIsCreatingProgram((prev) => !prev);
             closeVersionForm();
@@ -425,6 +462,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
                     label: `${university.universityName} (${university.universityCode})`,
                   }))}
                 />
+                <div className="space-y-2">
                 <Select
                   label="Ngành học"
                   required
@@ -439,6 +477,11 @@ export default function Main({ systemCode }: { systemCode: string }) {
                     label: organization.organizationName,
                   }))}
                 />
+                <button type="button" onClick={handleCreateMajor} disabled={!universityId}
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-primary-700 hover:underline disabled:opacity-40 disabled:no-underline dark:text-primary-300">
+                  <AiOutlinePlus aria-hidden="true" /> Tạo ngành học
+                </button>
+                </div>
                 <Select
                   label="Trình độ"
                   required
@@ -488,14 +531,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
               !organizationsQuery.isLoading &&
               organizations.length === 0 && (
                 <p className="text-sm text-amber-600">
-                  Trường này chưa có ngành. Hãy thêm ngành tại{" "}
-                  <Link
-                    href={`/commander/universities/${universityId}`}
-                    className="font-semibold underline"
-                  >
-                    Cơ sở đào tạo
-                  </Link>
-                  .
+                  Trường này chưa có ngành học. Chọn “Tạo ngành học” để bổ sung.
                 </p>
               )}
             {isHe5 &&
@@ -536,11 +572,14 @@ export default function Main({ systemCode }: { systemCode: string }) {
       <section className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-bold">Danh sách chương trình</h2>
-            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-bold">Danh sách chương trình</h2>
+              {isHe5 && <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-primary-50 px-2 text-xs font-semibold text-primary-700 dark:bg-primary-950 dark:text-primary-300">{visiblePrograms.length}</span>}
+            </div>
+            {!isHe5 && <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
               {visiblePrograms.length} chương trình
               {filterUniversityId ? " phù hợp với bộ lọc" : " đã được lưu"}
-            </p>
+            </p>}
             {!isHe5 && (
               <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                 Chọn chương trình để xem và quản lý các khóa đào tạo.
@@ -591,7 +630,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
               <Button
                 type="button"
                 className="mt-5"
-                icon={HiOutlinePlus}
+                icon={AiOutlinePlus}
                 onClick={() => setIsCreatingProgram(true)}
               >
                 Thêm chương trình
@@ -600,7 +639,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
           </div>
         ) : (
           <>
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid items-stretch gap-4 md:grid-cols-2 2xl:grid-cols-3">
               {visiblePrograms.map((program) => {
                 const isSelected = selectedProgram?.id === program.id;
                 return (
@@ -615,18 +654,37 @@ export default function Main({ systemCode }: { systemCode: string }) {
                       setEditingVersionId("");
                       closeVersionForm();
                     }}
-                    className={`rounded-xl border px-4 py-3 text-left font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                    className={`group flex min-w-0 flex-col overflow-hidden rounded-2xl border text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                       isSelected
                         ? "border-primary-500 bg-primary-50 text-primary-800 dark:border-primary-400 dark:bg-primary-950/40 dark:text-primary-200"
-                        : "border-neutral-200 bg-white hover:border-primary-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-900"
+                        : "border-neutral-200 bg-white shadow-sm hover:border-primary-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-900"
                     }`}
                   >
-                    {program.name}
+                    {isHe5 ? <>
+                      <div className="flex items-start gap-3 border-b border-neutral-100 px-5 py-4 dark:border-neutral-800">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                          <AiOutlineRead className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-xs font-semibold tracking-wide text-primary-700 dark:text-primary-300">{program.university?.universityCode}</span>
+                          <span className="mt-1 block break-words text-sm leading-5 text-neutral-600 dark:text-neutral-400">{program.university?.universityName}</span>
+                        </div>
+                        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${program.isActive ? "bg-emerald-500" : "bg-neutral-300"}`} aria-label={program.isActive ? "Đang hoạt động" : "Tạm dừng"} />
+                      </div>
+                      <div className="flex-1 space-y-3 px-5 py-4">
+                        <h3 className="break-words text-lg font-semibold leading-7 text-neutral-900 dark:text-neutral-100">{program.organization?.organizationName || program.name}</h3>
+                        <span className="inline-flex rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">{program.educationLevel?.levelName || "Chưa có trình độ"}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 bg-neutral-50/80 px-5 py-3 text-sm dark:bg-neutral-900/60">
+                        <span className="text-neutral-500 dark:text-neutral-400">{program.versions.length} khóa đào tạo</span>
+                        <span className="inline-flex items-center gap-2 font-semibold text-primary-700 dark:text-primary-300">Xem chi tiết <AiOutlineArrowRight aria-hidden="true" className="transition-transform group-hover:translate-x-1" /></span>
+                      </div>
+                    </> : <span className="px-4 py-3 font-semibold">{program.name}</span>}
                   </button>
                 );
               })}
             </div>
-            {!selectedProgram && (
+            {!isHe5 && !selectedProgram && (
               <div className="rounded-xl border border-dashed border-neutral-300 px-5 py-8 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
                 Chọn một chương trình để xem danh sách khóa đào tạo.
               </div>
@@ -657,7 +715,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
                       onClick={() => setSelectedProgramId("")}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:hover:bg-neutral-800 dark:hover:text-white"
                     >
-                      <HiOutlineX size={20} aria-hidden="true" />
+                      <AiOutlineClose size={20} aria-hidden="true" />
                     </button>
                   </div>
                   <article
@@ -838,7 +896,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
                         icon={
                           isCreatingSelectedVersion
                             ? undefined
-                            : HiOutlinePlus
+                            : AiOutlinePlus
                         }
                         onClick={() => {
                           if (isCreatingSelectedVersion) {
@@ -1007,7 +1065,7 @@ export default function Main({ systemCode }: { systemCode: string }) {
                               type="button"
                               size="sm"
                               variant="ghost"
-                              icon={HiOutlinePencil}
+                              icon={AiOutlineEdit}
                               onClick={() => {
                                 setEditingVersionId(version.id);
                                 setEditingVersionName(version.name);

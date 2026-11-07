@@ -9,6 +9,20 @@ export interface University {
   status: "ACTIVE" | "INACTIVE";
 }
 
+export interface UniversityStudent {
+  id: string;
+  code: string;
+  fullName: string;
+  gender: string | null;
+}
+
+export interface UniversityStudentQuery extends QueryRequest {
+  search?: string;
+  fullName?: string;
+  code?: string;
+  gender?: string;
+}
+
 /**
  * Tham số truy vấn cơ sở đào tạo
  */

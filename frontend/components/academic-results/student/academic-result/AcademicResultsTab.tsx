@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineRight } from "@/library/icons";
+
 import { useMemo } from "react";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { useAuthStore } from "@/store/useAuthStore";
-import { HiOutlineChevronRight } from "react-icons/hi";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import useTableQuery from "@/hooks/useTableQuery";
 import Badge from "@/library/Badge";
@@ -400,7 +401,7 @@ export default function AcademicResultsTab() {
               : "bg-neutral-100 text-neutral-500"
           }`}
         >
-          <HiOutlineChevronRight size={18} />
+          <AiOutlineRight size={18} />
         </span>
 
         <span className="flex min-w-0 flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-between">

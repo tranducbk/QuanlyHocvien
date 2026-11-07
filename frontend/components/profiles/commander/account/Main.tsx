@@ -1,24 +1,25 @@
 "use client";
 
+import {
+  AiOutlineBank,
+  AiOutlineCalendar,
+  AiOutlineClockCircle,
+  AiOutlineEdit,
+  AiOutlineEnvironment,
+  AiOutlineFlag,
+  AiOutlineGlobal,
+  AiOutlineIdcard,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineSafetyCertificate,
+  AiOutlineSolution,
+  AiOutlineUser,
+} from "@/library/icons";
+
 import { useRef, type ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authService } from "@/services/authentication/auth";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
-import {
-  HiOutlineUser,
-  HiOutlineMail,
-  HiOutlinePhone,
-  HiOutlineIdentification,
-  HiOutlineCalendar,
-  HiOutlineShieldCheck,
-  HiOutlineBriefcase,
-  HiOutlineFlag,
-  HiOutlinePencil,
-  HiOutlineLocationMarker,
-  HiOutlineGlobeAlt,
-  HiOutlineLibrary,
-  HiOutlineClock,
-} from "react-icons/hi";
 import Typography from "@/library/Typography";
 import PageContainer from "@/library/PageContainer";
 import Avatar from "@/library/Avatar";
@@ -116,7 +117,7 @@ export default function Main() {
               disabled={avatarMutation.isPending}
               className="absolute bottom-1 right-1 size-10 rounded-full bg-primary-600 text-white flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-lg dark:shadow-black/30 hover:bg-primary-700 transition-all z-10"
             >
-              <HiOutlinePencil size={18} />
+              <AiOutlineEdit size={18} />
             </button>
           </div>
 
@@ -140,7 +141,7 @@ export default function Main() {
               color="gray"
               className="flex items-center gap-2 font-medium"
             >
-              <HiOutlineIdentification size={16} className="text-neutral-400" />
+              <AiOutlineIdcard size={16} className="text-neutral-400" />
               Mã chỉ huy:{" "}
               <span className="font-bold text-neutral-800 dark:text-neutral-100">
                 {textOrDash(commander?.code)}
@@ -158,7 +159,7 @@ export default function Main() {
             variant="primary"
             className="px-8 py-4 rounded-2xl shadow-sm"
           >
-            <HiOutlinePencil size={20} className="mr-2" />
+            <AiOutlineEdit size={20} className="mr-2" />
             Cập nhật hồ sơ
           </Button>
         </div>
@@ -176,52 +177,52 @@ export default function Main() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày sinh"
                 value={formatDate(commander?.birthday)}
               />
               <InfoItem
-                icon={HiOutlineUser}
+                icon={AiOutlineUser}
                 label="Giới tính"
                 value={commander?.gender === "MALE" ? "Nam" : "Nữ"}
               />
               <InfoItem
-                icon={HiOutlineIdentification}
+                icon={AiOutlineIdcard}
                 label="Số CCCD"
                 value={commander?.cccd}
               />
               <InfoItem
-                icon={HiOutlineMail}
+                icon={AiOutlineMail}
                 label="Email"
                 value={commander?.email}
               />
               <InfoItem
-                icon={HiOutlinePhone}
+                icon={AiOutlinePhone}
                 label="Số điện thoại"
                 value={commander?.phoneNumber}
               />
               <InfoItem
-                icon={HiOutlineLocationMarker}
+                icon={AiOutlineEnvironment}
                 label="Quê quán"
                 value={commander?.hometown}
               />
               <InfoItem
-                icon={HiOutlineLocationMarker}
+                icon={AiOutlineEnvironment}
                 label="Nơi sinh"
                 value={commander?.placeOfBirth}
               />
               <InfoItem
-                icon={HiOutlineGlobeAlt}
+                icon={AiOutlineGlobal}
                 label="Dân tộc"
                 value={commander?.ethnicity}
               />
               <InfoItem
-                icon={HiOutlineLibrary}
+                icon={AiOutlineBank}
                 label="Tôn giáo"
                 value={commander?.religion}
               />
               <InfoItem
-                icon={HiOutlineLocationMarker}
+                icon={AiOutlineEnvironment}
                 label="Địa chỉ hiện tại"
                 value={commander?.currentAddress}
               />
@@ -237,32 +238,32 @@ export default function Main() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoItem
-                icon={HiOutlineShieldCheck}
+                icon={AiOutlineSafetyCertificate}
                 label="Cấp bậc"
                 value={commander?.rank}
               />
               <InfoItem
-                icon={HiOutlineBriefcase}
+                icon={AiOutlineSolution}
                 label="Đơn vị"
                 value={commander?.unit}
               />
               <InfoItem
-                icon={HiOutlineFlag}
+                icon={AiOutlineFlag}
                 label="Chức vụ chính quyền"
                 value={commander?.positionGovernment}
               />
               <InfoItem
-                icon={HiOutlineFlag}
+                icon={AiOutlineFlag}
                 label="Chức vụ Đảng"
                 value={commander?.positionParty}
               />
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày nhập ngũ"
                 value={formatDateTime(commander?.dateOfEnlistment)}
               />
               <InfoItem
-                icon={HiOutlineClock}
+                icon={AiOutlineClockCircle}
                 label="Thâm niên (Năm)"
                 value={commander?.startWork}
               />
@@ -282,17 +283,17 @@ export default function Main() {
 
             <div className="flex flex-col gap-4">
               <InfoItem
-                icon={HiOutlineShieldCheck}
+                icon={AiOutlineSafetyCertificate}
                 label="Số thẻ Đảng"
                 value={commander?.partyMemberCardNumber}
               />
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày vào Đảng (Dự bị)"
                 value={formatDate(commander?.probationaryPartyMember)}
               />
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày vào Đảng (Chính thức)"
                 value={formatDate(commander?.fullPartyMember)}
               />

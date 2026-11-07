@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineClockCircle, AiOutlineUser } from "@/library/icons";
+
 import { useQuery } from "@tanstack/react-query";
-import { HiOutlineUser, HiOutlineClock } from "react-icons/hi";
 import { tuitionFeeService } from "@/services/tuition-and-meals/tuition-fees";
 import { formatDateTime } from "@/utils/fn-common";
 import Badge from "@/library/Badge";
@@ -53,7 +54,7 @@ export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModa
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1 text-xs font-semibold text-neutral-500">
-                    <HiOutlineClock size={14} />
+                    <AiOutlineClockCircle size={14} />
                     {formatDateTime(history.createdAt)}
                   </div>
                 </div>
@@ -64,7 +65,7 @@ export default function TuitionHistoryModal({ tuitionFeeId }: TuitionHistoryModa
                 </div>
                 
                 <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-                  <HiOutlineUser size={14} />
+                  <AiOutlineUser size={14} />
                   {history.changer?.profile?.fullName || "Hệ thống"} 
                   {history.changer?.profile?.code ? ` (${history.changer.profile.code})` : ""}
                 </div>

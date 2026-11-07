@@ -15,6 +15,8 @@
     "migrate:training-program-placement": "node src/utils/migrateTrainingProgramPlacement.js",
     "swagger:check": "node src/utils/checkSwaggerCoverage.js",
     "test:api": "node src/utils/apiTest.js",
+    "test:he5-placement": "node src/utils/testHe5Placement.js",
+    "migrate:he5-placement": "node src/utils/migrateHe5Placement.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

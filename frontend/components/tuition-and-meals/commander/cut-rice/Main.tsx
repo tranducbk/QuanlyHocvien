@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineCalendar, AiOutlineProfile } from "@/library/icons";
+
 import { useState } from "react";
-import { HiOutlineCalendar, HiOutlineClipboardList } from "react-icons/hi";
 import PageContainer from "@/library/PageContainer";
 import Tabs from "@/library/Tabs";
 import CutRiceSchedulesTab from "./CutRiceSchedulesTab";
@@ -30,13 +31,13 @@ export default function CutRiceMain() {
           {
             id: "schedules",
             label: "Lịch cắt cơm",
-            icon: <HiOutlineCalendar />,
+            icon: <AiOutlineCalendar />,
             content: <CutRiceSchedulesTab />,
           },
           {
             id: "requests",
             label: "Yêu cầu cắt cơm",
-            icon: <HiOutlineClipboardList />,
+            icon: <AiOutlineProfile />,
             content: <CutRiceRequestsTab />,
           },
         ]}

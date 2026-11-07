@@ -2,6 +2,8 @@
 
 ## 1. Công nghệ hiện tại
 
+Icon toàn frontend sử dụng Ant Design qua `@/library/icons` (`frontend/library/icons/index.ts`), dựa trên `react-icons/ai` đã cài. Các thao tác tương đương dùng cùng export (Eye/Plus/Edit/Delete/Search/Filter/Control); không import riêng bộ icon khác trong component. Xem TASK-012.
+
 - Next.js App Router, React, TypeScript.
 - TanStack React Query cho dữ liệu server.
 - Zustand cho auth, loading, toast, modal và confirm.

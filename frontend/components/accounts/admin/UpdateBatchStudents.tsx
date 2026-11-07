@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineDownload, AiOutlineUpload } from "@/library/icons";
+
 import React from "react";
-import { HiOutlineDownload, HiOutlineUpload } from "react-icons/hi";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@/library/Button";
@@ -59,7 +60,7 @@ const UpdateBatchStudents: React.FC = () => {
       <div className="flex-1 overflow-y-auto px-1 custom-scrollbar space-y-6">
         <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-4 dark:border-blue-900 dark:bg-blue-950/30">
           <div className="p-2 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200">
-            <HiOutlineDownload size={24} />
+            <AiOutlineDownload size={24} />
           </div>
           <div className="flex-1">
             <Typography variant="body" weight="bold" color="primary">
@@ -72,7 +73,7 @@ const UpdateBatchStudents: React.FC = () => {
             <Button
               type="button"
               variant="ghost"
-              icon={HiOutlineDownload}
+              icon={AiOutlineDownload}
               onClick={() => templateMutation.mutate()}
               isLoading={templateMutation.isPending}
               className="mt-3"
@@ -115,7 +116,7 @@ const UpdateBatchStudents: React.FC = () => {
           <Button
             variant="primary"
             type="submit"
-            icon={HiOutlineUpload}
+            icon={AiOutlineUpload}
             isLoading={updateMutation.isPending}
             disabled={!isDirty}
           >

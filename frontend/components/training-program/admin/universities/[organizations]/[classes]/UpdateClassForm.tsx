@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineTeam } from "@/library/icons";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateClassSchema, UpdateClassFormValues } from "@/utils/validations";
@@ -8,7 +10,6 @@ import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
-import { HiOutlineUserGroup } from "react-icons/hi";
 import { Class } from "@/types/training-program/classes";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
@@ -48,7 +49,7 @@ export default function UpdateClassForm({ cls, educationLevelId }: Props) {
       <Input
         label="Tên lớp học"
         placeholder="VD: CNTT-K60, AT15..."
-        prefixIcon={<HiOutlineUserGroup />}
+        prefixIcon={<AiOutlineTeam />}
         error={errors.className?.message}
         isLoading={mutation.isPending}
         {...register("className")}
@@ -58,7 +59,7 @@ export default function UpdateClassForm({ cls, educationLevelId }: Props) {
         label="Số lượng học viên"
         type="number"
         placeholder="Nhập số lượng học viên hiện tại..."
-        prefixIcon={<HiOutlineUserGroup />}
+        prefixIcon={<AiOutlineTeam />}
         error={errors.studentCount?.message}
         isLoading={mutation.isPending}
         {...register("studentCount", { valueAsNumber: true })}

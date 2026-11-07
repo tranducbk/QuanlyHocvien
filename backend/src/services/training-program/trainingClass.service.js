@@ -30,7 +30,7 @@ const list = async (where) => {
   }));
 };
 
-const listMine = (user) => list({ commanderId: user.id, trainingSystemId: user.trainingSystemId });
+const listMine = (user) => list({ trainingSystemId: user.trainingSystemId, ...(user.trainingSystemCode === 'HE_5' ? {} : { commanderId: user.id }) });
 
 const getOwnedClass = async (id, commander) => {
   const trainingClass = await db.trainingClass.findOne({
@@ -41,6 +41,7 @@ const getOwnedClass = async (id, commander) => {
 };
 
 const listStudents = async (id, commander) => {
+  if (commander.trainingSystemCode === 'HE_5') throw new BadRequestError('Hãy chọn năm học tại quản lý lớp Hệ 5 để xem danh sách');
   await getOwnedClass(id, commander);
   const profiles = await db.profile.findAll({
     where: { trainingClassId: id },
@@ -54,6 +55,7 @@ const listStudents = async (id, commander) => {
 };
 
 const listAvailableStudents = async (id, search, commander) => {
+  if (commander.trainingSystemCode === 'HE_5') throw new BadRequestError('Hãy xếp lớp Hệ 5 qua bản nháp năm học');
   await getOwnedClass(id, commander);
   const term = (search || '').trim();
   const where = {
@@ -89,6 +91,7 @@ const listAvailableStudents = async (id, search, commander) => {
 };
 
 const assignStudent = async (id, studentCode, commander) => db.sequelize.transaction(async (transaction) => {
+  if (commander.trainingSystemCode === 'HE_5') throw new BadRequestError('Hệ 5 chỉ được xếp lớp trong bản nháp năm học, trước khi chốt');
   const trainingClass = await db.trainingClass.findOne({
     where: { id, trainingSystemId: commander.trainingSystemId, commanderId: commander.id },
     transaction,
@@ -247,6 +250,7 @@ const create = async (data, commander) => {
   const system = await db.trainingSystem.findByPk(commander.trainingSystemId);
   if (!system || !system.isActive) throw new BadRequestError('Hệ đào tạo không tồn tại hoặc đã ngừng hoạt động');
   const isHe5 = system.code === 'HE_5';
+  if (isHe5) throw new BadRequestError('Hệ 5 sử dụng 6 lớp cố định; không được tạo thêm lớp');
   if (!isHe5 && data.educationProviderId) throw new BadRequestError('Cơ sở đào tạo ngoài quân đội chỉ dùng cho Hệ 5');
   if (!isHe5 && (!data.trainingProgramId || !data.curriculumVersionId)) {
     throw new BadRequestError('Lớp của Hệ này cần chương trình và khóa');
@@ -314,8 +318,9 @@ const updateClass = async (id, data, commander) => {
   const system = await db.trainingSystem.findByPk(trainingClass.trainingSystemId);
   if (!system || !system.isActive) throw new BadRequestError('Hệ đào tạo không tồn tại hoặc đã ngừng hoạt động');
 
-  const merged = { ...trainingClass.get({ plain: true }), ...data };
   const isHe5 = system.code === 'HE_5';
+  if (isHe5) throw new BadRequestError('Lớp Hệ 5 là cố định; không được chỉnh sửa');
+  const merged = { ...trainingClass.get({ plain: true }), ...data };
   if (!isHe5 && merged.educationProviderId) throw new BadRequestError('Cơ sở đào tạo ngoài quân đội chỉ dùng cho Hệ 5');
   if (!isHe5 && (!merged.trainingProgramId || !merged.curriculumVersionId)) {
     throw new BadRequestError('Lớp của Hệ này cần chương trình và khóa');
@@ -371,6 +376,8 @@ const updateClass = async (id, data, commander) => {
 
 const updateClassStatus = async (id, status, commander) => {
   const trainingClass = await getOwnedClass(id, commander);
+  const system = await db.trainingSystem.findByPk(trainingClass.trainingSystemId);
+  if (system?.code === 'HE_5') throw new BadRequestError('Lớp Hệ 5 là cố định; không được thay đổi trạng thái');
   return trainingClass.update({ status });
 };
 

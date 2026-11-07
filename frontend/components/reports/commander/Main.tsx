@@ -1,16 +1,17 @@
 "use client";
 
+import {
+  AiOutlineAppstore,
+  AiOutlineCheckCircle,
+  AiOutlineCheckSquare,
+  AiOutlineDollar,
+  AiOutlineIdcard,
+  AiOutlineRead,
+  AiOutlineWarning,
+} from "@/library/icons";
+
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineBadgeCheck,
-  HiOutlineCash,
-  HiOutlineCheckCircle,
-  HiOutlineExclamation,
-  HiOutlineIdentification,
-  HiOutlineViewGrid,
-} from "react-icons/hi";
 import type { IconType } from "react-icons";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -60,10 +61,10 @@ export default function Main() {
         </section>
         <section className="grid gap-6 xl:grid-cols-2">
           <Panel title="Đề xuất điểm cần xử lý" href="/commander/military/approvals" actionLabel="Xem đề xuất">
-            <div className="space-y-3">{dashboard?.alerts.pendingRequests.length ? dashboard.alerts.pendingRequests.map((request) => <PendingRequestItem key={request.id} request={request} />) : <EmptyLine icon={HiOutlineCheckCircle} title="Không có đề xuất chờ duyệt" description="Đề xuất điểm của học viên sẽ được hiển thị ở đây." />}</div>
+            <div className="space-y-3">{dashboard?.alerts.pendingRequests.length ? dashboard.alerts.pendingRequests.map((request) => <PendingRequestItem key={request.id} request={request} />) : <EmptyLine icon={AiOutlineCheckCircle} title="Không có đề xuất chờ duyệt" description="Đề xuất điểm của học viên sẽ được hiển thị ở đây." />}</div>
           </Panel>
           <Panel title="Hồ sơ học viên cập nhật gần đây" href="/commander/military/students" actionLabel="Xem học viên">
-            <div className="space-y-3">{dashboard?.recent.students.length ? dashboard.recent.students.map((student) => <Link key={student.id} href="/commander/military/students" className="block rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"><Typography variant="body" weight="semibold">{student.fullName || "Chưa cập nhật"}</Typography><Typography variant="caption" color="gray" className="mt-1 block">{student.code || "Chưa có mã"} · {student.className || "Chưa xếp lớp"}</Typography></Link>) : <EmptyLine icon={HiOutlineAcademicCap} title="Chưa có học viên trong lớp" description="Học viên thuộc các lớp được giao sẽ hiển thị tại đây." />}</div>
+            <div className="space-y-3">{dashboard?.recent.students.length ? dashboard.recent.students.map((student) => <Link key={student.id} href="/commander/military/students" className="block rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"><Typography variant="body" weight="semibold">{student.fullName || "Chưa cập nhật"}</Typography><Typography variant="caption" color="gray" className="mt-1 block">{student.code || "Chưa có mã"} · {student.className || "Chưa xếp lớp"}</Typography></Link>) : <EmptyLine icon={AiOutlineRead} title="Chưa có học viên trong lớp" description="Học viên thuộc các lớp được giao sẽ hiển thị tại đây." />}</div>
           </Panel>
         </section>
       </PageContainer>
@@ -76,7 +77,7 @@ export default function Main() {
       value: formatNumber(dashboard?.overview.totalStudents),
       helper: "Hồ sơ đang quản lý",
       href: "/commander/profiles",
-      icon: HiOutlineIdentification,
+      icon: AiOutlineIdcard,
       tone: "primary",
     },
     {
@@ -84,7 +85,7 @@ export default function Main() {
       value: formatNumber(dashboard?.overview.totalClasses),
       helper: "Lớp trong hệ thống",
       href: "/commander/classes",
-      icon: HiOutlineViewGrid,
+      icon: AiOutlineAppstore,
       tone: "sky",
     },
     {
@@ -92,7 +93,7 @@ export default function Main() {
       value: formatNumber(dashboard?.overview.pendingGradeRequests),
       helper: "Đề xuất kết quả học tập",
       href: "/commander/approvals",
-      icon: HiOutlineCheckCircle,
+      icon: AiOutlineCheckCircle,
       tone: "warning",
     },
     {
@@ -100,7 +101,7 @@ export default function Main() {
       value: formatNumber(dashboard?.overview.unpaidTuitionRecords),
       helper: "Bản ghi cần theo dõi",
       href: "/commander/tuition",
-      icon: HiOutlineCash,
+      icon: AiOutlineDollar,
       tone: "error",
     },
     {
@@ -108,7 +109,7 @@ export default function Main() {
       value: formatNumber(dashboard?.overview.totalAchievements),
       helper: "Khen thưởng đã ghi nhận",
       href: "/commander/achievements",
-      icon: HiOutlineBadgeCheck,
+      icon: AiOutlineCheckSquare,
       tone: "success",
     },
     {
@@ -116,7 +117,7 @@ export default function Main() {
       value: formatNumber(dashboard?.overview.atRiskStudents),
       helper: "Học viên cần chú ý",
       href: "/commander/profiles",
-      icon: HiOutlineExclamation,
+      icon: AiOutlineWarning,
       tone: "neutral",
     },
   ] satisfies Array<{
@@ -178,7 +179,7 @@ export default function Main() {
                 ))
               ) : (
                 <EmptyLine
-                  icon={HiOutlineCheckCircle}
+                  icon={AiOutlineCheckCircle}
                   title="Không có đề xuất chờ duyệt"
                   description="Các đề xuất mới của học viên sẽ xuất hiện tại đây."
                 />
@@ -198,7 +199,7 @@ export default function Main() {
                 ))
               ) : (
                 <EmptyLine
-                  icon={HiOutlineCash}
+                  icon={AiOutlineDollar}
                   title="Chưa có cảnh báo học phí"
                   description="Các khoản chưa thanh toán sẽ được tổng hợp tại đây."
                 />
@@ -218,7 +219,7 @@ export default function Main() {
                 ))
               ) : (
                 <EmptyLine
-                  icon={HiOutlineAcademicCap}
+                  icon={AiOutlineRead}
                   title="Chưa có hồ sơ học viên"
                   description="Khi có hồ sơ mới hoặc thay đổi, danh sách sẽ hiển thị tại đây."
                 />

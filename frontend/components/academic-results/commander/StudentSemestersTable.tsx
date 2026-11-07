@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineEye } from "@/library/icons";
+
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineEye } from "react-icons/hi";
 import Table from "@/library/Table";
 import Typography from "@/library/Typography";
 import ActionButton from "@/library/ActionButton";
@@ -83,7 +84,7 @@ export default function StudentSemestersTable({ userId, excludeId }: StudentSeme
             <div className="flex gap-2">
               <ActionButton
                 tooltipText="Xem chi tiết & nhập điểm"
-                icon={HiOutlineEye}
+                icon={AiOutlineEye}
                 onClick={() => router.push(`/commander/academic-results/${record.id}`)}
                 color="blue"
               />

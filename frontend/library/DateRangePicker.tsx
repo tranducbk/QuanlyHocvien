@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineCalendar, AiOutlineDown } from "@/library/icons";
+
 import { useState, type Ref } from "react";
 import { m, AnimatePresence } from "motion/react";
-import { HiOutlineCalendar, HiOutlineChevronDown } from "react-icons/hi";
 import Popover from "./Popover";
 import Typography from "./Typography";
 import DayRangePanel from "./date-range-picker/DayRangePanel";
@@ -151,7 +152,7 @@ export default function DateRangePicker({
             `}
           >
             <div className="flex items-center gap-2 truncate">
-              <HiOutlineCalendar
+              <AiOutlineCalendar
                 size={18}
                 className="text-neutral-400 shrink-0"
               />
@@ -165,7 +166,7 @@ export default function DateRangePicker({
                 {displayText || displayPlaceholder}
               </span>
             </div>
-            <HiOutlineChevronDown
+            <AiOutlineDown
               size={16}
               className={`text-neutral-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
             />

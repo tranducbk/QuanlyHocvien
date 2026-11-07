@@ -20,4 +20,20 @@ const update = yup.object({
   status: yup.string().max(50).nullable(),
 });
 
-module.exports = { create, update };
+const params = yup.object({ id: yup.string().uuid().required() });
+const availableStudents = yup.object({
+  search: yup.string().trim().max(100),
+  fullName: yup.string().trim().max(100),
+  code: yup.string().trim().max(50),
+  gender: yup.string().oneOf(['MALE', 'FEMALE', 'OTHER']),
+  page: yup.number().integer().min(1),
+  limit: yup.number().integer().min(1).max(100),
+  sortBy: yup.string().oneOf(['fullName', 'code', 'gender']),
+  sortOrder: yup.string().oneOf(['asc', 'desc']),
+}).noUnknown();
+const addStudents = yup.object({
+  profileIds: yup.array().of(yup.string().uuid().required()).min(1).max(500).required()
+    .test('unique', 'Danh sách học viên bị trùng', (ids) => !ids || new Set(ids).size === ids.length),
+}).noUnknown();
+
+module.exports = { create, update, params, availableStudents, addStudents };

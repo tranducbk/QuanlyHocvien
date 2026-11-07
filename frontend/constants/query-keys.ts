@@ -2,6 +2,7 @@
  * Danh sách các Query Keys dùng cho React Query
  */
 export const QUERY_KEYS = {
+  HE5_PLACEMENT: "he5Placement",
   SUBJECT_CATALOG: "subjectCatalog",
   USERS: "users",
   TRAINING_PROGRAMS: "trainingPrograms",

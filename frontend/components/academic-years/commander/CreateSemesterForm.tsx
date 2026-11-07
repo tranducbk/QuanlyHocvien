@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineRead } from "@/library/icons";
+
 import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +15,6 @@ import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import Select from "@/library/Select";
-import { HiOutlineAcademicCap } from "react-icons/hi";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
 
@@ -77,7 +78,7 @@ export default function CreateSemesterForm({
           <Select
             label="Học kỳ"
             placeholder="Chọn học kỳ"
-            prefixIcon={<HiOutlineAcademicCap />}
+            prefixIcon={<AiOutlineRead />}
             options={[3].map((semester) => ({
               value: String(semester),
               label: semester === 3 ? "Kỳ hè" : `Học kỳ ${semester}`,
@@ -98,7 +99,7 @@ export default function CreateSemesterForm({
           <Select
             label="Năm học"
             placeholder="Chọn năm học"
-            prefixIcon={<HiOutlineAcademicCap />}
+            prefixIcon={<AiOutlineRead />}
             options={schoolYearOptions}
             value={field.value}
             onChange={(value) => field.onChange(String(value))}

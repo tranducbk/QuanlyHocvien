@@ -1,7 +1,7 @@
+import { AiOutlineHome, AiOutlineRight } from "@/library/icons";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import Link from "next/link";
-import { HiOutlineHome, HiOutlineChevronRight } from "react-icons/hi";
 
 export default function ClassSkeleton() {
   const columnCount = 6; // STT + Tên lớp + Số học viên + Ngày tạo + Ngày cập nhật + Hành động
@@ -11,18 +11,18 @@ export default function ClassSkeleton() {
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-neutral-400">
         <Link href="/commander" className="flex items-center gap-2">
-          <HiOutlineHome size={14} />
+          <AiOutlineHome size={14} />
           <Typography variant="label" tracking="wide">Tổng quan</Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Link href="/commander/universities" className="hover:text-primary-600 transition-colors">
           <Typography variant="label" tracking="wide">Cơ sở đào tạo</Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Skeleton width={80} height={14} />
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Skeleton width={80} height={14} />
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Skeleton width={80} height={14} />
       </div>
 

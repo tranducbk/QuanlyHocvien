@@ -10,6 +10,7 @@ import TableEmptyState from "./TableEmptyState";
 interface TableBodyProps<TData> {
   /** Instance của TanStack table */
   table: TableInstance<TData>;
+  compact?: boolean;
   /** Văn bản hiển thị khi không có dữ liệu */
   emptyText: string;
   /** Class CSS tùy chỉnh cho hàng */
@@ -22,6 +23,7 @@ interface TableBodyProps<TData> {
 
 const TableBody = <TData,>({
   table,
+  compact = false,
   emptyText,
   rowClassName,
   renderGroupRow,
@@ -33,7 +35,7 @@ const TableBody = <TData,>({
   return (
     <AnimatePresence mode="sync">
       {rows.length === 0 ? (
-        <TableEmptyState table={table} emptyText={emptyText} />
+        <TableEmptyState table={table} emptyText={emptyText} compact={compact} />
       ) : (
         rows.map((row) => {
           const groupContent = renderGroupRow?.(row);

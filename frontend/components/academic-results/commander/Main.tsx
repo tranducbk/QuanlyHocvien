@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineDownload, AiOutlineEye } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineDownload, HiOutlineEye } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
@@ -158,7 +159,7 @@ export default function Main() {
         cell: (info) => (
           <ActionButton
             tooltipText="Xem chi tiết & nhập điểm"
-            icon={HiOutlineEye}
+            icon={AiOutlineEye}
             onClick={() =>
               router.push(`/commander/academic-results/${info.row.original.id}`)
             }
@@ -254,7 +255,7 @@ export default function Main() {
         cell: (info) => (
           <ActionButton
             tooltipText="Xem chi tiết năm học"
-            icon={HiOutlineEye}
+            icon={AiOutlineEye}
             onClick={() =>
               router.push(
                 `/commander/academic-results/yearly/${info.row.original.id}`
@@ -396,7 +397,7 @@ export default function Main() {
         <Button
           variant="outline"
           size="sm"
-          icon={HiOutlineDownload}
+          icon={AiOutlineDownload}
           isLoading={exportMutation.isPending}
           onClick={() => exportMutation.mutate()}
         >

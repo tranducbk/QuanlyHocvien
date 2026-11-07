@@ -1,25 +1,25 @@
 "use client";
 
+import {
+  AiOutlineBank,
+  AiOutlineCalendar,
+  AiOutlineEdit,
+  AiOutlineEnvironment,
+  AiOutlineFlag,
+  AiOutlineGlobal,
+  AiOutlineIdcard,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineRead,
+  AiOutlineSafetyCertificate,
+  AiOutlineTeam,
+  AiOutlineUser,
+} from "@/library/icons";
+
 import { useRef, type ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authService } from "@/services/authentication/auth";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineCalendar,
-  HiOutlineFlag,
-  HiOutlineGlobeAlt,
-  HiOutlineIdentification,
-  HiOutlineLibrary,
-  HiOutlineLocationMarker,
-  HiOutlineMail,
-  HiOutlineOfficeBuilding,
-  HiOutlinePencil,
-  HiOutlinePhone,
-  HiOutlineShieldCheck,
-  HiOutlineUser,
-  HiOutlineUsers,
-} from "react-icons/hi";
 import Typography from "@/library/Typography";
 import PageContainer from "@/library/PageContainer";
 import Avatar from "@/library/Avatar";
@@ -122,7 +122,7 @@ export default function Main() {
               disabled={avatarMutation.isPending}
               className="absolute bottom-1 right-1 size-10 rounded-full bg-primary-600 text-white flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-lg dark:shadow-black/30 hover:bg-primary-700 transition-all z-10"
             >
-              <HiOutlinePencil size={18} />
+              <AiOutlineEdit size={18} />
             </button>
           </div>
 
@@ -146,7 +146,7 @@ export default function Main() {
               color="gray"
               className="flex items-center gap-2 font-medium"
             >
-              <HiOutlineIdentification size={16} className="text-neutral-400" />
+              <AiOutlineIdcard size={16} className="text-neutral-400" />
               Mã học viên:{" "}
               <span className="font-bold text-neutral-800 dark:text-neutral-100">
                 {textOrDash(student?.code)}
@@ -164,7 +164,7 @@ export default function Main() {
             variant="primary"
             className="px-8 py-4 rounded-2xl shadow-sm"
           >
-            <HiOutlinePencil size={20} className="mr-2" />
+            <AiOutlineEdit size={20} className="mr-2" />
             Cập nhật hồ sơ
           </Button>
         </div>
@@ -174,52 +174,52 @@ export default function Main() {
         <div className="lg:col-span-2 flex flex-col gap-8">
           <ProfileSection title="Thông tin cơ bản" accent="bg-primary-500">
             <InfoItem
-              icon={HiOutlineCalendar}
+              icon={AiOutlineCalendar}
               label="Ngày sinh"
               value={formatDate(student?.birthday)}
             />
             <InfoItem
-              icon={HiOutlineUser}
+              icon={AiOutlineUser}
               label="Giới tính"
               value={student?.gender === "MALE" ? "Nam" : "Nữ"}
             />
             <InfoItem
-              icon={HiOutlineIdentification}
+              icon={AiOutlineIdcard}
               label="Số CCCD"
               value={student?.cccd}
             />
             <InfoItem
-              icon={HiOutlineMail}
+              icon={AiOutlineMail}
               label="Email"
               value={student?.email}
             />
             <InfoItem
-              icon={HiOutlinePhone}
+              icon={AiOutlinePhone}
               label="Số điện thoại"
               value={student?.phoneNumber}
             />
             <InfoItem
-              icon={HiOutlineLocationMarker}
+              icon={AiOutlineEnvironment}
               label="Quê quán"
               value={student?.hometown}
             />
             <InfoItem
-              icon={HiOutlineLocationMarker}
+              icon={AiOutlineEnvironment}
               label="Nơi sinh"
               value={student?.placeOfBirth}
             />
             <InfoItem
-              icon={HiOutlineGlobeAlt}
+              icon={AiOutlineGlobal}
               label="Dân tộc"
               value={student?.ethnicity}
             />
             <InfoItem
-              icon={HiOutlineLibrary}
+              icon={AiOutlineBank}
               label="Tôn giáo"
               value={student?.religion}
             />
             <InfoItem
-              icon={HiOutlineLocationMarker}
+              icon={AiOutlineEnvironment}
               label="Địa chỉ hiện tại"
               value={student?.currentAddress}
             />
@@ -227,42 +227,42 @@ export default function Main() {
 
           <ProfileSection title="Thông tin học tập" accent="bg-secondary-500">
             <InfoItem
-              icon={HiOutlineOfficeBuilding}
+              icon={AiOutlineBank}
               label="Trường đào tạo"
               value={student?.university?.universityName}
             />
             <InfoItem
-              icon={HiOutlineUsers}
+              icon={AiOutlineTeam}
               label="Đơn vị"
               value={student?.organization?.organizationName}
             />
             <InfoItem
-              icon={HiOutlineAcademicCap}
+              icon={AiOutlineRead}
               label="Lớp học"
               value={student?.class?.className}
             />
             <InfoItem
-              icon={HiOutlineAcademicCap}
+              icon={AiOutlineRead}
               label="Trình độ"
               value={student?.educationLevel?.levelName}
             />
             <InfoItem
-              icon={HiOutlineCalendar}
+              icon={AiOutlineCalendar}
               label="Khóa nhập học"
               value={student?.enrollment}
             />
             <InfoItem
-              icon={HiOutlineCalendar}
+              icon={AiOutlineCalendar}
               label="Ngày tốt nghiệp"
               value={formatDate(student?.graduationDate)}
             />
             <InfoItem
-              icon={HiOutlineAcademicCap}
+              icon={AiOutlineRead}
               label="CPA hệ 4"
               value={student?.currentCpa4}
             />
             <InfoItem
-              icon={HiOutlineAcademicCap}
+              icon={AiOutlineRead}
               label="CPA hệ 10"
               value={student?.currentCpa10}
             />
@@ -270,22 +270,22 @@ export default function Main() {
 
           <ProfileSection title="Quân nhân & Chính trị" accent="bg-primary-500">
             <InfoItem
-              icon={HiOutlineShieldCheck}
+              icon={AiOutlineSafetyCertificate}
               label="Cấp bậc"
               value={student?.rank}
             />
             <InfoItem
-              icon={HiOutlineFlag}
+              icon={AiOutlineFlag}
               label="Chức vụ chính quyền"
               value={student?.positionGovernment}
             />
             <InfoItem
-              icon={HiOutlineFlag}
+              icon={AiOutlineFlag}
               label="Chức vụ Đảng"
               value={student?.positionParty}
             />
             <InfoItem
-              icon={HiOutlineCalendar}
+              icon={AiOutlineCalendar}
               label="Ngày nhập ngũ"
               value={formatDate(student?.dateOfEnlistment)}
             />
@@ -303,17 +303,17 @@ export default function Main() {
 
             <div className="flex flex-col gap-4">
               <InfoItem
-                icon={HiOutlineShieldCheck}
+                icon={AiOutlineSafetyCertificate}
                 label="Số thẻ Đảng"
                 value={student?.partyMemberCardNumber}
               />
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày vào Đảng (Dự bị)"
                 value={formatDate(student?.probationaryPartyMember)}
               />
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày vào Đảng (Chính thức)"
                 value={formatDate(student?.fullPartyMember)}
               />
@@ -341,12 +341,12 @@ export default function Main() {
                 <ForeignRelationsView relations={student?.foreignRelations} />
               </div>
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Ngày tham gia"
                 value={formatDateTime(profile?.createdAt)}
               />
               <InfoItem
-                icon={HiOutlineCalendar}
+                icon={AiOutlineCalendar}
                 label="Cập nhật cuối"
                 value={formatDateTime(profile?.updatedAt)}
               />

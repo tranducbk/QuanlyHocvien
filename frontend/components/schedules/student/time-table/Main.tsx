@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineCalendar } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { HiOutlineCalendar } from "react-icons/hi";
 import ErrorState from "@/library/ErrorState";
 import PageContainer from "@/library/PageContainer";
 import Select from "@/library/Select";
@@ -206,7 +207,7 @@ export default function Main() {
               <Select
                 label="Học kỳ"
                 placeholder="Chọn học kỳ"
-                prefixIcon={<HiOutlineCalendar />}
+                prefixIcon={<AiOutlineCalendar />}
                 value={activeSemesterId}
                 onChange={(value) => setSelectedSemesterId(String(value))}
                 options={semesterOptions}

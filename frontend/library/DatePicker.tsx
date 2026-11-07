@@ -1,14 +1,10 @@
 "use client";
 
+import { AiOutlineCalendar, AiOutlineDown, AiOutlineLeft, AiOutlineRight } from "@/library/icons";
+
 import { useState, useMemo } from "react";
 import type { Ref } from "react";
 import { m, AnimatePresence } from "motion/react";
-import {
-  HiOutlineCalendar,
-  HiOutlineChevronLeft,
-  HiOutlineChevronRight,
-  HiOutlineChevronDown,
-} from "react-icons/hi";
 import Dropdown from "@/library/Dropdown";
 import Typography from "./Typography";
 
@@ -258,7 +254,7 @@ export default function DatePicker({
               `}
           >
             <div className="flex items-center gap-2 truncate">
-              <HiOutlineCalendar
+              <AiOutlineCalendar
                 size={18}
                 className="text-neutral-400 shrink-0"
               />
@@ -268,7 +264,7 @@ export default function DatePicker({
                 {formatDisplayDate(value)}
               </span>
             </div>
-            <HiOutlineChevronDown
+            <AiOutlineDown
               size={16}
               className={`text-neutral-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
             />
@@ -294,7 +290,7 @@ export default function DatePicker({
                   <Typography variant="body" weight="bold" color="neutral">
                     {MONTHS[viewDate.getMonth()]}, {viewDate.getFullYear()}
                   </Typography>
-                  <HiOutlineChevronDown
+                  <AiOutlineDown
                     size={14}
                     className="text-neutral-400 group-hover:text-primary-500 transition-colors"
                   />
@@ -308,7 +304,7 @@ export default function DatePicker({
                     }}
                     className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg text-neutral-500 dark:text-neutral-400 transition-colors cursor-pointer"
                   >
-                    <HiOutlineChevronLeft size={18} />
+                    <AiOutlineLeft size={18} />
                   </button>
                   <button
                     type="button"
@@ -318,7 +314,7 @@ export default function DatePicker({
                     }}
                     className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg text-neutral-500 dark:text-neutral-400 transition-colors cursor-pointer"
                   >
-                    <HiOutlineChevronRight size={18} />
+                    <AiOutlineRight size={18} />
                   </button>
                 </div>
               </div>

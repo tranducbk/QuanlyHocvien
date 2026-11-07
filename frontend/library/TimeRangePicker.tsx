@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineClockCircle, AiOutlineDown } from "@/library/icons";
+
 import { useState, type Ref } from "react";
 import { m, AnimatePresence } from "motion/react";
-import { HiOutlineClock, HiOutlineChevronDown } from "react-icons/hi";
 import Button from "./Button";
 import Popover from "./Popover";
 import TimePanel from "./time-range-picker/TimePanel";
@@ -147,7 +148,7 @@ export default function TimeRangePicker({
             `}
           >
             <div className="flex items-center gap-2 truncate">
-              <HiOutlineClock size={18} className="text-neutral-400 shrink-0" />
+              <AiOutlineClockCircle size={18} className="text-neutral-400 shrink-0" />
               <span
                 className={
                   !displayText
@@ -158,7 +159,7 @@ export default function TimeRangePicker({
                 {displayText || displayPlaceholder}
               </span>
             </div>
-            <HiOutlineChevronDown
+            <AiOutlineDown
               size={16}
               className={`text-neutral-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
             />

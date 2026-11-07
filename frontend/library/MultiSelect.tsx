@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineClose, AiOutlineDown } from "@/library/icons";
+
 import type { ReactNode, Ref } from "react";
 import { useMemo } from "react";
 import { m, AnimatePresence } from "motion/react";
-import { HiOutlineChevronDown, HiOutlineX } from "react-icons/hi";
 import Checkbox from "@/library/Checkbox";
 import Popover from "@/library/Popover";
 import Typography from "./Typography";
@@ -209,7 +210,7 @@ export default function MultiSelect({
                     >
                       {opt.label}
                       {!disabled && (
-                        <HiOutlineX
+                        <AiOutlineClose
                           size={13}
                           className="shrink-0 cursor-pointer transition-opacity hover:opacity-70"
                           onClick={(e) => {
@@ -232,7 +233,7 @@ export default function MultiSelect({
                 </span>
               )}
             </div>
-            <HiOutlineChevronDown
+            <AiOutlineDown
               size={18}
               className={`shrink-0 text-neutral-400 dark:text-neutral-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
             />

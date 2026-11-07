@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineBank, AiOutlineRead, AiOutlineTag, AiOutlineTeam } from "@/library/icons";
+
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,12 +15,6 @@ import Input from "@/library/Input";
 import Button from "@/library/Button";
 import Select from "@/library/Select";
 import Divide from "@/library/Divide";
-import {
-  HiOutlineUserGroup,
-  HiOutlineOfficeBuilding,
-  HiOutlineAcademicCap,
-  HiOutlineTag,
-} from "react-icons/hi";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
 
@@ -118,7 +114,7 @@ export default function CreateClassForm() {
           label="Chọn trường đại học"
           required
           placeholder="Chọn trường đại học..."
-          prefixIcon={<HiOutlineOfficeBuilding size={16} />}
+          prefixIcon={<AiOutlineBank size={16} />}
           options={universityOptions}
           value={selectedUniversityId}
           onChange={(val) => {
@@ -141,7 +137,7 @@ export default function CreateClassForm() {
           label="Chọn khoa/ngành"
           required
           placeholder={"Chọn khoa/ngành..."}
-          prefixIcon={<HiOutlineTag size={16} />}
+          prefixIcon={<AiOutlineTag size={16} />}
           options={organizationOptions}
           value={selectedOrganizationId}
           onChange={(val) => {
@@ -169,7 +165,7 @@ export default function CreateClassForm() {
                 label="Chọn bậc đào tạo"
                 required
                 placeholder={"Chọn bậc đào tạo..."}
-                prefixIcon={<HiOutlineAcademicCap size={16} />}
+                prefixIcon={<AiOutlineRead size={16} />}
                 options={levelOptions}
                 value={value}
                 onChange={(val) => onChange(String(val))}
@@ -191,7 +187,7 @@ export default function CreateClassForm() {
       <Input
         label="Tên lớp học"
         placeholder="VD: CNTT-K60, AT15..."
-        prefixIcon={<HiOutlineUserGroup />}
+        prefixIcon={<AiOutlineTeam />}
         error={errors.className?.message}
         isLoading={mutation.isPending}
         {...register("className")}

@@ -1,11 +1,8 @@
 "use client";
 
+import { AiOutlineClose, AiOutlineCloudUpload, AiOutlineFileText } from "@/library/icons";
+
 import React, { useState, useRef } from "react";
-import {
-  HiOutlineCloudUpload,
-  HiOutlineDocumentText,
-  HiOutlineX,
-} from "react-icons/hi";
 import Typography from "./Typography";
 
 /** Các định dạng được phép: ảnh, PDF, Excel, Word (.docx) */
@@ -150,7 +147,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             <div
               className={`p-4 rounded-xl ${disabled ? "bg-neutral-200 text-neutral-400" : "bg-green-50 text-green-600"}`}
             >
-              <HiOutlineDocumentText size={40} />
+              <AiOutlineFileText size={40} />
             </div>
             <div className="text-center px-4">
               <Typography
@@ -169,7 +166,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 onClick={removeFile}
                 className="cursor-pointer mt-2 flex items-center gap-1 text-error-500 hover:text-error-600 text-sm font-bold transition-colors"
               >
-                <HiOutlineX size={16} />
+                <AiOutlineClose size={16} />
                 Gỡ bỏ file
               </button>
             )}
@@ -185,7 +182,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     : "bg-neutral-100 text-neutral-400"
               }`}
             >
-              <HiOutlineCloudUpload size={40} />
+              <AiOutlineCloudUpload size={40} />
             </div>
             <div className="text-center">
               <Typography

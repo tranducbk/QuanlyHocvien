@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineCheck, AiOutlineClose } from "@/library/icons";
+
 import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineCheck, HiOutlineX } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import ErrorState from "@/library/ErrorState";
@@ -194,13 +195,13 @@ export default function CutRiceRequestsTab() {
             <div className="flex items-center gap-1">
               <ActionButton
                 tooltipText="Duyệt yêu cầu"
-                icon={HiOutlineCheck}
+                icon={AiOutlineCheck}
                 color="green"
                 onClick={() => approveMutation.mutate(record.id)}
               />
               <ActionButton
                 tooltipText="Từ chối yêu cầu"
-                icon={HiOutlineX}
+                icon={AiOutlineClose}
                 color="red"
                 onClick={() => rejectMutation.mutate(record.id)}
               />

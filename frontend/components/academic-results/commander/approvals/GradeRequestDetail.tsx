@@ -1,16 +1,17 @@
 "use client";
 
-import { IconType } from "react-icons";
 import {
-  HiOutlineAcademicCap,
-  HiOutlineCalendar,
-  HiOutlineCheckCircle,
-  HiOutlineClipboardList,
-  HiOutlineDocumentText,
-  HiOutlineExternalLink,
-  HiOutlineScale,
-  HiOutlineUser,
-} from "react-icons/hi";
+  AiOutlineAudit,
+  AiOutlineCalendar,
+  AiOutlineCheckCircle,
+  AiOutlineExport,
+  AiOutlineFileText,
+  AiOutlineProfile,
+  AiOutlineRead,
+  AiOutlineUser,
+} from "@/library/icons";
+
+import { IconType } from "react-icons";
 import Badge from "@/library/Badge";
 import Button from "@/library/Button";
 import Typography from "@/library/Typography";
@@ -34,7 +35,7 @@ export default function GradeRequestDetail({ request }: GradeRequestDetailProps)
       <div className="flex flex-col gap-5 rounded-4xl border border-white/60 bg-white/40 p-6 shadow-sm backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/60 dark:shadow-none md:flex-row md:items-center md:justify-between ">
         <div className="flex items-start gap-4">
           <div className="flex size-14 shrink-0 items-center justify-center rounded-3xl bg-primary-50 text-primary-600 shadow-sm dark:bg-primary-500/10 dark:text-primary-300">
-            <HiOutlineClipboardList size={28} />
+            <AiOutlineProfile size={28} />
           </div>
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -66,7 +67,7 @@ export default function GradeRequestDetail({ request }: GradeRequestDetailProps)
               }
             }}
           >
-            <HiOutlineExternalLink size={20} className="mr-2" />
+            <AiOutlineExport size={20} className="mr-2" />
             Minh chứng
           </Button>
         )}
@@ -74,18 +75,18 @@ export default function GradeRequestDetail({ request }: GradeRequestDetailProps)
 
       <DetailSection title="Thông tin cần xét duyệt" accent="bg-primary-500">
         <InfoGrid>
-          <InfoItem icon={HiOutlineUser} label="Học viên" value={request.user?.profile?.fullName} />
-          <InfoItem icon={HiOutlineAcademicCap} label="Môn học" value={request.subjectResult?.subjectName} />
-          <InfoItem icon={HiOutlineCalendar} label="Học kỳ" value={getSemesterLabel(request)} />
-          <InfoItem icon={HiOutlineCalendar} label="Ngày gửi" value={formatDateTime(request.createdAt)} />
-          <InfoItem icon={HiOutlineScale} label="Điểm hiện tại" value={formatScore(request.subjectResult?.gradePoint10)} />
-          <InfoItem icon={HiOutlineScale} label="Điểm đề xuất" value={formatScore(request.proposedGradePoint10)} />
+          <InfoItem icon={AiOutlineUser} label="Học viên" value={request.user?.profile?.fullName} />
+          <InfoItem icon={AiOutlineRead} label="Môn học" value={request.subjectResult?.subjectName} />
+          <InfoItem icon={AiOutlineCalendar} label="Học kỳ" value={getSemesterLabel(request)} />
+          <InfoItem icon={AiOutlineCalendar} label="Ngày gửi" value={formatDateTime(request.createdAt)} />
+          <InfoItem icon={AiOutlineAudit} label="Điểm hiện tại" value={formatScore(request.subjectResult?.gradePoint10)} />
+          <InfoItem icon={AiOutlineAudit} label="Điểm đề xuất" value={formatScore(request.proposedGradePoint10)} />
         </InfoGrid>
 
         <div className="mt-4 rounded-2xl border border-neutral-100/50 bg-white/50 p-4 transition-all dark:border-neutral-800 dark:bg-neutral-950/70">
           <div className="mb-3 flex items-center gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-50 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-500">
-              <HiOutlineDocumentText size={20} />
+              <AiOutlineFileText size={20} />
             </div>
             <Typography variant="label" color="gray">
               Lý do đề xuất
@@ -100,8 +101,8 @@ export default function GradeRequestDetail({ request }: GradeRequestDetailProps)
       {(request.reviewNote || request.reviewedAt || request.reviewer) && (
         <DetailSection title="Phản hồi xét duyệt" accent="bg-secondary-500">
           <InfoGrid>
-            <InfoItem icon={HiOutlineCheckCircle} label="Trạng thái" value={statusMap[request.status].label} />
-            <InfoItem icon={HiOutlineCalendar} label="Ngày xét duyệt" value={formatDateTime(request.reviewedAt)} />
+            <InfoItem icon={AiOutlineCheckCircle} label="Trạng thái" value={statusMap[request.status].label} />
+            <InfoItem icon={AiOutlineCalendar} label="Ngày xét duyệt" value={formatDateTime(request.reviewedAt)} />
           </InfoGrid>
 
           <div className="mt-4 rounded-2xl border border-neutral-100/50 bg-white/50 p-4 dark:border-neutral-800 dark:bg-neutral-950/70">

@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineDownload, AiOutlineUpload } from "@/library/icons";
+
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HiOutlineDownload, HiOutlineUpload } from "react-icons/hi";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import FileUpload from "@/library/FileUpload";
@@ -57,7 +58,7 @@ export default function ImportTuitionFeesForm() {
       <div className="rounded-2xl border border-primary-100 bg-primary-50/60 p-4 dark:border-primary-800 dark:bg-primary-950/30">
         <div className="flex items-start gap-3">
           <div className="rounded-xl bg-primary-100 p-2 text-primary-600 dark:bg-primary-900 dark:text-primary-200">
-            <HiOutlineDownload size={22} />
+            <AiOutlineDownload size={22} />
           </div>
           <div className="min-w-0 flex-1">
             <Typography variant="body" weight="bold" color="neutral">
@@ -69,7 +70,7 @@ export default function ImportTuitionFeesForm() {
             <Button
               type="button"
               variant="ghost"
-              icon={HiOutlineDownload}
+              icon={AiOutlineDownload}
               onClick={() => templateMutation.mutate()}
               isLoading={templateMutation.isPending}
               className="mt-3"
@@ -112,7 +113,7 @@ export default function ImportTuitionFeesForm() {
         <Button
           variant="primary"
           type="submit"
-          icon={HiOutlineUpload}
+          icon={AiOutlineUpload}
           disabled={!isDirty}
           isLoading={importMutation.isPending}
         >

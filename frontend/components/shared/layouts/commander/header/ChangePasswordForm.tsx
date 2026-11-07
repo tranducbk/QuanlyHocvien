@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLock } from "@/library/icons";
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,11 +13,6 @@ import Input from "@/library/Input";
 import Button from "@/library/Button";
 import { authService } from "@/services/authentication/auth";
 import { ChangePasswordRequest } from "@/types/authentication/auth";
-import {
-  HiOutlineLockClosed,
-  HiOutlineEye,
-  HiOutlineEyeOff,
-} from "react-icons/hi";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
 import { MUTATION_KEYS } from "@/constants/query-keys";
@@ -60,16 +57,16 @@ const ChangePasswordForm: React.FC = () => {
         type={showOldPassword ? "text" : "password"}
         placeholder="Nhập mật khẩu hiện tại"
         isLoading={changePasswordMutation.isPending}
-        prefixIcon={<HiOutlineLockClosed size={18} />}
+        prefixIcon={<AiOutlineLock size={18} />}
         suffixIcon={
           <button
             type="button"
             onClick={() => setShowOldPassword(!showOldPassword)}
           >
             {showOldPassword ? (
-              <HiOutlineEyeOff size={18} />
+              <AiOutlineEyeInvisible size={18} />
             ) : (
-              <HiOutlineEye size={18} />
+              <AiOutlineEye size={18} />
             )}
           </button>
         }
@@ -84,16 +81,16 @@ const ChangePasswordForm: React.FC = () => {
         placeholder="Nhập mật khẩu mới"
         isLoading={changePasswordMutation.isPending}
         required={true}
-        prefixIcon={<HiOutlineLockClosed size={18} />}
+        prefixIcon={<AiOutlineLock size={18} />}
         suffixIcon={
           <button
             type="button"
             onClick={() => setShowNewPassword(!showNewPassword)}
           >
             {showNewPassword ? (
-              <HiOutlineEyeOff size={18} />
+              <AiOutlineEyeInvisible size={18} />
             ) : (
-              <HiOutlineEye size={18} />
+              <AiOutlineEye size={18} />
             )}
           </button>
         }
@@ -106,16 +103,16 @@ const ChangePasswordForm: React.FC = () => {
         type={showConfirmPassword ? "text" : "password"}
         placeholder="Nhập lại mật khẩu mới"
         isLoading={changePasswordMutation.isPending}
-        prefixIcon={<HiOutlineLockClosed size={18} />}
+        prefixIcon={<AiOutlineLock size={18} />}
         suffixIcon={
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             {showConfirmPassword ? (
-              <HiOutlineEyeOff size={18} />
+              <AiOutlineEyeInvisible size={18} />
             ) : (
-              <HiOutlineEye size={18} />
+              <AiOutlineEye size={18} />
             )}
           </button>
         }

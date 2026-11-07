@@ -1,5 +1,5 @@
+import { AiOutlineReload } from "@/library/icons";
 import type { ButtonHTMLAttributes, ElementType, Ref } from "react";
-import { HiOutlineRefresh } from "react-icons/hi";
 
 type ButtonSize = "sm" | "md" | "lg";
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -20,7 +20,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Vị trí hiển thị icon so với văn bản */
   iconPlacement?: "left" | "right";
 
-  /** Icon component (từ react-icons, ví dụ: HiOutlinePlus) */
+  /** Icon component (từ react-icons, ví dụ: AiOutlinePlus) */
   icon?: ElementType;
 
   /** Class CSS tùy chỉnh cho icon */
@@ -100,7 +100,7 @@ export default function Button({
       {...props}
     >
       {isLoading && iconPlacement === "left" && (
-        <HiOutlineRefresh
+        <AiOutlineReload
           size={iconSize}
           className="shrink-0 animate-spin"
           aria-hidden="true"
@@ -114,7 +114,7 @@ export default function Button({
         <Icon size={iconSize} className={`shrink-0 ${iconClassName}`} />
       )}
       {isLoading && iconPlacement === "right" && (
-        <HiOutlineRefresh
+        <AiOutlineReload
           size={iconSize}
           className="shrink-0 animate-spin"
           aria-hidden="true"

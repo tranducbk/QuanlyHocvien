@@ -1,15 +1,18 @@
 "use client";
 
+import { AiOutlineAppstore, AiOutlineClockCircle } from "@/library/icons";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { organizationService } from "@/services/training-program/organizations";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
-import { HiOutlineCollection, HiOutlineClock } from "react-icons/hi";
 import Divide from "@/library/Divide";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
+import { useQueryClient } from "@tanstack/react-query";
+import type { Organization } from "@/types/training-program/organizations";
 
 import {
   createOrganizationSchema,
@@ -18,12 +21,15 @@ import {
 
 interface Props {
   universityId: string;
+  onCreated?: (organization: Organization) => void;
 }
 
 export default function CreateOrganizationForm({
   universityId,
+  onCreated,
 }: Props) {
   const { closeModal } = useModalStore();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -43,9 +49,14 @@ export default function CreateOrganizationForm({
     mutationFn: (data: CreateOrganizationFormValues) =>
       organizationService.createOrganization(data),
     invalidateQueryKey: [QUERY_KEYS.ORGANIZATIONS, universityId],
-    successMessage: "Thêm mới đơn vị thành công!",
+    successMessage: "Đã tạo ngành học",
     errorMessage: "Đã có lỗi xảy ra!",
-    onSuccess: () => closeModal(),
+    onSuccess: async (response) => {
+      await Promise.all([QUERY_KEYS.UNIVERSITIES, QUERY_KEYS.UNIVERSITY_HIERARCHY]
+        .map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
+      if (response.data) onCreated?.(response.data);
+      closeModal();
+    },
   });
 
   return (
@@ -54,9 +65,9 @@ export default function CreateOrganizationForm({
       className="space-y-6 py-2"
     >
       <Input
-        label="Tên đơn vị / Chuyên ngành"
-        placeholder="VD: Khoa Công nghệ thông tin..."
-        prefixIcon={<HiOutlineCollection />}
+        label="Tên ngành học"
+        placeholder="VD: Công nghệ thông tin"
+        prefixIcon={<AiOutlineAppstore />}
         error={errors.organizationName?.message}
         isLoading={mutation.isPending}
         {...register("organizationName")}
@@ -66,7 +77,7 @@ export default function CreateOrganizationForm({
         label="Thời gian di chuyển (phút)"
         type="number"
         placeholder="Thời gian đi từ đơn vị về trường (để tính cắt cơm)..."
-        prefixIcon={<HiOutlineClock />}
+        prefixIcon={<AiOutlineClockCircle />}
         error={errors.travelTime?.message}
         isLoading={mutation.isPending}
         {...register("travelTime", { valueAsNumber: true })}
@@ -90,7 +101,7 @@ export default function CreateOrganizationForm({
             isLoading={mutation.isPending}
             disabled={!isDirty}
           >
-            Thêm mới
+            Tạo ngành học
           </Button>
         </div>
       </div>

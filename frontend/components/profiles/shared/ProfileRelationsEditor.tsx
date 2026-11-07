@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlinePlus } from "@/library/icons";
+
 import Button from "@/library/Button";
 import Input from "@/library/Input";
 import Textarea from "@/library/Textarea";
@@ -10,7 +12,6 @@ import {
   createEmptyForeignRelation,
   MAX_PROFILE_RELATION_RECORDS,
 } from "@/utils/profile-relations";
-import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 import styles from "./ProfileRelationsEditor.module.css";
 
 interface FieldError {
@@ -323,7 +324,7 @@ function RelationGroup({
           type="button"
           variant="outline"
           size="sm"
-          icon={HiOutlinePlus}
+          icon={AiOutlinePlus}
           onClick={onAdd}
           disabled={isAddDisabled}
           isLoading={isLoading}
@@ -358,7 +359,7 @@ function RelationCard({
           type="button"
           variant="danger"
           size="sm"
-          icon={HiOutlineTrash}
+          icon={AiOutlineDelete}
           onClick={onRemove}
           isLoading={isLoading}
         >

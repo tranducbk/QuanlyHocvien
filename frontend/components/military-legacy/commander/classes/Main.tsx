@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineCheckCircle } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HiOutlineCheckCircle } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import PageContainer from "@/library/PageContainer";
 import { QUERY_KEYS } from "@/constants/query-keys";
@@ -94,7 +95,7 @@ export default function MilitaryClassesPage() {
         cell: ({ row }) => (
           <ActionButton
             tooltipText="Xem học viên trong lớp"
-            icon={HiOutlineCheckCircle}
+            icon={AiOutlineCheckCircle}
             color={classId === row.original.id ? "green" : "blue"}
             onClick={() => setClassId(row.original.id)}
           />

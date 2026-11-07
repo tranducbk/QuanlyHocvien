@@ -1,13 +1,11 @@
 "use client";
 
+import { AiOutlineCheckCircle, AiOutlineExport } from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
-import {
-  HiOutlineCheckCircle,
-  HiOutlineExternalLink,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge, { BadgeVariant } from "@/library/Badge";
 import Button from "@/library/Button";
@@ -158,14 +156,14 @@ export default function Main() {
             <div className="flex items-center gap-1">
               <ActionButton
                 tooltipText="Đánh dấu đã đọc"
-                icon={HiOutlineCheckCircle}
+                icon={AiOutlineCheckCircle}
                 color="green"
                 disabled={notification.isRead || markReadMutation.isPending}
                 onClick={() => markReadMutation.mutate(notification.id)}
               />
               <ActionButton
                 tooltipText="Mở liên kết"
-                icon={HiOutlineExternalLink}
+                icon={AiOutlineExport}
                 color="blue"
                 disabled={!notification.link}
                 onClick={() => openNotificationLink(notification)}
@@ -233,7 +231,7 @@ export default function Main() {
         actions={
           <Button
             type="button"
-            icon={HiOutlineCheckCircle}
+            icon={AiOutlineCheckCircle}
             isLoading={markAllReadMutation.isPending}
             onClick={() => markAllReadMutation.mutate()}
             className="flex items-center gap-2 px-4 py-2 bg-secondary-500 border border-secondary-500 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-secondary-600 hover:border-secondary-600 transition-all shadow-lg shadow-secondary-500/20 cursor-pointer active:scale-95 h-auto"

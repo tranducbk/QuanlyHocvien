@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit } from "@/library/icons";
+
 import { useMemo, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { dutyScheduleService } from "@/services/schedules/duty-schedules";
@@ -11,7 +13,6 @@ import Typography from "@/library/Typography";
 import Badge from "@/library/Badge";
 import Table from "@/library/Table";
 import { FilterField } from "@/library/table/TableFilter";
-import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
 import { formatDate, formatDateTime } from "@/utils/fn-common";
 import { RANKS } from "@/constants/constants";
 import useTableQuery from "@/hooks/useTableQuery";
@@ -171,14 +172,14 @@ export default function DutySchedulesMain() {
             <div className="flex items-center justify-start gap-1">
               <ActionButton
                 tooltipText="Chỉnh sửa"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 onClick={() => handleEdit(schedule)}
                 color="blue"
               />
 
               <ActionButton
                 tooltipText="Xóa"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 onClick={() =>
                   openConfirm({

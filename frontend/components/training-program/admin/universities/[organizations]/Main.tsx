@@ -1,19 +1,20 @@
 "use client";
 
+import {
+  AiOutlineAppstore,
+  AiOutlineClockCircle,
+  AiOutlineDelete,
+  AiOutlineDown,
+  AiOutlineEdit,
+  AiOutlineLock,
+  AiOutlinePlus,
+  AiOutlineTeam,
+  AiOutlineUnlock,
+} from "@/library/icons";
+
 import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "motion/react";
-import {
-  HiOutlinePlus,
-  HiOutlineCollection,
-  HiOutlineClock,
-  HiOutlineChevronDown,
-  HiOutlineUserGroup,
-  HiOutlineTrash,
-  HiOutlinePencil,
-  HiOutlineLockOpen,
-  HiOutlineLockClosed,
-} from "react-icons/hi";
 
 import Typography from "@/library/Typography";
 import Button from "@/library/Button";
@@ -159,7 +160,7 @@ export default function Main({ universityId }: Props) {
         <Button
           onClick={() => handleOpenCreateOrgModal()}
           className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px]! font-black! uppercase tracking-wider text-white hover:bg-primary-700 hover:border-primary-700 transition-all shadow-lg shadow-primary-600/20 cursor-pointer active:scale-95 h-auto"
-          icon={HiOutlinePlus}
+          icon={AiOutlinePlus}
         >
           Thêm chuyên ngành / Đơn vị
         </Button>
@@ -183,7 +184,7 @@ export default function Main({ universityId }: Props) {
                     }}
                   >
                     <div className="size-12 rounded-xl bg-secondary-50 dark:bg-secondary-900/30 flex items-center justify-center text-secondary-600 dark:text-secondary-300">
-                      <HiOutlineCollection size={24} />
+                      <AiOutlineAppstore size={24} />
                     </div>
                     <div>
                       <Typography variant="h3" weight="bold">
@@ -191,13 +192,13 @@ export default function Main({ universityId }: Props) {
                       </Typography>
                       <div className="flex items-center gap-4 mt-1">
                         <div className="flex items-center gap-1 text-neutral-400">
-                          <HiOutlineClock size={14} />
+                          <AiOutlineClockCircle size={14} />
                           <Typography variant="caption">
                             Di chuyển: {org.travelTime} phút
                           </Typography>
                         </div>
                         <div className="flex items-center gap-1 text-neutral-400">
-                          <HiOutlineUserGroup size={14} />
+                          <AiOutlineTeam size={14} />
                           <Typography variant="caption">
                             {org.totalStudents} học viên
                           </Typography>
@@ -221,8 +222,8 @@ export default function Main({ universityId }: Props) {
                       }
                       icon={
                         org.status === "ACTIVE"
-                          ? HiOutlineLockOpen
-                          : HiOutlineLockClosed
+                          ? AiOutlineUnlock
+                          : AiOutlineLock
                       }
                       color={org.status === "ACTIVE" ? "amber" : "green"}
                       onClick={() =>
@@ -247,13 +248,13 @@ export default function Main({ universityId }: Props) {
                     />
                     <ActionButton
                       tooltipText="Chỉnh sửa"
-                      icon={HiOutlinePencil}
+                      icon={AiOutlineEdit}
                       color="blue"
                       onClick={() => handleOpenUpdateOrgModal(org)}
                     />
                     <ActionButton
                       tooltipText="Xóa đơn vị"
-                      icon={HiOutlineTrash}
+                      icon={AiOutlineDelete}
                       color="red"
                       onClick={() =>
                         openConfirm({
@@ -268,7 +269,7 @@ export default function Main({ universityId }: Props) {
                     />
                     <ActionButton
                       tooltipText="Xem trình độ đào tạo"
-                      icon={HiOutlineChevronDown}
+                      icon={AiOutlineDown}
                       color="neutral"
                       className={
                         expandedIds.includes(org.id)

@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineExclamationCircle, AiOutlinePlus } from "@/library/icons";
+
 import { useEffect, useRef, useState } from "react";
 import {
   useIsMutating,
@@ -15,11 +17,6 @@ import {
   type FieldErrors,
   type UseFormRegister,
 } from "react-hook-form";
-import {
-  HiOutlineExclamationCircle,
-  HiOutlinePlus,
-  HiOutlineTrash,
-} from "react-icons/hi";
 import Button from "@/library/Button";
 import PageContainer from "@/library/PageContainer";
 import Select from "@/library/Select";
@@ -588,7 +585,7 @@ export default function TimeTable() {
             <div className="flex justify-end border-t border-neutral-100 pt-4 dark:border-neutral-800">
               <Button
                 type="button"
-                icon={HiOutlinePlus}
+                icon={AiOutlinePlus}
                 disabled={save.isPending || Boolean(pendingScope) || isFormOpen}
                 onClick={openScheduleEditor}
               >
@@ -683,7 +680,7 @@ export default function TimeTable() {
                         }}
                         className="flex size-9 shrink-0 items-center justify-center rounded-lg text-neutral-400 transition hover:bg-error-50 hover:text-error-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-error-950/40"
                       >
-                        <HiOutlineTrash aria-hidden="true" size={18} />
+                        <AiOutlineDelete aria-hidden="true" size={18} />
                       </button>
                     </li>
                   ))}
@@ -722,7 +719,7 @@ export default function TimeTable() {
             role="alertdialog"
           >
             <div className="flex items-start gap-3">
-              <HiOutlineExclamationCircle
+              <AiOutlineExclamationCircle
                 aria-hidden="true"
                 className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
                 size={24}

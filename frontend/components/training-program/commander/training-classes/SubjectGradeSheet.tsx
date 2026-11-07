@@ -1,10 +1,11 @@
 "use client";
 
+import { AiOutlineLeft, AiOutlineRight } from "@/library/icons";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import Link from "next/link";
-import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import Button from "@/library/Button";
 import Input from "@/library/Input";
 import Select from "@/library/Select";
@@ -865,7 +866,7 @@ function GradeRows({
               onClick={() => setViewPage(Math.max(0, currentViewPage - 1))}
               aria-label="Trang trước"
             >
-              <HiOutlineChevronLeft aria-hidden />
+              <AiOutlineLeft aria-hidden />
             </Button>
             <Button
               type="button"
@@ -878,7 +879,7 @@ function GradeRows({
               }
               aria-label="Trang tiếp theo"
             >
-              <HiOutlineChevronRight aria-hidden />
+              <AiOutlineRight aria-hidden />
             </Button>
           </div>
         </nav>

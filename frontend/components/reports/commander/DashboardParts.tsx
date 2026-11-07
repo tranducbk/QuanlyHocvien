@@ -1,7 +1,7 @@
+import { AiOutlineExport } from "@/library/icons";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
-import { HiOutlineExternalLink } from "react-icons/hi";
 import Typography from "@/library/Typography";
 
 export type DashboardTone = "primary" | "success" | "warning" | "error" | "sky" | "neutral";
@@ -52,7 +52,7 @@ export function Panel({ title, href, actionLabel, children }: {
         {href && (
           <Link href={href} className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 px-3 py-2 text-sm font-semibold text-neutral-600 transition-colors hover:border-primary-300 hover:text-primary-600 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-primary-700 dark:hover:text-primary-300">
             {actionLabel || "Xem thêm"}
-            <HiOutlineExternalLink size={16} />
+            <AiOutlineExport size={16} />
           </Link>
         )}
       </div>

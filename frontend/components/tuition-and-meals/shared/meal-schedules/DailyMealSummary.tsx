@@ -1,7 +1,7 @@
+import { AiOutlineBarChart } from "@/library/icons";
 import Typography from "@/library/Typography";
 import type { CutRiceDailySummary, MealDayKey } from "@/types/tuition-and-meals/cut-rice";
 import { MEAL_DAYS } from "@/utils/meal-schedule";
-import { HiOutlineChartBar } from "react-icons/hi";
 import styles from "./DailyMealSummary.module.css";
 
 interface DailyMealSummaryProps {
@@ -45,7 +45,7 @@ export default function DailyMealSummary({
     <section className={styles.section}>
       <div className={styles.heading}>
         <span className={styles.headingIcon}>
-          <HiOutlineChartBar aria-hidden="true" />
+          <AiOutlineBarChart aria-hidden="true" />
         </span>
         <div>
           <Typography variant="body" weight="bold">

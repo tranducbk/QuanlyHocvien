@@ -1,7 +1,7 @@
+import { AiOutlineHome, AiOutlineRight } from "@/library/icons";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import Link from "next/link";
-import { HiOutlineChevronRight, HiOutlineHome } from "react-icons/hi";
 
 export default function AchievementSkeleton() {
   const columnCount = 8;
@@ -10,12 +10,12 @@ export default function AchievementSkeleton() {
     <div className="space-y-8 rounded-2xl bg-white dark:bg-neutral-950 p-6 min-h-screen text-neutral-900 dark:text-neutral-100 transition-colors">
       <div className="flex items-center gap-2 text-neutral-400">
         <Link href="/commander" className="flex items-center gap-2">
-          <HiOutlineHome size={14} />
+          <AiOutlineHome size={14} />
           <Typography variant="label" tracking="wide">
             Tổng quan
           </Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Typography variant="label" color="primary" tracking="wide">
           Quản lý thành tích
         </Typography>

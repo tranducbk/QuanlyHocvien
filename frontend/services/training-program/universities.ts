@@ -5,9 +5,15 @@ import {
   UniversityQueryRequest,
   CreateUniversityRequest,
   UpdateUniversityRequest,
+  UniversityStudent,
+  UniversityStudentQuery,
 } from "@/types/training-program/universities";
 
 export const universityService = {
+  getAvailableStudents: (id: string, params: UniversityStudentQuery): Promise<PaginatedResponse<UniversityStudent>> =>
+    apiClient.get(ENDPOINTS.UNIVERSITIES.AVAILABLE_STUDENTS(id), { params }),
+  addStudents: (id: string, profileIds: string[]): Promise<ApiResponse<{ added: number }>> =>
+    apiClient.post(ENDPOINTS.UNIVERSITIES.STUDENTS(id), { profileIds }),
   getUniversities: async (
     params?: UniversityQueryRequest
   ): Promise<PaginatedResponse<University>> => {

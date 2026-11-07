@@ -1,9 +1,10 @@
 "use client";
 
+import { AiOutlineTeam } from "@/library/icons";
+
 import { useMemo, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { HiOutlineUserGroup } from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import PageContainer from "@/library/PageContainer";
 import Table from "@/library/Table";
@@ -151,7 +152,7 @@ export default function Main() {
           return (
             <ActionButton
               tooltipText="Danh sách học viên"
-              icon={HiOutlineUserGroup}
+              icon={AiOutlineTeam}
               onClick={() => handleOpenStudentsListModal(cls)}
               color="secondary"
             />

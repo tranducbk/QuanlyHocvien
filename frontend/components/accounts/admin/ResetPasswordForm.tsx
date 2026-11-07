@@ -1,13 +1,10 @@
 "use client";
 
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLock } from "@/library/icons";
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  HiOutlineLockClosed,
-  HiOutlineEye,
-  HiOutlineEyeOff,
-} from "react-icons/hi";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
 import { userService } from "@/services/accounts/user";
@@ -67,7 +64,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
         type={showNewPassword ? "text" : "password"}
         placeholder="Nhập mật khẩu mới"
         isLoading={resetPasswordMutation.isPending}
-        prefixIcon={<HiOutlineLockClosed size={18} />}
+        prefixIcon={<AiOutlineLock size={18} />}
         suffixIcon={
           <button
             type="button"
@@ -75,9 +72,9 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
             onClick={() => setShowNewPassword(!showNewPassword)}
           >
             {showNewPassword ? (
-              <HiOutlineEyeOff size={18} />
+              <AiOutlineEyeInvisible size={18} />
             ) : (
-              <HiOutlineEye size={18} />
+              <AiOutlineEye size={18} />
             )}
           </button>
         }
@@ -91,7 +88,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
         type={showConfirmPassword ? "text" : "password"}
         placeholder="Nhập lại mật khẩu mới"
         isLoading={resetPasswordMutation.isPending}
-        prefixIcon={<HiOutlineLockClosed size={18} />}
+        prefixIcon={<AiOutlineLock size={18} />}
         suffixIcon={
           <button
             type="button"
@@ -99,9 +96,9 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             {showConfirmPassword ? (
-              <HiOutlineEyeOff size={18} />
+              <AiOutlineEyeInvisible size={18} />
             ) : (
-              <HiOutlineEye size={18} />
+              <AiOutlineEye size={18} />
             )}
           </button>
         }

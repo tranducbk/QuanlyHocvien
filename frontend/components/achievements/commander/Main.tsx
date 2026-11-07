@@ -1,11 +1,9 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlineEdit } from "@/library/icons";
+
 import { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  HiOutlinePencil,
-  HiOutlineTrash,
-} from "react-icons/hi";
 import ActionButton from "@/library/ActionButton";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -209,13 +207,13 @@ export default function Main() {
             <div className="flex items-center gap-1">
               <ActionButton
                 tooltipText="Cập nhật"
-                icon={HiOutlinePencil}
+                icon={AiOutlineEdit}
                 color="blue"
                 onClick={() => handleUpdate(achievement)}
               />
               <ActionButton
                 tooltipText="Xóa thành tích"
-                icon={HiOutlineTrash}
+                icon={AiOutlineDelete}
                 color="red"
                 onClick={() =>
                   openConfirm({

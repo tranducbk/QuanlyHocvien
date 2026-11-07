@@ -1,11 +1,7 @@
+import { AiOutlineHome, AiOutlinePlus, AiOutlineRight } from "@/library/icons";
 import Skeleton from "@/library/Skeleton";
 import Typography from "@/library/Typography";
 import Link from "next/link";
-import {
-  HiOutlineChevronRight,
-  HiOutlineHome,
-  HiOutlinePlus,
-} from "react-icons/hi";
 
 export default function UniversitySkeleton() {
   const columnCount = 6;
@@ -14,12 +10,12 @@ export default function UniversitySkeleton() {
     <div className="space-y-8 relative rounded-2xl bg-white dark:bg-neutral-950 p-6 min-h-screen text-neutral-900 dark:text-neutral-100 transition-colors">
       <div className="flex items-center gap-2 text-neutral-400">
         <Link href="/commander" className="flex items-center gap-2">
-          <HiOutlineHome size={14} />
+          <AiOutlineHome size={14} />
           <Typography variant="label" tracking="wide">
             Tổng quan
           </Typography>
         </Link>
-        <HiOutlineChevronRight size={12} />
+        <AiOutlineRight size={12} />
         <Typography variant="label" color="primary" tracking="wide">
           Cơ sở đào tạo
         </Typography>
@@ -33,7 +29,7 @@ export default function UniversitySkeleton() {
           disabled
           className="flex items-center gap-2 px-4 py-2 bg-primary-600 border border-primary-600 rounded-xl text-[11px] font-black uppercase tracking-wider text-white opacity-50 cursor-not-allowed h-auto"
         >
-          <HiOutlinePlus size={16} />
+          <AiOutlinePlus size={16} />
           Thêm trường đại học
         </button>
       </div>

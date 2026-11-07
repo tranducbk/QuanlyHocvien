@@ -1,15 +1,16 @@
 "use client";
 
+import {
+  AiOutlineBarChart,
+  AiOutlineCalendar,
+  AiOutlineCheckCircle,
+  AiOutlineDollar,
+  AiOutlineExport,
+  AiOutlineRead,
+} from "@/library/icons";
+
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import {
-  HiOutlineAcademicCap,
-  HiOutlineCalendar,
-  HiOutlineCash,
-  HiOutlineChartBar,
-  HiOutlineCheckCircle,
-  HiOutlineExternalLink,
-} from "react-icons/hi";
 import type { IconType } from "react-icons";
 import Badge from "@/library/Badge";
 import PageContainer from "@/library/PageContainer";
@@ -107,10 +108,10 @@ export default function Main() {
         className="space-y-8"
       >
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Điểm trung bình hệ 10" value={formatScore(averageGrade)} helper="Lần thi cao nhất của từng môn" icon={HiOutlineChartBar} tone="primary" />
-          <StatCard label="Môn đã đạt" value={formatNumber(passedSubjects)} helper={`${bestResults.length - passedSubjects} môn chưa đạt`} icon={HiOutlineCheckCircle} tone="success" />
-          <StatCard label="Tiết học lớp" value={formatNumber(schedules.length)} helper="Lịch áp dụng chung cho lớp" icon={HiOutlineCalendar} tone="secondary" />
-          <StatCard label="Thành tích" value={formatNumber(cohortAchievementsQuery.data?.data?.length)} helper="Thành tích cá nhân đã ghi nhận" icon={HiOutlineCheckCircle} tone="warning" />
+          <StatCard label="Điểm trung bình hệ 10" value={formatScore(averageGrade)} helper="Lần thi cao nhất của từng môn" icon={AiOutlineBarChart} tone="primary" />
+          <StatCard label="Môn đã đạt" value={formatNumber(passedSubjects)} helper={`${bestResults.length - passedSubjects} môn chưa đạt`} icon={AiOutlineCheckCircle} tone="success" />
+          <StatCard label="Tiết học lớp" value={formatNumber(schedules.length)} helper="Lịch áp dụng chung cho lớp" icon={AiOutlineCalendar} tone="secondary" />
+          <StatCard label="Thành tích" value={formatNumber(cohortAchievementsQuery.data?.data?.length)} helper="Thành tích cá nhân đã ghi nhận" icon={AiOutlineCheckCircle} tone="warning" />
         </section>
         <section className="grid gap-6 xl:grid-cols-2">
           <Panel title="Kết quả học tập" href="/student/results">
@@ -128,7 +129,7 @@ export default function Main() {
                   </Badge>
                 </div>
               ))}
-              {!bestResults.length && <EmptyLine icon={HiOutlineAcademicCap} text="Chưa có kết quả học tập." />}
+              {!bestResults.length && <EmptyLine icon={AiOutlineRead} text="Chưa có kết quả học tập." />}
             </div>
           </Panel>
           <Panel title="Lịch học lớp" href="/student/time-table">
@@ -142,7 +143,7 @@ export default function Main() {
                   </Typography>
                 </div>
               ))}
-              {!schedules.length && <EmptyLine icon={HiOutlineCalendar} text="Chưa có lịch học được công bố." />}
+              {!schedules.length && <EmptyLine icon={AiOutlineCalendar} text="Chưa có lịch học được công bố." />}
             </div>
           </Panel>
         </section>
@@ -168,28 +169,28 @@ export default function Main() {
             label="CPA hệ 4"
             value={formatScore(overview?.cpa4)}
             helper={`${overview?.credits || 0} tín chỉ tích lũy`}
-            icon={HiOutlineChartBar}
+            icon={AiOutlineBarChart}
             tone="primary"
           />
           <StatCard
             label="Môn đã đạt"
             value={formatNumber(overview?.passedSubjects)}
             helper={`${overview?.failedSubjects || 0} môn chưa đạt`}
-            icon={HiOutlineCheckCircle}
+            icon={AiOutlineCheckCircle}
             tone="success"
           />
           <StatCard
             label="Lịch học"
             value={formatNumber(overview?.scheduleCount)}
             helper={`${overview?.cutMealCount || 0} bữa cắt cơm`}
-            icon={HiOutlineCalendar}
+            icon={AiOutlineCalendar}
             tone="secondary"
           />
           <StatCard
             label="Học phí chưa nộp"
             value={formatNumber(overview?.unpaidTuitionCount)}
             helper={formatCurrency(overview?.unpaidTuitionAmount || 0)}
-            icon={HiOutlineCash}
+            icon={AiOutlineDollar}
             tone={overview?.unpaidTuitionCount ? "warning" : "neutral"}
           />
         </section>
@@ -234,7 +235,7 @@ export default function Main() {
                   </div>
                 ))
               ) : (
-                <EmptyLine icon={HiOutlineCash} text="Chưa có bản ghi học phí." />
+                <EmptyLine icon={AiOutlineDollar} text="Chưa có bản ghi học phí." />
               )}
             </div>
           </Panel>
@@ -314,7 +315,7 @@ const Panel = ({
           className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 px-3 py-2 text-sm font-semibold text-neutral-600 transition-colors hover:border-primary-300 hover:text-primary-600 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-primary-700 dark:hover:text-primary-300"
         >
           Xem thêm
-          <HiOutlineExternalLink size={16} />
+          <AiOutlineExport size={16} />
         </Link>
       )}
     </div>

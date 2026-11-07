@@ -1,4 +1,12 @@
 export const ENDPOINTS = {
+  HE5_PLACEMENT: {
+    YEARS: "/api/he5-placement/years",
+    YEAR: (id: string) => `/api/he5-placement/years/${id}`,
+    AVAILABLE: (id: string) => `/api/he5-placement/years/${id}/available`,
+    ASSIGN: (id: string) => `/api/he5-placement/years/${id}/assign`,
+    GRADUATE: (id: string) => `/api/he5-placement/years/${id}/graduate`,
+    CLOSE: (id: string) => `/api/he5-placement/years/${id}/close`,
+  },
   AUTH: {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
@@ -78,6 +86,8 @@ export const ENDPOINTS = {
   },
   UNIVERSITIES: {
     BASE: "/api/universities",
+    AVAILABLE_STUDENTS: (id: string) => `/api/universities/${id}/available-students`,
+    STUDENTS: (id: string) => `/api/universities/${id}/students`,
   },
   ORGANIZATIONS: {
     BASE: "/api/organizations",

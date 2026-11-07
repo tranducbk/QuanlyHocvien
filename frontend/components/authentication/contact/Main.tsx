@@ -1,14 +1,15 @@
 "use client";
+
+import {
+  AiOutlineArrowLeft,
+  AiOutlineExclamationCircle,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineUser,
+} from "@/library/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { m } from "motion/react";
-import {
-  FiUser,
-  FiPhone,
-  FiMail,
-  FiAlertCircle,
-  FiArrowLeft,
-} from "react-icons/fi";
 import Button from "@/library/Button";
 import AnimatedContainer from "@/library/AnimatedContainer";
 import Divide from "@/library/Divide";
@@ -16,14 +17,14 @@ import Typography from "@/library/Typography";
 
 const channels = [
   {
-    icon: FiUser,
+    icon: AiOutlineUser,
     title: "Liên hệ trực tiếp",
     description: "Gặp trực tiếp chỉ huy tại phòng làm việc trong giờ hành chính.",
     accent: "text-primary-600 dark:text-primary-400",
     badge: "bg-primary-100 dark:bg-primary-500/20",
   },
   {
-    icon: FiPhone,
+    icon: AiOutlinePhone,
     title: "Liên hệ gián tiếp",
     description: "Gọi điện thoại, nhắn tin hoặc gửi email theo thông tin bên dưới.",
     accent: "text-emerald-600 dark:text-emerald-400",
@@ -134,7 +135,7 @@ export default function Main() {
             >
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center justify-center size-10 rounded-full bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 shrink-0">
-                  <FiUser size={18} />
+                  <AiOutlineUser size={18} />
                 </span>
                 <div>
                   <Typography variant="h4" color="neutral" weight="bold">
@@ -151,7 +152,7 @@ export default function Main() {
                   href={`tel:${phone}`}
                   className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 hover:opacity-80 transition-opacity"
                 >
-                  <FiPhone size={15} className="shrink-0" />
+                  <AiOutlinePhone size={15} className="shrink-0" />
                   <Typography variant="caption" weight="semibold">
                     {phone}
                   </Typography>
@@ -160,7 +161,7 @@ export default function Main() {
                   href={`mailto:${email}`}
                   className="inline-flex items-center gap-1.5 text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity"
                 >
-                  <FiMail size={15} className="shrink-0" />
+                  <AiOutlineMail size={15} className="shrink-0" />
                   <Typography variant="caption" weight="semibold">
                     {email}
                   </Typography>
@@ -173,7 +174,7 @@ export default function Main() {
         {/* Important note */}
         <div className="mt-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/80 dark:bg-amber-500/10 p-4">
           <div className="flex items-start gap-2.5">
-            <FiAlertCircle
+            <AiOutlineExclamationCircle
               size={16}
               className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
             />
@@ -197,7 +198,7 @@ export default function Main() {
 
         {/* Back to login */}
         <Link href="/login" className="mt-6 block">
-          <Button type="button" size="lg" variant="primary" fullWidth icon={FiArrowLeft}>
+          <Button type="button" size="lg" variant="primary" fullWidth icon={AiOutlineArrowLeft}>
             Quay lại đăng nhập
           </Button>
         </Link>

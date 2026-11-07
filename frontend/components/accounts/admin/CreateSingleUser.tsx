@@ -1,10 +1,11 @@
 "use client";
 
+import { AiOutlineEye, AiOutlineEyeInvisible } from "@/library/icons";
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import Button from "@/library/Button";
 import Input from "@/library/Input";
 import Select from "@/library/Select";
@@ -147,7 +148,7 @@ const CreateSingleUser: React.FC = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="cursor-pointer text-neutral-400 hover:text-neutral-600 transition-colors"
             >
-              {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              {showPassword ? <AiOutlineEyeInvisible size={18} /> : <AiOutlineEye size={18} />}
             </button>
           }
           required={true}

@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineDelete, AiOutlinePlus } from "@/library/icons";
+
 import {
   Control,
   FieldErrors,
@@ -8,7 +10,6 @@ import {
   UseFormRegister,
   Controller,
 } from "react-hook-form";
-import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 import Button from "@/library/Button";
 import Input from "@/library/Input";
 import MultiSelect from "@/library/MultiSelect";
@@ -95,7 +96,7 @@ function ScheduleFields({
         </Typography>
         {fieldsLength > 1 && (
           <Button type="button" variant="ghost" onClick={() => remove(index)}>
-            <HiOutlineTrash /> Xóa
+            <AiOutlineDelete /> Xóa
           </Button>
         )}
       </div>
@@ -218,7 +219,7 @@ export default function TimeTableCalendarForm({
                   variant="ghost"
                   onClick={() => append({ ...emptySchedule, day })}
                 >
-                  <HiOutlinePlus /> Thêm
+                  <AiOutlinePlus /> Thêm
                 </Button>
               </div>
 

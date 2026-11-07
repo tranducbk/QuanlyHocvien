@@ -62,7 +62,7 @@ Quản lý trường, tổ chức/chuyên ngành, trình độ, lớp và xếp 
 
 ### Trạng thái
 
-**Có trong source**. Với Hệ 5, Chỉ huy có thể tìm và xếp vào lớp các học viên Hệ 5 chưa thuộc lớp, do mình quản lý và phù hợp với cơ sở/tổ chức/trình độ của lớp. Quyền Admin hiện tại không thay đổi.
+**Có trong source**. Hệ 5 chuyển chức năng quản lý lớp sang 6 lớp quản lý cố định dùng chung và danh sách riêng theo năm học theo [TASK-010](../tasks/TASK-010-he5-annual-class-placement.md). Chỉ huy Hệ 5 xem/xếp lớp toàn Hệ trong bản nháp, kế thừa năm trước, đánh dấu tốt nghiệp và chốt để khóa danh sách. Giữ lịch sử các năm cũ; không mở rộng quyền quản lý hồ sơ/điểm hoặc luồng lớp tại cơ sở đào tạo legacy. Cần migration `migrateHe5Placement.js` trước khi sử dụng giao diện mới.
 
 ## F05 - Kết quả học tập
 

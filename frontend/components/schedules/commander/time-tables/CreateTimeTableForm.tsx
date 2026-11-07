@@ -1,10 +1,11 @@
 "use client";
 
+import { AiOutlineCalendar, AiOutlineRead } from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { HiOutlineAcademicCap, HiOutlineCalendar } from "react-icons/hi";
 import Button from "@/library/Button";
 import Divide from "@/library/Divide";
 import Select from "@/library/Select";
@@ -122,7 +123,7 @@ export default function CreateTimeTableForm() {
             <Select
               label="Học viên"
               placeholder="Chọn học viên"
-              prefixIcon={<HiOutlineAcademicCap />}
+              prefixIcon={<AiOutlineRead />}
               value={value}
               onChange={(selectedValue) => onChange(selectedValue)}
               options={studentOptions}
@@ -150,7 +151,7 @@ export default function CreateTimeTableForm() {
             <Select
               label="Học kỳ"
               placeholder="Chọn học kỳ"
-              prefixIcon={<HiOutlineCalendar />}
+              prefixIcon={<AiOutlineCalendar />}
               value={value}
               onChange={(selectedValue) => onChange(String(selectedValue))}
               options={semesterOptions}

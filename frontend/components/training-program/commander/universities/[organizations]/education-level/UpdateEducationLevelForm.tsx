@@ -1,12 +1,13 @@
 "use client";
 
+import { AiOutlineRead } from "@/library/icons";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { organizationService } from "@/services/training-program/organizations";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
-import { HiOutlineAcademicCap } from "react-icons/hi";
 import { EducationLevel } from "@/types/training-program/organizations";
 import { updateEducationLevelSchema, UpdateEducationLevelFormValues } from "@/utils/validations";
 import Divide from "@/library/Divide";
@@ -47,7 +48,7 @@ export default function UpdateEducationLevelForm({ level, organizationId }: Prop
       <Input
         label="Tên trình độ đào tạo"
         placeholder="Chọn Cử nhân hoặc Kỹ sư"
-        prefixIcon={<HiOutlineAcademicCap />}
+        prefixIcon={<AiOutlineRead />}
         error={errors.levelName?.message}
         isLoading={mutation.isPending}
         {...register("levelName")}

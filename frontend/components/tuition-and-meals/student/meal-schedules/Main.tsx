@@ -1,14 +1,15 @@
 "use client";
 
+import {
+  AiOutlineCalendar,
+  AiOutlineClockCircle,
+  AiOutlineMoon,
+  AiOutlineSend,
+  AiOutlineSun,
+} from "@/library/icons";
+
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  HiOutlineCalendar,
-  HiOutlineClock,
-  HiOutlineMoon,
-  HiOutlinePaperAirplane,
-  HiOutlineSun,
-} from "react-icons/hi";
 import Badge from "@/library/Badge";
 import Button from "@/library/Button";
 import DatePicker from "@/library/DatePicker";
@@ -77,9 +78,9 @@ const getRequestStatus = (request: CutRiceRequest) => {
 };
 
 const mealIcons = {
-  morning: HiOutlineSun,
-  noon: HiOutlineClock,
-  evening: HiOutlineMoon,
+  morning: AiOutlineSun,
+  noon: AiOutlineClockCircle,
+  evening: AiOutlineMoon,
 };
 
 export default function Main() {
@@ -184,7 +185,7 @@ export default function Main() {
       className="space-y-8"
       actions={
         <Button
-          icon={HiOutlinePaperAirplane}
+          icon={AiOutlineSend}
           onClick={() => {
             if (!activeSemesterId) return;
             openModal({
@@ -211,7 +212,7 @@ export default function Main() {
               <Select
                 label="Học kỳ"
                 placeholder="Chọn học kỳ"
-                prefixIcon={<HiOutlineCalendar />}
+                prefixIcon={<AiOutlineCalendar />}
                 value={activeSemesterId}
                 onChange={(value) => {
                   setSelectedSemesterId(String(value));
@@ -305,7 +306,7 @@ export default function Main() {
                       Đối chiếu từng ngày theo ba khung giờ ăn cố định.
                     </Typography>
                   </div>
-                  <HiOutlineCalendar aria-hidden="true" />
+                  <AiOutlineCalendar aria-hidden="true" />
                 </div>
                 <MealWeekGrid weekly={cutRice?.weekly} />
               </section>

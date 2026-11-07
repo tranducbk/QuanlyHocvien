@@ -47,6 +47,10 @@ export interface TableProps<TData> {
 
   /** Hiển thị cột số thứ tự (mặc định: true) */
   showIndex?: boolean;
+  /** Ẩn phân trang cho danh sách cố định, ngắn. */
+  showPagination?: boolean;
+  /** Bố cục gọn cho bảng có ít nội dung. */
+  compact?: boolean;
   /** Hiển thị nút tùy chỉnh ẩn hiện cột (mặc định: true) */
   showVisibilityToggle?: boolean;
   /** Cho phép kéo thả để đổi vị trí cột. */
@@ -97,6 +101,8 @@ const Table = <TData,>({
   sorting,
   onSortingChange,
   showIndex = true,
+  showPagination = true,
+  compact = false,
   showVisibilityToggle = true,
   enableColumnOrdering = true,
   filterFields,
@@ -210,10 +216,11 @@ const Table = <TData,>({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? "space-y-3" : "space-y-4"}>
       {/* table Toolbar */}
       <TableToolbar
         table={table}
+        compact={compact}
         filterFields={filterFields}
         showFilter={showFilter}
         defaultFilterOpen={defaultFilterOpen}
@@ -266,6 +273,7 @@ const Table = <TData,>({
               <tbody>
                 <TableBody
                   table={table}
+                  compact={compact}
                   emptyText={emptyText}
                   rowClassName={rowClassName}
                   renderGroupRow={renderGroupRow}
@@ -275,14 +283,18 @@ const Table = <TData,>({
             </table>
           </div>
 
-          <Divide className="w-full" />
-          <Pagination
-            pageIndex={pagination.pageIndex + 1}
-            totalPages={totalPages}
-            pageSize={pagination.pageSize}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
+          {showPagination && (
+            <>
+              <Divide className="w-full" />
+              <Pagination
+                pageIndex={pagination.pageIndex + 1}
+                totalPages={totalPages}
+                pageSize={pagination.pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            </>
+          )}
         </div>
       </DragDropProvider>
     </div>

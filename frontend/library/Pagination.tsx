@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
 import {
-  HiOutlineChevronLeft,
-  HiOutlineChevronRight,
-  HiOutlineChevronDoubleLeft,
-  HiOutlineChevronDoubleRight,
-} from "react-icons/hi";
+  AiOutlineDoubleLeft,
+  AiOutlineDoubleRight,
+  AiOutlineLeft,
+  AiOutlineRight,
+} from "@/library/icons";
+
+import React, { useEffect } from "react";
 
 import Select from "@/library/Select";
 import { DEFAULT_PAGE } from "@/constants/constants";
@@ -95,7 +96,7 @@ const Pagination: React.FC<PaginationProps> = ({
           className="size-8 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-colors cursor-pointer"
           title="Trang đầu"
         >
-          <HiOutlineChevronDoubleLeft size={16} />
+          <AiOutlineDoubleLeft size={16} />
         </button>
 
         <button
@@ -103,7 +104,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={pageIndex === 1}
           className="size-8 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-colors cursor-pointer"
         >
-          <HiOutlineChevronLeft size={16} />
+          <AiOutlineLeft size={16} />
         </button>
 
         <div className="flex items-center gap-1">
@@ -122,7 +123,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={pageIndex >= totalPages}
           className="size-8 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-colors cursor-pointer"
         >
-          <HiOutlineChevronRight size={16} />
+          <AiOutlineRight size={16} />
         </button>
 
         {/* Nút đến cuối */}
@@ -132,7 +133,7 @@ const Pagination: React.FC<PaginationProps> = ({
           className="size-8 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-colors cursor-pointer"
           title="Trang cuối"
         >
-          <HiOutlineChevronDoubleRight size={16} />
+          <AiOutlineDoubleRight size={16} />
         </button>
 
         <div className="hidden lg:block ml-4 text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.2em]">

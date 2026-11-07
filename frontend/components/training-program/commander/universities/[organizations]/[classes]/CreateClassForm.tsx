@@ -1,5 +1,7 @@
 "use client";
 
+import { AiOutlineTeam } from "@/library/icons";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClassSchema, CreateClassFormValues } from "@/utils/validations";
@@ -7,7 +9,6 @@ import { classService } from "@/services/training-program/classes";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/constants/query-keys";
 import Input from "@/library/Input";
 import Button from "@/library/Button";
-import { HiOutlineUserGroup } from "react-icons/hi";
 import Divide from "@/library/Divide";
 import useAppMutation from "@/hooks/useAppMutation";
 import { useModalStore } from "@/store/useModalStore";
@@ -45,7 +46,7 @@ export default function CreateClassForm({ educationLevelId }: Props) {
       <Input
         label="Tên lớp học"
         placeholder="VD: CNTT-K60, AT15..."
-        prefixIcon={<HiOutlineUserGroup />}
+        prefixIcon={<AiOutlineTeam />}
         error={errors.className?.message}
         isLoading={mutation.isPending}
         {...register("className")}

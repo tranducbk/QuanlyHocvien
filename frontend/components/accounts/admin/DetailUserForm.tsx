@@ -1,5 +1,20 @@
 "use client";
 
+import {
+  AiOutlineBank,
+  AiOutlineCalendar,
+  AiOutlineCheckSquare,
+  AiOutlineClockCircle,
+  AiOutlineEnvironment,
+  AiOutlineGift,
+  AiOutlineIdcard,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineRead,
+  AiOutlineTeam,
+  AiOutlineThunderbolt,
+} from "@/library/icons";
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/accounts/user";
@@ -10,21 +25,6 @@ import Typography from "@/library/Typography";
 import Badge from "@/library/Badge";
 import DetailUserSkeleton from "./DetailUserSkeleton";
 import Avatar from "@/library/Avatar";
-import {
-  HiOutlineMail,
-  HiOutlineClock,
-  HiOutlineIdentification,
-  HiOutlineAcademicCap,
-  HiOutlineOfficeBuilding,
-  HiOutlineBadgeCheck,
-  HiOutlineCalendar,
-  HiOutlineLocationMarker,
-  HiOutlinePhone,
-  HiOutlineCake,
-  HiOutlineLibrary,
-  HiOutlineSparkles,
-  HiOutlineUserGroup,
-} from "react-icons/hi";
 import { UserDetailResponse } from "@/types/accounts/user";
 import {
   FamilyMembersView,
@@ -115,17 +115,17 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
 
           <div className="space-y-4 bg-neutral-50/30 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800">
             <DetailItem
-              icon={<HiOutlineIdentification />}
+              icon={<AiOutlineIdcard />}
               label="Tên đăng nhập"
               value={user.username}
             />
             <DetailItem
-              icon={<HiOutlineClock />}
+              icon={<AiOutlineClockCircle />}
               label="Ngày tạo"
               value={formatDateTime(user.createdAt)}
             />
             <DetailItem
-              icon={<HiOutlineClock />}
+              icon={<AiOutlineClockCircle />}
               label="Cập nhật cuối"
               value={formatDateTime(user.updatedAt)}
             />
@@ -146,17 +146,17 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
 
           <div className="space-y-4 bg-neutral-50/30 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800">
             <DetailItem
-              icon={<HiOutlineMail />}
+              icon={<AiOutlineMail />}
               label="Email"
               value={user.profile?.email}
             />
             <DetailItem
-              icon={<HiOutlinePhone />}
+              icon={<AiOutlinePhone />}
               label="Số điện thoại"
               value={user.profile?.phoneNumber || "Chưa cập nhật"}
             />
             <DetailItem
-              icon={<HiOutlineLocationMarker />}
+              icon={<AiOutlineEnvironment />}
               label="Địa chỉ hiện tại"
               value={user.profile?.currentAddress || "Chưa cập nhật"}
             />
@@ -181,12 +181,12 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
               <div className="space-y-4 bg-neutral-50/30 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800">
                 <div className="grid grid-cols-2 gap-4">
                   <DetailItem
-                    icon={<HiOutlineCake />}
+                    icon={<AiOutlineGift />}
                     label="Ngày sinh"
                     value={formatDate(user.profile.birthday)}
                   />
                   <DetailItem
-                    icon={<HiOutlineUserGroup />}
+                    icon={<AiOutlineTeam />}
                     label="Giới tính"
                     value={
                       user.profile.gender
@@ -198,30 +198,30 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
                   />
                 </div>
                 <DetailItem
-                  icon={<HiOutlineIdentification />}
+                  icon={<AiOutlineIdcard />}
                   label="Số CCCD"
                   value={user.profile.cccd}
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <DetailItem
-                    icon={<HiOutlineLocationMarker />}
+                    icon={<AiOutlineEnvironment />}
                     label="Quê quán"
                     value={user.profile.hometown}
                   />
                   <DetailItem
-                    icon={<HiOutlineLocationMarker />}
+                    icon={<AiOutlineEnvironment />}
                     label="Nơi sinh"
                     value={user.profile.placeOfBirth}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <DetailItem
-                    icon={<HiOutlineSparkles />}
+                    icon={<AiOutlineThunderbolt />}
                     label="Dân tộc"
                     value={user.profile.ethnicity}
                   />
                   <DetailItem
-                    icon={<HiOutlineSparkles />}
+                    icon={<AiOutlineThunderbolt />}
                     label="Tôn giáo"
                     value={user.profile.religion}
                   />
@@ -246,31 +246,31 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
               <div className="space-y-4 bg-neutral-50/30 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800">
                 <div className="grid grid-cols-2 gap-4">
                   <DetailItem
-                    icon={<HiOutlineBadgeCheck />}
+                    icon={<AiOutlineCheckSquare />}
                     label="Cấp bậc"
                     value={user.profile.rank}
                   />
                   {user.role === "STUDENT" && (
                     <DetailItem
-                      icon={<HiOutlineLibrary />}
+                      icon={<AiOutlineBank />}
                       label="Khóa"
                       value={user.profile.enrollment}
                     />
                   )}
                   {user.role === "COMMANDER" && (
                     <DetailItem
-                      icon={<HiOutlineLibrary />}
+                      icon={<AiOutlineBank />}
                       label="Năm công tác"
                       value={user.profile.startWork}
                     />
                   )}
                   <DetailItem
-                    icon={<HiOutlineOfficeBuilding />}
+                    icon={<AiOutlineBank />}
                     label="Đơn vị"
                     value={user.profile.unit}
                   />
                   <DetailItem
-                    icon={<HiOutlineAcademicCap />}
+                    icon={<AiOutlineRead />}
                     label="Chức vụ chính quyền"
                     value={user.profile.positionGovernment}
                   />
@@ -279,22 +279,22 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
                 {user.role === "STUDENT" && (
                   <div className="grid grid-cols-2 gap-4">
                     <DetailItem
-                      icon={<HiOutlineLibrary />}
+                      icon={<AiOutlineBank />}
                       label="Trường đại học"
                       value={user.profile.university?.universityName}
                     />
                     <DetailItem
-                      icon={<HiOutlineUserGroup />}
+                      icon={<AiOutlineTeam />}
                       label="Lớp"
                       value={user.profile.class?.className}
                     />
                     <DetailItem
-                      icon={<HiOutlineOfficeBuilding />}
+                      icon={<AiOutlineBank />}
                       label="Ngành"
                       value={user.profile.organization?.organizationName}
                     />
                     <DetailItem
-                      icon={<HiOutlineAcademicCap />}
+                      icon={<AiOutlineRead />}
                       label="Trình độ đào tạo"
                       value={user.profile.educationLevel?.levelName}
                     />
@@ -303,13 +303,13 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <DetailItem
-                    icon={<HiOutlineCalendar />}
+                    icon={<AiOutlineCalendar />}
                     label="Ngày nhập ngũ"
                     value={formatDate(user.profile.dateOfEnlistment)}
                   />
                   {user.role === "STUDENT" && (
                     <DetailItem
-                      icon={<HiOutlineCalendar />}
+                      icon={<AiOutlineCalendar />}
                       label="Ngày tốt nghiệp"
                       value={formatDate(user.profile.graduationDate)}
                     />
@@ -334,24 +334,24 @@ const DetailUserForm: React.FC<DetailUserFormProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-neutral-50/30 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800">
                 <div className="space-y-4">
                   <DetailItem
-                    icon={<HiOutlineBadgeCheck />}
+                    icon={<AiOutlineCheckSquare />}
                     label="Chức vụ Đảng"
                     value={user.profile.positionParty || "Chưa có"}
                   />
                   <DetailItem
-                    icon={<HiOutlineIdentification />}
+                    icon={<AiOutlineIdcard />}
                     label="Số thẻ Đảng"
                     value={user.profile.partyMemberCardNumber || "Chưa có"}
                   />
                 </div>
                 <div className="space-y-4">
                   <DetailItem
-                    icon={<HiOutlineCalendar />}
+                    icon={<AiOutlineCalendar />}
                     label="Vào Đảng (dự bị)"
                     value={formatDate(user.profile.probationaryPartyMember)}
                   />
                   <DetailItem
-                    icon={<HiOutlineCalendar />}
+                    icon={<AiOutlineCalendar />}
                     label="Vào Đảng (chính thức)"
                     value={formatDate(user.profile.fullPartyMember)}
                   />

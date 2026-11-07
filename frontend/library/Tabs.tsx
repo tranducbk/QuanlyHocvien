@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineLeft, AiOutlineRight } from "@/library/icons";
+
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { m, AnimatePresence } from "motion/react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import Typography from "./Typography";
 
 export interface TabItem {
@@ -77,7 +78,7 @@ const Tabs: React.FC<TabsProps> = ({
             onClick={() => scroll("left")}
             className="flex items-center justify-center size-9 shrink-0 bg-white dark:bg-neutral-800 rounded-full shadow-md border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
           >
-            <FiChevronLeft size={18} />
+            <AiOutlineLeft size={18} />
           </button>
         )}
 
@@ -139,7 +140,7 @@ const Tabs: React.FC<TabsProps> = ({
             onClick={() => scroll("right")}
             className="flex items-center justify-center size-9 shrink-0 bg-white dark:bg-neutral-800 rounded-full shadow-md border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
           >
-            <FiChevronRight size={18} />
+            <AiOutlineRight size={18} />
           </button>
         )}
       </div>
