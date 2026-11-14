@@ -1,0 +1,145 @@
+.overview {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0 0.25rem;
+  color: rgb(107 114 128);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+}
+
+.mutedText {
+  color: rgb(156 163 175);
+}
+
+.cutLegend {
+  color: rgb(37 99 235);
+  font-weight: 800;
+}
+
+.legend strong {
+  color: rgb(55 65 81);
+}
+
+.dayHeader {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.matrixTable :global(table) {
+  width: 100%;
+  table-layout: fixed;
+}
+
+:global(.dark) .legend {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .legend strong {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .cutLegend {
+  color: rgb(147 197 253);
+}
+
+.matrixTable > div {
+  overflow-x: auto;
+}
+
+.matrixTable :global(th),
+.matrixTable :global(td) {
+  overflow: hidden;
+  padding-inline: 0.375rem;
+}
+
+.matrixTable :global(th:first-child),
+.matrixTable :global(td:first-child) {
+  width: 6.5rem;
+}
+
+.matrixTable :global(th:nth-child(2)),
+.matrixTable :global(td:nth-child(2)) {
+  width: 10rem;
+}
+
+.matrixTable :global(th:nth-child(n + 3):nth-child(-n + 9)),
+.matrixTable :global(td:nth-child(n + 3):nth-child(-n + 9)) {
+  width: 5.25rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.matrixTable :global(th:nth-child(n + 3):nth-child(-n + 9)) > div,
+.matrixTable :global(th:nth-child(n + 3):nth-child(-n + 9)) > div > div {
+  width: 100%;
+  justify-content: center;
+}
+
+.matrixTable :global(th:nth-child(n + 3):nth-child(-n + 9)) > div > div > span {
+  width: 100%;
+  text-align: center;
+}
+
+.matrixTable :global(th:last-child),
+.matrixTable :global(td:last-child) {
+  width: 5.5rem;
+  text-align: center;
+}
+
+@media (max-width: 1023px) {
+  .matrixTable :global(th:first-child),
+  .matrixTable :global(td:first-child) {
+    display: none;
+  }
+
+  .matrixTable :global(th:nth-child(2)),
+  .matrixTable :global(td:nth-child(2)) {
+    width: 8rem;
+  }
+
+  .matrixTable :global(th:nth-child(n + 3):nth-child(-n + 9)),
+  .matrixTable :global(td:nth-child(n + 3):nth-child(-n + 9)) {
+    width: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .matrixTable :global(th),
+  .matrixTable :global(td) {
+    padding-inline: 0.125rem;
+  }
+
+  .matrixTable :global(th:nth-child(2)),
+  .matrixTable :global(td:nth-child(2)) {
+    width: 6rem;
+  }
+
+  .matrixTable :global(th:last-child),
+  .matrixTable :global(td:last-child) {
+    width: 4.75rem;
+  }
+
+}

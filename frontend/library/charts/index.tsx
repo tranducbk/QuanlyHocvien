@@ -1,6 +1,7 @@
 "use client";
 
-import { HiOutlineChartPie } from "react-icons/hi";
+import { AiOutlinePieChart } from "@/library/icons";
+
 import {
   Area,
   AreaChart,
@@ -78,7 +79,7 @@ export const ChartTooltip = ({
 
 const ChartEmpty = ({ description }: { description?: string }) => (
   <div className="flex h-56 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 text-neutral-400 dark:border-neutral-800 dark:text-neutral-500">
-    <HiOutlineChartPie size={28} />
+    <AiOutlinePieChart size={28} />
     <Typography variant="caption" color="gray">
       {description || "Chưa có dữ liệu để hiển thị."}
     </Typography>

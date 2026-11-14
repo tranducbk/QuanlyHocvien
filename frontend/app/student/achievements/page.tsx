@@ -1,4 +1,4 @@
-import Main from "@/components/student/achievements/Main";
+import Main from "@/components/achievements/student/Main";
 
 export const metadata = {
   title: "Thành tích | Cổng học viên",

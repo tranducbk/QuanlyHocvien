@@ -51,4 +51,3 @@
 - `npm run test:task004`: đạt 32/32 kiểm tra API chỉ đọc, gồm ma trận quyền, route sửa/xóa đã đóng và truy cập chéo Chỉ huy.
 - `git diff --check`: đạt.
 - Không chạy toàn bộ `npm run test:api` trên database Neon đang cấu hình vì script này tạo, sửa và xóa dữ liệu. Luồng ghi `ADD -> approve` đã được cập nhật trong `functionalTest.js` để chạy trên database test cô lập khi thực hiện full regression.
-

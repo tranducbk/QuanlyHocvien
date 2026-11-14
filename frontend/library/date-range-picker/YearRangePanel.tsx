@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineLeft, AiOutlineRight } from "@/library/icons";
+
 import { useState } from "react";
-import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import Typography from "@/library/Typography";
 import {
   getRangeState,
@@ -39,7 +40,7 @@ export default function YearRangePanel({
           onClick={() => setYearPageStart(yearPageStart - YEAR_PAGE_SIZE)}
           className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg text-neutral-500 dark:text-neutral-400 transition-colors cursor-pointer"
         >
-          <HiOutlineChevronLeft size={18} />
+          <AiOutlineLeft size={18} />
         </button>
         <Typography variant="body" weight="bold" color="neutral">
           {yearPageStart} - {yearPageStart + YEAR_PAGE_SIZE - 1}
@@ -49,7 +50,7 @@ export default function YearRangePanel({
           onClick={() => setYearPageStart(yearPageStart + YEAR_PAGE_SIZE)}
           className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg text-neutral-500 dark:text-neutral-400 transition-colors cursor-pointer"
         >
-          <HiOutlineChevronRight size={18} />
+          <AiOutlineRight size={18} />
         </button>
       </div>
       <div className="grid grid-cols-3 gap-2">

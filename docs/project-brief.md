@@ -48,7 +48,7 @@ Hệ thống sử dụng ba role `ADMIN`, `COMMANDER`, `STUDENT`; không có rol
 
 ### Không làm hoặc chưa làm
 
-- Không cho sửa, xóa hoặc mở khóa điểm đã nhập.
+- Không xóa điểm/lịch sử hoặc mở lại học kỳ đã chốt. Hệ 1/3/4/7 cho Chỉ huy sửa có lịch sử, sau chốt bắt buộc lý do; Hệ 5 chưa chuyển đổi.
 - Không có role, phân quyền hoặc portal dành cho Giảng viên.
 - Không dùng reset database thay cho migration trên dữ liệu thật.
 
@@ -70,8 +70,8 @@ Hệ thống sử dụng ba role `ADMIN`, `COMMANDER`, `STUDENT`; không có rol
 
 - API nghiệp vụ phân quyền đúng theo ba role hiện hành.
 - Chỉ Chỉ huy được truy cập API quản lý điểm; Học viên chỉ xem dữ liệu của chính mình.
-- Điểm đã nhập không thể sửa hoặc xóa.
+- Điểm Hệ 1/3/4/7 chỉ Chỉ huy đúng phạm vi được sửa, mọi lần sửa có lịch sử; sau chốt lớp/học kỳ cần lý do. Không xóa điểm.
 - Chỉ huy quản lý lớp và dữ liệu nghiệp vụ.
-- Admin xem và chỉnh sửa tài khoản của mọi hệ, chỉ xem thông tin chính trị nội bộ, không xem điểm; không vai trò nào được sửa, xóa hoặc mở khóa điểm chính thức.
+- Admin xem và chỉnh sửa tài khoản của mọi hệ, chỉ xem thông tin chính trị nội bộ, không xem điểm; Học viên không sửa điểm chính thức, không vai trò nào được xóa điểm/lịch sử.
 - Dữ liệu hiện tại được bảo toàn.
 - Backend API, frontend và tài liệu được kiểm thử/cập nhật đồng bộ.

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Main from "@/components/student/profile/Main";
+import Main from "@/components/profiles/student/Main";
 
 export const metadata: Metadata = {
   title: "Hồ sơ học viên | Hệ thống quản lý học viên",

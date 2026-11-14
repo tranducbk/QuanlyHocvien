@@ -1,5 +1,17 @@
 # Đặc tả hệ thống Quản lý Học viên
 
+> Quyết định lớp Hệ 5 (TASK-010): dùng chung 6 lớp cố định Lớp 1–6, không tạo/sửa/xóa/ngừng lớp.
+> Chỉ huy Hệ 5 xem và xếp lớp toàn bộ học viên Hệ 5 theo năm học, bắt đầu 2026–2027.
+> Đầu năm kế thừa danh sách năm trước, điều chỉnh lớp, thêm học viên và đánh dấu tốt nghiệp;
+> sau Chỉ huy chốt danh sách thì khóa thay đổi trong năm. Giữ nguyên hồ sơ, điểm và danh sách các năm trước.
+> Quyết định này thay phần mô tả lớp Hệ 5 gắn chương trình/cơ sở và giới hạn Chỉ huy theo từng học viên trong chức năng xếp lớp;
+> không mở rộng quyền ở các chức năng khác. Chi tiết trong `docs/tasks/TASK-010-he5-annual-class-placement.md`.
+
+> Quyết định mới về điểm (TASK-008): Hệ 1/3/4/7 cho Chỉ huy sửa điểm trong lớp được giao;
+> mọi lần sửa lưu người, thời gian, điểm trước/sau. Sau chốt điểm lớp/học kỳ, sửa hoặc bổ sung
+> bắt buộc lý do. Không xóa điểm/lịch sử, không mở lại học kỳ. Các mô tả điểm bất biến bên dưới
+> chỉ còn áp dụng cho luồng Hệ 5 chưa chuyển đổi; quyền Admin/Học viên không mở rộng.
+
 ## 1. Mô hình hệ thống
 
 Hệ thống quản lý năm hệ độc lập:
@@ -30,7 +42,7 @@ Mỗi tài khoản nghiệp vụ và mọi dữ liệu nghiệp vụ thuộc đ�
 - Quản lý học viên và nghiệp vụ trong hệ mình phụ trách.
 - Quản lý thông tin chính trị nội bộ của học viên trong phạm vi hệ.
 - Quản lý lớp, môn, học kỳ, lịch học, kết quả và các nghiệp vụ thuộc hệ.
-- Không sửa, xóa hoặc mở khóa điểm chính thức đã ghi nhận.
+- Hệ 1/3/4/7 được sửa điểm theo TASK-008; sau chốt bắt buộc lý do và luôn lưu lịch sử. Không xóa điểm hoặc mở lại học kỳ. Hệ 5 giữ quy tắc hiện hành.
 
 ### Học viên
 
@@ -88,7 +100,7 @@ Backend xác định quyền và hệ từ tài khoản đã xác thực; không
 
 - Kết quả gắn với học viên, hệ, lớp, môn, học kỳ, lần học/thi và người ghi nhận.
 - Chỉ Chỉ huy được truy cập API quản lý kết quả. Học viên chỉ xem kết quả của mình; Admin không xem điểm.
-- Điểm chính thức bất biến: không có thao tác hoặc API sửa, xóa hay mở khóa.
+- Hệ 1/3/4/7: sửa điểm có lịch sử, sau chốt bắt buộc lý do; không có API xóa điểm/lịch sử hoặc mở lại kỳ. Điểm Hệ 5 giữ quy tắc hiện hành.
 - Hệ thống lưu mọi lần học/thi; khi tổng hợp dùng kết quả cao nhất theo quy định.
 - Không lưu kết quả nếu thiếu điểm thành phần bắt buộc hoặc trùng học viên/môn/học kỳ/lần thi.
 - Điểm thành phần theo thang 0–10; điểm tổng kết tính theo trọng số và làm tròn hai chữ số.
@@ -124,6 +136,6 @@ Backend xác định quyền và hệ từ tài khoản đã xác thực; không
 - Chỉ huy chỉ quản lý đúng hệ; Học viên chỉ đọc dữ liệu của mình.
 - Hệ 1 và Hệ 7 theo cùng quy trình, chương trình đào tạo được phân biệt.
 - Học viên chỉ vào lớp cùng hệ; chuyển lớp có lịch sử.
-- Điểm chính thức không thể sửa, xóa hoặc mở khóa; quy trình đề xuất/duyệt chống trùng và tạo kết quả nguyên tử.
+- Sửa điểm Hệ 1/3/4/7 và ghi lịch sử phải nguyên tử, sau chốt bắt buộc lý do; không xóa điểm. Đề xuất/duyệt chống trùng, không cho Học viên sửa trực tiếp điểm chính thức.
 - Chức năng học phí và cắt cơm chỉ xuất hiện trong Hệ 5.
 - Migration bảo toàn dữ liệu và API không nhận phạm vi quyền từ client.

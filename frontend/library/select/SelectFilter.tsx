@@ -1,8 +1,8 @@
+import { AiOutlineSearch } from "@/library/icons";
 import { ReactNode, useMemo, useState } from "react";
 import { SelectOption } from "@/library/select/SelectOption";
 import { compareItems, rankItem } from "@tanstack/match-sorter-utils";
 import { normalizeSearchText } from "@/utils/fn-common";
-import { HiOutlineSearch } from "react-icons/hi";
 
 export interface SelectFilterConfig {
   /** Bật ô lọc trong dropdown */
@@ -55,7 +55,7 @@ export default function SelectFilter({
     <div>
       <div onClick={(e) => e.stopPropagation()} className="p-1">
         <div className="relative">
-          <HiOutlineSearch
+          <AiOutlineSearch
             size={16}
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
           />

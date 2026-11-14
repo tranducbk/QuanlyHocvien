@@ -2,7 +2,13 @@
  * Danh sách các Query Keys dùng cho React Query
  */
 export const QUERY_KEYS = {
+  HE5_PLACEMENT: "he5Placement",
+  SUBJECT_CATALOG: "subjectCatalog",
   USERS: "users",
+  TRAINING_PROGRAMS: "trainingPrograms",
+  TRAINING_CLASSES: "trainingClasses",
+  COMMANDER_TRAINING_CLASSES: "commanderTrainingClasses",
+  TRAINING_CLASS_ACADEMIC: "trainingClassAcademic",
   PROFILE: "profile",
   STUDENT_PROFILES: "studentProfiles",
   UNIVERSITY_HIERARCHY: "university_hierarchy",
@@ -47,6 +53,8 @@ export const MUTATION_KEYS = {
   UPDATE_PROFILE: [QUERY_KEYS.PROFILE, "update"],
   UPDATE_AVATAR: [QUERY_KEYS.PROFILE, "avatar"],
   CREATE_USER: [QUERY_KEYS.USERS, "create"],
+  CREATE_TRAINING_PROGRAM: [QUERY_KEYS.TRAINING_PROGRAMS, "create"],
+  CREATE_CURRICULUM_VERSION: [QUERY_KEYS.TRAINING_PROGRAMS, "create-version"],
   IMPORT_USERS: [QUERY_KEYS.USERS, "import"],
   UPDATE_USER: [QUERY_KEYS.USERS, "update"],
   CREATE_BATCH_USERS: [QUERY_KEYS.USERS, "create-batch"],

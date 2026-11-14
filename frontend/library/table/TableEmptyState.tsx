@@ -7,11 +7,13 @@ import { Table } from "@tanstack/react-table";
 interface TableEmptyStateProps<TData> {
   table: Table<TData>;
   emptyText: string;
+  compact?: boolean;
 }
 
 const TableEmptyState = <TData,>({
   table,
   emptyText,
+  compact = false,
 }: TableEmptyStateProps<TData>) => {
   return (
     <m.tr
@@ -20,13 +22,13 @@ const TableEmptyState = <TData,>({
       exit={{ opacity: 0 }}
     >
       <td
-        colSpan={table.getAllColumns().length}
-        className="px-6 py-24 text-center bg-white dark:bg-neutral-950 transition-colors"
+        colSpan={table.getVisibleLeafColumns().length}
+        className={`px-6 ${compact ? "py-10" : "py-24"} text-center bg-white dark:bg-neutral-950 transition-colors`}
       >
         <div className="flex flex-col items-center gap-4 text-neutral-300 dark:text-neutral-700">
-          <div className="size-20 rounded-full bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center">
+          <div className={`${compact ? "size-12" : "size-20"} rounded-full bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center`}>
             <svg
-              className="size-10 opacity-20"
+              className={`${compact ? "size-6 opacity-50" : "size-10 opacity-20"}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -40,12 +42,12 @@ const TableEmptyState = <TData,>({
             </svg>
           </div>
           <div className="space-y-1">
-            <p className="text-base font-black text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
+            <p className={compact ? "text-sm font-medium text-neutral-500 dark:text-neutral-400" : "text-base font-black text-neutral-500 dark:text-neutral-400 uppercase tracking-widest"}>
               {emptyText}
             </p>
-            <p className="text-sm font-medium italic text-neutral-400 dark:text-neutral-500">
+            {!compact && <p className="text-sm font-medium italic text-neutral-400 dark:text-neutral-500">
               Vui lòng kiểm tra lại bộ lọc hoặc dữ liệu đầu vào
-            </p>
+            </p>}
           </div>
         </div>
       </td>

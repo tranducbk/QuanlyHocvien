@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Main from "@/components/commander/academic-results/yearly-detail/Main";
+import Main from "@/components/academic-results/commander/yearly-detail/Main";
 
 export const metadata: Metadata = {
   title: "Chi tiết kết quả năm học - Hệ thống quản lý Học viên",

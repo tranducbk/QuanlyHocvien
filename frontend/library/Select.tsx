@@ -1,8 +1,9 @@
 "use client";
 
+import { AiOutlineDown } from "@/library/icons";
+
 import type { ReactNode, Ref } from "react";
 import { m, AnimatePresence } from "motion/react";
-import { HiOutlineChevronDown } from "react-icons/hi";
 import Dropdown from "@/library/Dropdown";
 import Typography from "./Typography";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
@@ -206,7 +207,7 @@ export default function Select({
                 {displayValue}
               </span>
             </div>
-            <HiOutlineChevronDown
+            <AiOutlineDown
               size={18}
               className={`text-neutral-400 dark:text-neutral-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
             />

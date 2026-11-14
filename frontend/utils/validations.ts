@@ -54,8 +54,12 @@ export const createUserSchema = z.object({
   fullName: z.string().min(1, "Họ và tên không được để trống"),
   password: z.string().min(6, "Mật khẩu phải ít nhất 6 ký tự"),
   role: z.enum(["STUDENT", "COMMANDER", "ADMIN"]),
-  systemType: z.enum(["EXTERNAL", "MILITARY"]).nullable().optional(),
+  trainingSystemCode: z.enum(["HE_1", "HE_3", "HE_4", "HE_5", "HE_7"]).optional(),
   commanderId: z.string().nullable().or(z.literal("")).optional(),
+}).superRefine((data, context) => {
+  if (data.role !== "ADMIN" && !data.trainingSystemCode) {
+    context.addIssue({ code: "custom", path: ["trainingSystemCode"], message: "Phải chọn hệ đào tạo" });
+  }
 });
 
 export const updateUserSchema = z.object({
@@ -199,18 +203,6 @@ export const studentProfileSchema = z.object({
   positionParty: z.string().nullable().or(z.literal("")).optional(),
   dateOfEnlistment: z.string().nullable().or(z.literal("")).optional(),
   enrollment: z.number().nullable().optional(),
-  currentCpa4: z
-    .number()
-    .min(0, "CPA hệ 4 không được âm")
-    .max(4, "CPA hệ 4 tối đa là 4")
-    .nullable()
-    .optional(),
-  currentCpa10: z
-    .number()
-    .min(0, "CPA hệ 10 không được âm")
-    .max(10, "CPA hệ 10 tối đa là 10")
-    .nullable()
-    .optional(),
   graduationDate: z.string().nullable().or(z.literal("")).optional(),
   partyMemberCardNumber: z.string().nullable().or(z.literal("")).optional(),
   probationaryPartyMember: z.string().nullable().or(z.literal("")).optional(),
@@ -249,7 +241,11 @@ export type UpdateOrganizationFormValues = z.infer<
  * Schema validation cho form thêm trình độ (EducationLevel)
  */
 export const createEducationLevelSchema = z.object({
-  levelName: z.string().min(1, "Tên trình độ là bắt buộc"),
+  levelName: z
+    .string()
+    .refine((value) => ["Cử nhân", "Kỹ sư"].includes(value), {
+      message: "Chọn trình độ Cử nhân hoặc Kỹ sư",
+    }),
   organizationId: z.string().min(1, "Organization ID is required"),
 });
 
@@ -261,7 +257,11 @@ export type CreateEducationLevelFormValues = z.infer<
  * Schema validation cho form cập nhật trình độ (EducationLevel)
  */
 export const updateEducationLevelSchema = z.object({
-  levelName: z.string().min(1, "Tên trình độ là bắt buộc"),
+  levelName: z
+    .string()
+    .refine((value) => ["Cử nhân", "Kỹ sư"].includes(value), {
+      message: "Chọn trình độ Cử nhân hoặc Kỹ sư",
+    }),
 });
 
 export type UpdateEducationLevelFormValues = z.infer<
@@ -382,6 +382,7 @@ export const scheduleItemSchema = z.object({
   }),
   room: z.string().min(1, "Phòng học là bắt buộc"),
   subjectName: z.string().min(1, "Môn học là bắt buộc"),
+  subjectId: z.string().optional(),
   week: z
     .array(
       z

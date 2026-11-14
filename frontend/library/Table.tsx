@@ -47,6 +47,10 @@ export interface TableProps<TData> {
 
   /** Hiển thị cột số thứ tự (mặc định: true) */
   showIndex?: boolean;
+  /** Ẩn phân trang cho danh sách cố định, ngắn. */
+  showPagination?: boolean;
+  /** Bố cục gọn cho bảng có ít nội dung. */
+  compact?: boolean;
   /** Hiển thị nút tùy chỉnh ẩn hiện cột (mặc định: true) */
   showVisibilityToggle?: boolean;
   /** Cho phép kéo thả để đổi vị trí cột. */
@@ -61,6 +65,8 @@ export interface TableProps<TData> {
   emptyText?: string;
   /** Class CSS bổ sung cho container của bảng */
   className?: string;
+  /** Ép bảng vừa chiều rộng container thay vì cuộn ngang. */
+  fitToContainer?: boolean;
   /** Class CSS cho các hàng (tr) */
   rowClassName?: string | ((row: Row<TData>) => string);
   /** Lay cac row con de expand tren client */
@@ -95,6 +101,8 @@ const Table = <TData,>({
   sorting,
   onSortingChange,
   showIndex = true,
+  showPagination = true,
+  compact = false,
   showVisibilityToggle = true,
   enableColumnOrdering = true,
   filterFields,
@@ -102,6 +110,7 @@ const Table = <TData,>({
   defaultFilterOpen = false,
   emptyText = "Không có dữ liệu hiển thị",
   className = "",
+  fitToContainer = false,
   rowClassName = "",
   getSubRows,
   renderGroupRow,
@@ -214,10 +223,11 @@ const Table = <TData,>({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? "space-y-3" : "space-y-4"}>
       {/* table Toolbar */}
       <TableToolbar
         table={table}
+        compact={compact}
         filterFields={filterFields}
         showFilter={showFilter}
         defaultFilterOpen={defaultFilterOpen}
@@ -235,8 +245,24 @@ const Table = <TData,>({
         <div
           className={`w-full rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden bg-white dark:bg-neutral-950 shadow-sm dark:shadow-none transition-colors ${className}`}
         >
-          <div className="overflow-x-auto custom-scrollbar relative">
-            <table className="w-full text-left border-collapse">
+          <div
+            className={`${fitToContainer ? "overflow-x-hidden" : "overflow-x-auto custom-scrollbar"} relative`}
+          >
+            <table
+              className={`w-full text-left border-collapse ${fitToContainer ? "table-fixed" : ""}`}
+            >
+              {fitToContainer && (
+                <colgroup>
+                  {table.getVisibleLeafColumns().map((column) => (
+                    <col
+                      key={column.id}
+                      style={{
+                        width: `${(column.getSize() / table.getTotalSize()) * 100}%`,
+                      }}
+                    />
+                  ))}
+                </colgroup>
+              )}
               <thead className="bg-neutral-50/50 dark:bg-neutral-900/70">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
@@ -254,6 +280,7 @@ const Table = <TData,>({
               <tbody>
                 <TableBody
                   table={table}
+                  compact={compact}
                   emptyText={emptyText}
                   rowClassName={rowClassName}
                   renderGroupRow={renderGroupRow}
@@ -263,14 +290,18 @@ const Table = <TData,>({
             </table>
           </div>
 
-          <Divide className="w-full" />
-          <Pagination
-            pageIndex={pagination.pageIndex + 1}
-            totalPages={totalPages}
-            pageSize={pagination.pageSize}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
+          {showPagination && (
+            <>
+              <Divide className="w-full" />
+              <Pagination
+                pageIndex={pagination.pageIndex + 1}
+                totalPages={totalPages}
+                pageSize={pagination.pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            </>
+          )}
         </div>
       </DragDropProvider>
     </div>

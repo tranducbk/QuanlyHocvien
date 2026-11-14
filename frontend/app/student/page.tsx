@@ -1,4 +1,4 @@
-import Main from "@/components/student/dashboard/Main";
+import Main from "@/components/reports/student/Main";
 
 export default function StudentDashboardPage() {
   return <Main />;

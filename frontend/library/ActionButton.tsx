@@ -57,6 +57,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   return (
     <Tooltip content={tooltipText} position={tooltipPosition}>
       <button
+        type="button"
+        aria-label={tooltipText}
         onClick={onClick}
         disabled={disabled}
         className={`

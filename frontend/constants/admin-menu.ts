@@ -1,9 +1,5 @@
+import { AiOutlineHome, AiOutlineTeam } from "@/library/icons";
 import React from "react";
-import {
-  HiOutlineUserGroup,
-  HiOutlineHome,
-  HiOutlineAcademicCap,
-} from "react-icons/hi";
 
 export type MenuItem = {
   title: string;
@@ -15,16 +11,11 @@ export const ADMIN_MENU = [
   {
     title: "Tổng quan",
     path: "/admin",
-    icon: HiOutlineHome,
+    icon: AiOutlineHome,
   },
   {
     title: "Quản lý tài khoản",
     path: "/admin/accounts",
-    icon: HiOutlineUserGroup,
-  },
-  {
-    title: "Lớp quân sự",
-    path: "/admin/military/classes",
-    icon: HiOutlineAcademicCap,
+    icon: AiOutlineTeam,
   },
 ] as const satisfies readonly MenuItem[];

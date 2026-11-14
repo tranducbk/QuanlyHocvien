@@ -27,11 +27,6 @@ const sequelize = dbConfig.URL
       pool: dbConfig.pool
     });
 
-sequelize
-  .authenticate()
-  .then(() => console.log('PostgreSQL connection has been established successfully.'))
-  .catch(err => console.error('Unable to connect to the database:', err));
-
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
@@ -41,51 +36,115 @@ db.sequelize = sequelize;
 // ==========================
 
 // Nhóm Quản lý Tổ chức & Cơ sở
-db.university = require('./university.js')(sequelize, DataTypes);
-db.organization = require('./organization.js')(sequelize, DataTypes);
-db.educationLevel = require('./educationLevel.js')(sequelize, DataTypes);
-db.class = require('./class.js')(sequelize, DataTypes);
-db.militaryClass = require('./militaryClass.js')(sequelize, DataTypes);
-db.militaryClassHistory = require('./militaryClassHistory.js')(sequelize, DataTypes);
-db.militarySemester = require('./militarySemester.js')(sequelize, DataTypes);
-db.militarySubject = require('./militarySubject.js')(sequelize, DataTypes);
-db.militaryTimeTable = require('./militaryTimeTable.js')(sequelize, DataTypes);
-db.militarySubjectResult = require('./militarySubjectResult.js')(sequelize, DataTypes);
-db.militaryGradeProposal = require('./militaryGradeProposal.js')(sequelize, DataTypes);
-db.militaryAchievement = require('./militaryAchievement.js')(sequelize, DataTypes);
-db.militaryDutySchedule = require('./militaryDutySchedule.js')(sequelize, DataTypes);
+db.university = require('./training-program/university.js')(sequelize, DataTypes);
+db.organization = require('./training-program/organization.js')(sequelize, DataTypes);
+db.educationLevel = require('./training-program/educationLevel.js')(sequelize, DataTypes);
+db.class = require('./training-program/class.js')(sequelize, DataTypes);
+db.militaryClass = require('./military-legacy/militaryClass.js')(sequelize, DataTypes);
+db.militaryClassHistory = require('./military-legacy/militaryClassHistory.js')(sequelize, DataTypes);
+db.militarySemester = require('./military-legacy/militarySemester.js')(sequelize, DataTypes);
+db.militarySubject = require('./military-legacy/militarySubject.js')(sequelize, DataTypes);
+db.militaryTimeTable = require('./military-legacy/militaryTimeTable.js')(sequelize, DataTypes);
+db.militarySubjectResult = require('./military-legacy/militarySubjectResult.js')(sequelize, DataTypes);
+db.militaryGradeProposal = require('./military-legacy/militaryGradeProposal.js')(sequelize, DataTypes);
+db.militaryAchievement = require('./military-legacy/militaryAchievement.js')(sequelize, DataTypes);
+db.militaryDutySchedule = require('./military-legacy/militaryDutySchedule.js')(sequelize, DataTypes);
 
 // Nhóm Hồ sơ Sinh viên
-db.profile = require('./profile.js')(sequelize, DataTypes);
-db.user = require('./user.js')(sequelize, DataTypes);
+db.profile = require('./profiles/profile.js')(sequelize, DataTypes);
+db.user = require('./accounts/user.js')(sequelize, DataTypes);
+db.trainingSystem = require('./training-program/TrainingSystem.js')(sequelize, DataTypes);
+db.trainingProgram = require('./training-program/TrainingProgram.js')(sequelize, DataTypes);
+db.curriculumVersion = require('./training-program/CurriculumVersion.js')(sequelize, DataTypes);
+db.trainingClass = require('./training-program/TrainingClass.js')(sequelize, DataTypes);
+db.trainingClassSemester = require('./training-program/trainingClassSemester.js')(sequelize, DataTypes);
+db.trainingClassSubject = require('./training-program/trainingClassSubject.js')(sequelize, DataTypes);
+db.subjectCatalog = require('./training-program/subjectCatalog.js')(sequelize, DataTypes);
+db.trainingClassTimeTable = require('./schedules/trainingClassTimeTable.js')(sequelize, DataTypes);
+db.trainingClassAchievement = require('./achievements/trainingClassAchievement.js')(sequelize, DataTypes);
+db.trainingClassDutySchedule = require('./schedules/trainingClassDutySchedule.js')(sequelize, DataTypes);
+db.trainingClassResult = require('./academic-results/trainingClassResult.js')(sequelize, DataTypes);
+db.trainingClassGradeRevision = require('./academic-results/trainingClassGradeRevision.js')(sequelize, DataTypes);
+db.trainingClassGradeRevision.belongsTo(db.user, { as: 'editor', foreignKey: 'changedBy', onDelete: 'RESTRICT' });
+db.trainingClassGradeRevision.belongsTo(db.trainingClassResult, { foreignKey: 'resultId', onDelete: 'RESTRICT' });
+db.trainingClassGradeProposal = require('./academic-results/trainingClassGradeProposal.js')(sequelize, DataTypes);
 
 // Nhóm Kết quả Học tập & Đào tạo
-db.yearlyResult = require('./yearlyResult.js')(sequelize, DataTypes);
-db.semesterResult = require('./semesterResult.js')(sequelize, DataTypes);
-db.subjectResult = require('./subjectResult.js')(sequelize, DataTypes);
-db.schoolYear = require('./schoolYear.js')(sequelize, DataTypes);
-db.semester = require('./semester.js')(sequelize, DataTypes);
-db.timeTable = require('./timeTable.js')(sequelize, DataTypes);
-db.tuitionFee = require('./tuitionFee.js')(sequelize, DataTypes);
-db.tuitionHistory = require('./tuitionHistory.js')(sequelize, DataTypes);
+db.yearlyResult = require('./academic-results/yearlyResult.js')(sequelize, DataTypes);
+db.semesterResult = require('./academic-results/semesterResult.js')(sequelize, DataTypes);
+db.subjectResult = require('./academic-results/subjectResult.js')(sequelize, DataTypes);
+db.schoolYear = require('./academic-years/schoolYear.js')(sequelize, DataTypes);
+db.semester = require('./academic-years/semester.js')(sequelize, DataTypes);
+db.timeTable = require('./schedules/timeTable.js')(sequelize, DataTypes);
+db.tuitionFee = require('./tuition-and-meals/tuitionFee.js')(sequelize, DataTypes);
+db.tuitionHistory = require('./tuition-and-meals/tuitionHistory.js')(sequelize, DataTypes);
 
 // Nhóm Thi đua & Nghiên cứu
-db.achievement = require('./achievement.js')(sequelize, DataTypes);
-db.achievementProfile = require('./achievementProfile.js')(sequelize, DataTypes);
-db.yearlyAchievement = require('./yearlyAchievement.js')(sequelize, DataTypes);
-db.scientificInitiative = require('./scientificInitiative.js')(sequelize, DataTypes);
-db.scientificTopic = require('./scientificTopic.js')(sequelize, DataTypes);
+db.achievement = require('./achievements/achievement.js')(sequelize, DataTypes);
+db.achievementProfile = require('./achievements/achievementProfile.js')(sequelize, DataTypes);
+db.yearlyAchievement = require('./achievements/yearlyAchievement.js')(sequelize, DataTypes);
+db.scientificInitiative = require('./scientific-research/scientificInitiative.js')(sequelize, DataTypes);
+db.scientificTopic = require('./scientific-research/scientificTopic.js')(sequelize, DataTypes);
 
 // Nhóm Bổ trợ & Lịch trình
-db.commanderDutySchedule = require('./commanderDutySchedule.js')(sequelize, DataTypes);
-db.cutRice = require('./cutRice.js')(sequelize, DataTypes);
-db.cutRiceRequest = require('./cutRiceRequest.js')(sequelize, DataTypes);
-db.notification = require('./notification.js')(sequelize, DataTypes);
-db.gradeRequest = require('./gradeRequest.js')(sequelize, DataTypes);
+db.commanderDutySchedule = require('./schedules/commanderDutySchedule.js')(sequelize, DataTypes);
+db.cutRice = require('./tuition-and-meals/cutRice.js')(sequelize, DataTypes);
+db.cutRiceRequest = require('./tuition-and-meals/cutRiceRequest.js')(sequelize, DataTypes);
+db.notification = require('./notification/notification.js')(sequelize, DataTypes);
+db.gradeRequest = require('./academic-results/gradeRequest.js')(sequelize, DataTypes);
 
 // ==========================
 // Relations
 // ==========================
+
+db.trainingSystem.hasMany(db.user, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.user.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingSystem.hasMany(db.trainingProgram, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingProgram.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.university.hasMany(db.trainingProgram, { foreignKey: 'universityId', onDelete: 'RESTRICT' });
+db.trainingProgram.belongsTo(db.university, { foreignKey: 'universityId', onDelete: 'RESTRICT' });
+db.organization.hasMany(db.trainingProgram, { foreignKey: 'organizationId', onDelete: 'RESTRICT' });
+db.trainingProgram.belongsTo(db.organization, { foreignKey: 'organizationId', onDelete: 'RESTRICT' });
+db.educationLevel.hasMany(db.trainingProgram, { foreignKey: 'educationLevelId', onDelete: 'RESTRICT' });
+db.trainingProgram.belongsTo(db.educationLevel, { foreignKey: 'educationLevelId', onDelete: 'RESTRICT' });
+db.trainingProgram.hasMany(db.curriculumVersion, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.curriculumVersion.belongsTo(db.trainingProgram, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.trainingSystem.hasMany(db.trainingClass, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.university.hasMany(db.trainingClass, { foreignKey: 'educationProviderId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.university, { foreignKey: 'educationProviderId', onDelete: 'RESTRICT' });
+db.trainingProgram.hasMany(db.trainingClass, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.trainingProgram, { foreignKey: 'trainingProgramId', onDelete: 'RESTRICT' });
+db.curriculumVersion.hasMany(db.trainingClass, { foreignKey: 'curriculumVersionId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.curriculumVersion, { foreignKey: 'curriculumVersionId', onDelete: 'RESTRICT' });
+db.user.hasMany(db.trainingClass, { as: 'assignedTrainingClasses', foreignKey: 'commanderId', onDelete: 'RESTRICT' });
+db.trainingClass.belongsTo(db.user, { as: 'commander', foreignKey: 'commanderId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.trainingClassSemester, { as: 'semesters', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSemester.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.trainingClassSubject, { as: 'subjects', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSubject.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSemester.hasMany(db.trainingClassSubject, { as: 'subjects', foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+db.trainingClassSubject.belongsTo(db.trainingClassSemester, { foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+db.subjectCatalog.belongsTo(db.trainingSystem, { foreignKey: 'trainingSystemId', onDelete: 'RESTRICT' });
+db.trainingClassSubject.belongsTo(db.subjectCatalog, { foreignKey: 'catalogSubjectId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.trainingClassTimeTable, { as: 'timeTables', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassTimeTable.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.trainingClassSemester.hasOne(db.trainingClassTimeTable, { as: 'timeTable', foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+db.trainingClassTimeTable.belongsTo(db.trainingClassSemester, { foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+for (const recordModel of [db.trainingClassAchievement, db.trainingClassDutySchedule]) {
+  recordModel.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+  recordModel.belongsTo(db.user, { as: 'student', foreignKey: 'studentUserId', onDelete: 'RESTRICT' });
+}
+for (const gradeModel of [db.trainingClassResult, db.trainingClassGradeProposal]) {
+  gradeModel.belongsTo(db.trainingClass, { foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+  gradeModel.belongsTo(db.trainingClassSemester, { foreignKey: 'semesterId', onDelete: 'RESTRICT' });
+  gradeModel.belongsTo(db.trainingClassSubject, { foreignKey: 'subjectId', onDelete: 'RESTRICT' });
+  gradeModel.belongsTo(db.profile, { foreignKey: 'profileId', onDelete: 'RESTRICT' });
+}
+db.trainingClassGradeProposal.belongsTo(db.user, { as: 'student', foreignKey: 'studentUserId', onDelete: 'RESTRICT' });
+db.trainingClassGradeProposal.belongsTo(db.user, { as: 'reviewer', foreignKey: 'reviewerId', onDelete: 'RESTRICT' });
+db.trainingClass.hasMany(db.profile, { as: 'students', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
+db.profile.belongsTo(db.trainingClass, { as: 'trainingClass', foreignKey: 'trainingClassId', onDelete: 'RESTRICT' });
 
 // --- Nhóm Quản lý Tổ chức & Cơ sở ---
 
@@ -661,5 +720,9 @@ db.gradeRequest.belongsTo(db.user, {
   onUpdate: 'CASCADE',
   onDelete: 'SET NULL'
 });
+
+db.he5PlacementYear = require('./training-program/he5PlacementYear')(sequelize, DataTypes);
+db.he5Placement = require('./training-program/he5Placement')(sequelize, DataTypes);
+db.he5PlacementEvent = require('./training-program/he5PlacementEvent')(sequelize, DataTypes);
 
 module.exports = db;

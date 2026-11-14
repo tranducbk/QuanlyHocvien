@@ -1,5 +1,5 @@
-import Main from "@/components/commander/semesters/Main";
+import { redirect } from "next/navigation";
 
 export default function SemestersPage() {
-  return <Main />;
+  redirect("/commander/academic-results");
 }

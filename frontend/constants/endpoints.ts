@@ -1,4 +1,12 @@
 export const ENDPOINTS = {
+  HE5_PLACEMENT: {
+    YEARS: "/api/he5-placement/years",
+    YEAR: (id: string) => `/api/he5-placement/years/${id}`,
+    AVAILABLE: (id: string) => `/api/he5-placement/years/${id}/available`,
+    ASSIGN: (id: string) => `/api/he5-placement/years/${id}/assign`,
+    GRADUATE: (id: string) => `/api/he5-placement/years/${id}/graduate`,
+    CLOSE: (id: string) => `/api/he5-placement/years/${id}/close`,
+  },
   AUTH: {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
@@ -31,8 +39,55 @@ export const ENDPOINTS = {
     IMPORT_TEMPLATE: "/api/users/import-template",
     EXPORT: "/api/users/export",
   },
+  TRAINING_PROGRAMS: {
+    BASE: "/api/training-programs",
+    PROGRAM: (id: string) => `/api/training-programs/${id}`,
+    PROGRAM_STATUS: (id: string) => `/api/training-programs/${id}/status`,
+    VERSIONS: (id: string) => `/api/training-programs/${id}/versions`,
+    VERSION: (programId: string, versionId: string) =>
+      `/api/training-programs/${programId}/versions/${versionId}`,
+  },
+  TRAINING_CLASSES: {
+    SUBJECT_GRADES: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/subject-grades`,
+    RESULT_ITEM: (id: string, resultId: string) => `/api/training-classes/${id}/results/${resultId}`,
+    RESULT_HISTORY: (id: string, resultId: string) => `/api/training-classes/${id}/results/${resultId}/history`,
+    GRADE_STATUS: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/grade-status`,
+    CLOSE_GRADES: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/close-grades`,
+    SUBJECT_CATALOG: "/api/training-classes/subject-catalog",
+    SUBJECT_CATALOG_ITEM: (id: string) => `/api/training-classes/subject-catalog/${id}`,
+    BASE: "/api/training-classes",
+    MINE: "/api/training-classes/mine",
+    CLASS: (id: string) => `/api/training-classes/${id}`,
+    CLASS_STATUS: (id: string) => `/api/training-classes/${id}/status`,
+    STUDENTS: (id: string) => `/api/training-classes/${id}/students`,
+    SEMESTERS: (id: string) => `/api/training-classes/${id}/semesters`,
+    SUBJECTS: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/subjects`,
+    TIME_TABLE: (id: string, semesterId: string) => `/api/training-classes/${id}/semesters/${semesterId}/time-table`,
+    ACHIEVEMENTS: (id: string) => `/api/training-classes/${id}/achievements`,
+    ACHIEVEMENT: (id: string, recordId: string) => `/api/training-classes/${id}/achievements/${recordId}`,
+      ACHIEVEMENT_TEMPLATE: (id: string) => `/api/training-classes/${id}/achievements/template`,
+      ACHIEVEMENT_IMPORT: (id: string) => `/api/training-classes/${id}/achievements/import`,
+      ACHIEVEMENT_EXPORT: (id: string) => `/api/training-classes/${id}/achievements/export`,
+    DUTY_SCHEDULES: (id: string) => `/api/training-classes/${id}/duty-schedules`,
+    DUTY_SCHEDULE: (id: string, recordId: string) => `/api/training-classes/${id}/duty-schedules/${recordId}`,
+    RESULTS: (id: string) => `/api/training-classes/${id}/results`,
+      RESULTS_SUMMARY: (id: string) => `/api/training-classes/${id}/results/summary`,
+      RESULTS_EXPORT: (id: string) => `/api/training-classes/${id}/results/export`,
+    AVAILABLE_STUDENTS: (id: string) => `/api/training-classes/${id}/students/available`,
+    GRADE_PROPOSALS: (id: string) => `/api/training-classes/${id}/grade-proposals`,
+    REVIEW_GRADE_PROPOSAL: (id: string, proposalId: string, decision: "approve" | "reject") => `/api/training-classes/${id}/grade-proposals/${proposalId}/${decision}`,
+  },
+  TRAINING_CLASS_ACADEMIC: {
+    MY_SUBJECTS: "/api/training-class-academic/me/subjects",
+    MY_TIME_TABLES: "/api/training-class-academic/me/time-tables",
+    MY_ACHIEVEMENTS: "/api/training-class-academic/me/achievements",
+    MY_RESULTS: "/api/training-class-academic/me/results",
+    MY_GRADE_PROPOSALS: "/api/training-class-academic/me/grade-proposals",
+  },
   UNIVERSITIES: {
     BASE: "/api/universities",
+    AVAILABLE_STUDENTS: (id: string) => `/api/universities/${id}/available-students`,
+    STUDENTS: (id: string) => `/api/universities/${id}/students`,
   },
   ORGANIZATIONS: {
     BASE: "/api/organizations",
@@ -42,6 +97,8 @@ export const ENDPOINTS = {
   },
   CLASSES: {
     BASE: "/api/classes",
+    AVAILABLE_STUDENTS: (id: string | number) =>
+      `/api/classes/${id}/available-students`,
     STUDENTS: (id: string | number) => `/api/classes/${id}/students`,
     STUDENT_DETAIL: (id: string | number, userId: string | number) =>
       `/api/classes/${id}/students/${userId}`,
@@ -162,8 +219,6 @@ export const ENDPOINTS = {
     COMMANDER_BASE: "/api/commanders/grade-requests",
     COMMANDER_DETAIL: (id: string | number) =>
       `/api/commanders/grade-requests/${id}`,
-    APPROVE: (id: string | number) =>
-      `/api/commanders/grade-requests/${id}/approve`,
     REJECT: (id: string | number) =>
       `/api/commanders/grade-requests/${id}/reject`,
   },

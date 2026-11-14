@@ -1,4 +1,4 @@
-import Main from "@/components/commander/military/approvals/Main";
+import Main from "@/components/military-legacy/commander/approvals/Main";
 
 export default function MilitaryApprovalsPage() {
   return <Main />;

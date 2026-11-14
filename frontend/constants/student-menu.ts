@@ -1,12 +1,13 @@
-import React from "react";
 import {
-  HiOutlineAcademicCap,
-  HiOutlineBadgeCheck,
-  HiOutlineCalendar,
-  HiOutlineCash,
-  HiOutlineHome,
-  HiOutlineIdentification,
-} from "react-icons/hi";
+  AiOutlineBell,
+  AiOutlineCalendar,
+  AiOutlineCheckSquare,
+  AiOutlineDollar,
+  AiOutlineHome,
+  AiOutlineIdcard,
+  AiOutlineRead,
+} from "@/library/icons";
+import React from "react";
 
 export type MenuItem = {
   title: string;
@@ -18,36 +19,69 @@ export const STUDENT_MENU = [
   {
     title: "Tổng quan",
     path: "/student",
-    icon: HiOutlineHome,
+    icon: AiOutlineHome,
   },
   {
     title: "Thông tin cá nhân",
     path: "/student/profile",
-    icon: HiOutlineIdentification,
+    icon: AiOutlineIdcard,
   },
   {
     title: "Kết quả học tập",
     path: "/student/results",
-    icon: HiOutlineAcademicCap,
+    icon: AiOutlineRead,
   },
   {
     title: "Quản lý lịch học",
     path: "/student/time-table",
-    icon: HiOutlineCalendar,
+    icon: AiOutlineCalendar,
   },
   {
     title: "Lịch cắt cơm",
     path: "/student/meal-schedules",
-    icon: HiOutlineCalendar,
+    icon: AiOutlineCalendar,
   },
   {
     title: "Thành tích",
     path: "/student/achievements",
-    icon: HiOutlineBadgeCheck,
+    icon: AiOutlineCheckSquare,
   },
   {
     title: "Học phí",
     path: "/student/tuition",
-    icon: HiOutlineCash,
+    icon: AiOutlineDollar,
+  },
+] as const satisfies readonly MenuItem[];
+
+export const COHORT_STUDENT_MENU = [
+  {
+    title: "Tổng quan",
+    path: "/student",
+    icon: AiOutlineHome,
+  },
+  {
+    title: "Thông tin cá nhân",
+    path: "/student/profile",
+    icon: AiOutlineIdcard,
+  },
+  {
+    title: "Kết quả học tập",
+    path: "/student/results",
+    icon: AiOutlineRead,
+  },
+  {
+    title: "Quản lý lịch học",
+    path: "/student/time-table",
+    icon: AiOutlineCalendar,
+  },
+  {
+    title: "Thành tích",
+    path: "/student/achievements",
+    icon: AiOutlineCheckSquare,
+  },
+  {
+    title: "Thông báo",
+    path: "/student/notification",
+    icon: AiOutlineBell,
   },
 ] as const satisfies readonly MenuItem[];

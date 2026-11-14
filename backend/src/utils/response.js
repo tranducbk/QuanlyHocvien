@@ -1,4 +1,4 @@
-const { ValidationError } = require('../utils/apiError');
+const { ValidationError } = require('./apiError');
 const { serialize } = require('./serialize');
 
 const success = (res, data = null, message = 'Thành công', statusCode = 200) => {

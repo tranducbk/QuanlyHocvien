@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineLeft, AiOutlineRight } from "@/library/icons";
+
 import { useMemo, useState } from "react";
-import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import Typography from "@/library/Typography";
 import {
   daysInMonth,
@@ -72,7 +73,7 @@ export default function DayRangePanel({
           onClick={() => navigateMonth(-1)}
           className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg text-neutral-500 dark:text-neutral-400 transition-colors cursor-pointer"
         >
-          <HiOutlineChevronLeft size={18} />
+          <AiOutlineLeft size={18} />
         </button>
         <Typography variant="body" weight="bold" color="neutral">
           {MONTHS[viewMonth]}, {viewYear}
@@ -82,7 +83,7 @@ export default function DayRangePanel({
           onClick={() => navigateMonth(1)}
           className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg text-neutral-500 dark:text-neutral-400 transition-colors cursor-pointer"
         >
-          <HiOutlineChevronRight size={18} />
+          <AiOutlineRight size={18} />
         </button>
       </div>
 

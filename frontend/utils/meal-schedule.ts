@@ -3,7 +3,7 @@ import type {
   MealSlotKey,
   MealSlots,
   WeeklyCutRice,
-} from "@/types/cut-rice";
+} from "@/types/tuition-and-meals/cut-rice";
 
 export const MEAL_DAYS: MealDayKey[] = [
   "Thứ 2",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Main from "@/components/forgot-password/Main";
+import Main from "@/components/authentication/forgot-password/Main";
 
 export const metadata: Metadata = {
   title: "Quên mật khẩu | Quản lý Học viên",

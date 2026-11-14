@@ -1,7 +1,8 @@
 "use client";
 
+import { AiOutlineUser } from "@/library/icons";
+
 import React, { useState } from "react";
-import { HiOutlineUser } from "react-icons/hi";
 
 interface AvatarProps {
   src?: string | null;
@@ -73,7 +74,7 @@ const Avatar: React.FC<AvatarProps> = ({
             onError={() => setFailedSrc(imageSrc)}
           />
         ) : (
-          <HiOutlineUser size={iconSize} />
+          <AiOutlineUser size={iconSize} />
         )}
       </div>
     </div>

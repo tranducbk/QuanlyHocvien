@@ -3,8 +3,8 @@ import {
   dehydrate,
   QueryClient,
 } from "@tanstack/react-query";
-import Sidebar from "@/components/commander/layout/Sidebar";
-import Header from "@/components/commander/layout/header/Header";
+import Sidebar from "@/components/shared/layouts/commander/Sidebar";
+import Header from "@/components/shared/layouts/commander/header/Header";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import apiServer from "@/services/axios-server";
 import { ENDPOINTS } from "@/constants/endpoints";

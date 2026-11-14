@@ -1,0 +1,20 @@
+module.exports = (sequelize, DataTypes) => sequelize.define('TrainingClassGradeProposal', {
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+  trainingClassId: { type: DataTypes.UUID, allowNull: false },
+  semesterId: { type: DataTypes.UUID, allowNull: false },
+  subjectId: { type: DataTypes.UUID, allowNull: false },
+  profileId: { type: DataTypes.UUID, allowNull: false },
+  studentUserId: { type: DataTypes.UUID, allowNull: false },
+  attemptNo: { type: DataTypes.INTEGER, allowNull: false },
+  midtermScore: { type: DataTypes.DECIMAL(4, 2), allowNull: false },
+  finalScore: { type: DataTypes.DECIMAL(4, 2), allowNull: false },
+  reason: { type: DataTypes.TEXT, allowNull: false },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'PENDING' },
+  reviewerId: { type: DataTypes.UUID, allowNull: true },
+  reviewNote: { type: DataTypes.TEXT, allowNull: true },
+  reviewedAt: { type: DataTypes.DATE, allowNull: true },
+}, {
+  tableName: 'training_class_grade_proposals',
+  timestamps: true,
+  underscored: true,
+});

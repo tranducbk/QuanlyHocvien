@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { User } from "@/types/auth";
+import { User } from "@/types/authentication/auth";
 import Cookies from "js-cookie";
 import { getTokenExpiration, isTokenExpired } from "@/utils/fn-common";
 import { JWT_CONFIG } from "@/constants/constants";
@@ -44,7 +44,8 @@ export const useAuthStore = create<AuthState>()(
           sameSite: "strict",
         });
         Cookies.remove("systemType");
-        if (data.user.systemType) Cookies.set("systemType", data.user.systemType, {
+        Cookies.remove("trainingSystemCode");
+        if (data.user.trainingSystemCode) Cookies.set("trainingSystemCode", data.user.trainingSystemCode, {
           expires: expiryDate || JWT_CONFIG.DEFAULT_EXPIRED_DATE,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
@@ -61,6 +62,7 @@ export const useAuthStore = create<AuthState>()(
         Cookies.remove("accessToken");
         Cookies.remove("role");
         Cookies.remove("systemType");
+        Cookies.remove("trainingSystemCode");
         set({
           user: null,
           accessToken: null,

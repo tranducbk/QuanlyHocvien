@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { AUTH_ROUTES } from "@/constants/constants";
 import { isTokenExpired } from "@/utils/fn-common";
 import { ENDPOINTS } from "@/constants/endpoints";
-import { LoginResponse } from "@/types/auth";
+import { LoginResponse } from "@/types/authentication/auth";
 
 const apiServer = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,

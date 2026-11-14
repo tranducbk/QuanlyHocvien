@@ -44,6 +44,7 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
       { name: 'Reports', description: 'CH-09: Thống kê & Báo cáo' },
       { name: 'Cut Rice', description: 'HV-07 + CH-06: Lịch cắt cơm' },
       { name: 'Universities', description: 'CH-02: Trường đại học' },
+      { name: 'Training Programs', description: 'Chỉ huy nhập chương trình đào tạo và khóa theo Hệ' },
       { name: 'Organizations', description: 'CH-02: Đơn vị/Khoa' },
       { name: 'Education Levels', description: 'CH-02: Trình độ đào tạo' },
       { name: 'Classes', description: 'CH-02: Lớp học' },
@@ -148,7 +149,7 @@ API cho 3 nhóm: **Học viên**, **Chỉ huy**, **Quản trị viên**
     },
     security: [{ BearerAuth: [] }],
   },
-  apis: [path.join(__dirname, '../routes/*.route.js').replace(/\\/g, '/')],
+  apis: [path.join(__dirname, '../routes/**/*.route.js').replace(/\\/g, '/')],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

@@ -1,4 +1,4 @@
-import Main from "@/components/commander/universities/[organizations]/Main";
+import Main from "@/components/training-program/commander/universities/[organizations]/Main";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
