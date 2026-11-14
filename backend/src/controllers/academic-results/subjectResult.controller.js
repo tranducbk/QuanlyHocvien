@@ -20,17 +20,6 @@ const getDetail = asyncHandler(async (req, res) => {
   return success(res, result);
 });
 
-const update = asyncHandler(async (req, res) => {
-  await validateOrThrow(s.update, req.body);
-  const result = await service.update(req.params.id, req.body);
-  return success(res, result, 'Cập nhật thành công');
-});
-
-const deleteRecord = asyncHandler(async (req, res) => {
-  await service.delete(req.params.id);
-  return success(res, null, 'Xóa thành công');
-});
-
 const downloadTemplate = asyncHandler(async (req, res) => {
   const buffer = await service.downloadTemplate();
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -47,4 +36,4 @@ const importExcel = asyncHandler(async (req, res) => {
   return success(res, result, `Thêm thành công ${result.length} môn học`);
 });
 
-module.exports = { create, getAll, getDetail, update, delete: deleteRecord, downloadTemplate, importExcel };
+module.exports = { create, getAll, getDetail, downloadTemplate, importExcel };

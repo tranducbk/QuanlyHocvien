@@ -30,7 +30,6 @@ export default function UpdateClassForm({ cls, educationLevelId }: Props) {
     resolver: zodResolver(updateClassSchema),
     defaultValues: {
       className: cls.className,
-      studentCount: cls.studentCount,
     },
   });
 
@@ -53,16 +52,6 @@ export default function UpdateClassForm({ cls, educationLevelId }: Props) {
         error={errors.className?.message}
         isLoading={mutation.isPending}
         {...register("className")}
-        required
-      />
-      <Input
-        label="Số lượng học viên"
-        type="number"
-        placeholder="Nhập số lượng học viên hiện tại..."
-        prefixIcon={<AiOutlineTeam />}
-        error={errors.studentCount?.message}
-        isLoading={mutation.isPending}
-        {...register("studentCount", { valueAsNumber: true })}
         required
       />
 

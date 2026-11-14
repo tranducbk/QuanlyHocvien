@@ -219,6 +219,7 @@ const getAll = async (query, requester) => {
 
   if (query.code) profileWhere.code = query.code;
   if (query.fullName) profileWhere.fullName = { [db.Sequelize.Op.iLike]: `%${query.fullName}%` };
+  if (query.commanderId) profileWhere.commanderId = query.commanderId;
   if (requester?.role === 'COMMANDER') {
     where.role = 'STUDENT';
     where.trainingSystemId = requester.trainingSystemId;
@@ -262,6 +263,7 @@ const exportUsers = async (query = {}) => {
   }
   if (query.code) profileWhere.code = query.code;
   if (query.fullName) profileWhere.fullName = { [db.Sequelize.Op.iLike]: `%${query.fullName}%` };
+  if (query.commanderId) profileWhere.commanderId = query.commanderId;
 
   const orderFieldMap = {
     username: 'username',

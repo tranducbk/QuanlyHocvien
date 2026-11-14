@@ -70,7 +70,7 @@ export const cutRiceService = {
     semesterId?: string,
     weekStartDate?: string
   ) => {
-    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE(userId), null, {
+    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE(userId), {}, {
       params: {
         ...(semesterId ? { semesterId } : {}),
         ...(weekStartDate ? { weekStartDate } : {}),
@@ -79,7 +79,7 @@ export const cutRiceService = {
   },
 
   generateAll: async () => {
-    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE_ALL);
+    return apiClient.post(ENDPOINTS.CUT_RICE.GENERATE_ALL, {});
   },
 
   importExcel: async (file: File): Promise<ApiResponse<BatchMutationResult>> => {

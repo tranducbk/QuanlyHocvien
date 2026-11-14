@@ -129,6 +129,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
         id: "code",
         header: "Mã học viên",
         accessorKey: "code",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" weight="semibold" color="neutral">
             {textOrDash(info.row.original.code)}
@@ -149,6 +150,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
         id: "unit",
         header: "Đơn vị",
         accessorKey: "unit",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" color="neutral">
             {textOrDash(info.row.original.unit)}
@@ -159,6 +161,7 @@ export default function ClassStudentsListModal({ cls, readOnly = false }: Props)
         id: "rank",
         header: "Cấp bậc",
         accessorKey: "rank",
+        meta: { align: "center" },
         cell: (info) => (
           <Typography variant="body" color="neutral">
             {textOrDash(info.row.original.rank)}

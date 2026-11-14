@@ -95,7 +95,10 @@ export interface YearlyResultQueryRequest extends QueryRequest {
 export type GradeRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type GradeRequestType = "ADD" | "UPDATE" | "DELETE";
 
-export const statusMap: Record<GradeRequestStatus, { label: string; variant: "warning" | "success" | "error" }> = {
+export const statusMap: Record<
+  GradeRequestStatus,
+  { label: string; variant: "warning" | "success" | "error" }
+> = {
   PENDING: { label: "Chờ duyệt", variant: "warning" },
   APPROVED: { label: "Đã duyệt", variant: "success" },
   REJECTED: { label: "Từ chối", variant: "error" },
@@ -114,7 +117,7 @@ export interface GradeRequest {
     profile?: {
       fullName?: string;
       code?: string;
-    }
+    };
   };
   subjectResultId: string;
   requestType: GradeRequestType;
@@ -148,9 +151,9 @@ export interface GradeRequestQueryRequest extends QueryRequest {
 
 export interface CreateGradeRequestRequest {
   subjectResultId: string;
-  requestType: GradeRequestType;
+  requestType: "ADD";
   reason: string;
-  proposedGradePoint10?: number;
+  proposedGradePoint10: number;
   attachmentUrl?: string;
 }
 

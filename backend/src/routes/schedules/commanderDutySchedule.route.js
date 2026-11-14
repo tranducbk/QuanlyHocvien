@@ -22,7 +22,13 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *       },
  *       "responses": {
  *         "201": {
- *           "description": "Created"
+ *           "description": "Kết quả học kỳ đã được tạo"
+ *         },
+ *         "400": {
+ *           "description": "Học viên hoặc kết quả năm không thuộc phạm vi quản lý"
+ *         },
+ *         "403": {
+ *           "description": "Không có quyền truy cập"
  *         }
  *       }
  *     },
@@ -36,20 +42,47 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *           "name": "page",
  *           "in": "query",
  *           "schema": {
- *             "type": "integer"
+ *             "type": "integer",
+ *             "minimum": 1
  *           }
  *         },
  *         {
  *           "name": "limit",
  *           "in": "query",
  *           "schema": {
- *             "type": "integer"
+ *             "type": "integer",
+ *             "minimum": 1
+ *           }
+ *         },
+ *         {
+ *           "name": "userId",
+ *           "in": "query",
+ *           "schema": {
+ *             "type": "string",
+ *             "format": "uuid"
+ *           }
+ *         },
+ *         {
+ *           "name": "schoolYear",
+ *           "in": "query",
+ *           "schema": {
+ *             "type": "string"
+ *           }
+ *         },
+ *         {
+ *           "name": "semester",
+ *           "in": "query",
+ *           "schema": {
+ *             "type": "string"
  *           }
  *         }
  *       ],
  *       "responses": {
  *         "200": {
- *           "description": "OK"
+ *           "description": "Danh sách kết quả học kỳ"
+ *         },
+ *         "403": {
+ *           "description": "Không có quyền truy cập"
  *         }
  *       }
  *     }
@@ -75,60 +108,16 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *           "description": "OK"
  *         }
  *       }
- *     },
- *     "put": {
- *       "tags": [
- *         "Duty Schedules"
- *       ],
- *       "summary": "Cập nhật",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "integer"
- *           }
- *         }
- *       ],
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
- *     },
- *     "delete": {
- *       "tags": [
- *         "Duty Schedules"
- *       ],
- *       "summary": "Xóa",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "integer"
- *           }
- *         }
- *       ],
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
  *     }
  *   }
  * }
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
 
 router.post('/', controller.create);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
 
 module.exports = router;

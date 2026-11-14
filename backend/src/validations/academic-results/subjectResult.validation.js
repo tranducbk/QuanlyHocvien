@@ -10,14 +10,4 @@ const create = yup.object({
   gradePoint10: yup.number().min(0).max(10).nullable(),
 });
 
-const update = yup.object({
-  semesterResultId: yup.string().uuid('Mã kết quả học kỳ không hợp lệ').nullable(),
-  subjectCode: yup.string().max(50).nullable(),
-  subjectName: yup.string().max(255).nullable(),
-  credits: yup.number().integer().min(0).nullable(),
-  letterGrade: yup.string().max(5).nullable(),
-  gradePoint4: yup.number().min(0).max(4).nullable(),
-  gradePoint10: yup.number().min(0).max(10).nullable(),
-});
-
-module.exports = { create, update };
+module.exports = { create };

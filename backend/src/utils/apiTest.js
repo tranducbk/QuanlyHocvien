@@ -336,16 +336,16 @@ async function main() {
   // Find a subject result owned by the logged-in student.
   let srId = null;
   if (studentUserId) {
-    const studentSemPage = await request('GET', `/semester-results?userId=${studentUserId}&limit=1`, null, adminToken);
+    const studentSemPage = await request('GET', `/semester-results?userId=${studentUserId}&limit=1`, null, commanderToken);
     const studentSemId = firstId(studentSemPage);
     if (studentSemId) {
-      srId = firstId(await request('GET', `/subject-results?semesterResultId=${studentSemId}&limit=1`, null, adminToken));
+      srId = firstId(await request('GET', `/subject-results?semesterResultId=${studentSemId}&limit=1`, null, commanderToken));
     }
   }
   if (srId) {
-    const grBody = { subjectResultId: srId, requestType: 'UPDATE', reason: 'Test reason' };
+    const grBody = { subjectResultId: srId, requestType: 'UPDATE', reason: 'Test immutable grade' };
     const grRes = await request('POST', '/students/grade-requests', grBody, studentToken);
-    ok('POST /students/grade-requests | student (201)   ', grRes.status, 201);
+    ok('POST /students/grade-requests UPDATE | student (400)', grRes.status, 400);
     ok('POST /students/grade-requests | admin (403)     ', (await request('POST', '/students/grade-requests', grBody, adminToken)).status, 403);
     ok('POST /students/grade-requests | commander (403) ', (await request('POST', '/students/grade-requests', grBody, commanderToken)).status, 403);
   }
@@ -355,16 +355,16 @@ async function main() {
   ok('GET  /students/grade-requests    | student (200)   ', (await request('GET', '/students/grade-requests', null, studentToken)).status, 200);
   ok('GET  /students/grade-requests?limit=1 | pagination ', (await request('GET', '/students/grade-requests?limit=1', null, studentToken)).body?.pagination?.limit, 1);
 
-  ok('GET  /commanders/grade-requests  | admin (200)     ', (await request('GET', '/commanders/grade-requests', null, adminToken)).status, 200);
+  ok('GET  /commanders/grade-requests  | admin (403)     ', (await request('GET', '/commanders/grade-requests', null, adminToken)).status, 403);
   ok('GET  /commanders/grade-requests  | commander (200) ', (await request('GET', '/commanders/grade-requests', null, commanderToken)).status, 200);
   ok('GET  /commanders/grade-requests  | student (403)   ', (await request('GET', '/commanders/grade-requests', null, studentToken)).status, 403);
 
   // Approve test (find a PENDING request)
-  const pendPage = await request('GET', '/commanders/grade-requests?status=PENDING&limit=1', null, adminToken);
+  const pendPage = await request('GET', '/commanders/grade-requests?status=PENDING&limit=1', null, commanderToken);
   const grId = firstId(pendPage);
   if (grId) {
     const appRes = await request('POST', `/commanders/grade-requests/${grId}/approve`, { reviewNote: 'OK' }, adminToken);
-    ok('POST /cmd/grade-requests/:id/approve | admin (200)  ', appRes.status, 200);
+    ok('POST /cmd/grade-requests/:id/approve | admin (403)  ', appRes.status, 403);
     ok('POST /cmd/grade-requests/:id/approve | student (403)', (await request('POST', `/commanders/grade-requests/${grId}/approve`, {}, studentToken)).status, 403);
   }
 
@@ -374,7 +374,7 @@ async function main() {
   section('10. RESOURCE CRUD: GET All (Admin+Commander)');
   const resources = [
     '/universities', '/organizations', '/education-levels', '/classes',
-    '/semester-results', '/subject-results', '/semesters',
+    '/semesters',
     '/time-tables', '/tuition-fees',
     '/achievements', '/achievement-profiles', '/yearly-achievements',
     '/scientific-initiatives', '/scientific-topics',
@@ -385,6 +385,14 @@ async function main() {
     ok(`GET  ${p.padEnd(22)} | admin     `, (await request('GET', p, null, adminToken)).status, 200);
     ok(`GET  ${p.padEnd(22)} | commander `, (await request('GET', p, null, commanderToken)).status, 200);
     ok(`GET  ${p.padEnd(22)} | student   `, (await request('GET', p, null, studentToken)).status, 403);
+  }
+
+  for (const p of ['/semester-results', '/subject-results']) {
+    ok(`GET  ${p.padEnd(22)} | admin     `, (await request('GET', p, null, adminToken)).status, 403);
+    ok(`GET  ${p.padEnd(22)} | commander `, (await request('GET', p, null, commanderToken)).status, 200);
+    ok(`GET  ${p.padEnd(22)} | student   `, (await request('GET', p, null, studentToken)).status, 403);
+    ok(`PUT  ${p.padEnd(22)} | not exposed`, (await request('PUT', `${p}/00000000-0000-0000-0000-000000000000`, {}, commanderToken)).status, 404);
+    ok(`DELETE ${p.padEnd(21)} | not exposed`, (await request('DELETE', `${p}/00000000-0000-0000-0000-000000000000`, null, commanderToken)).status, 404);
   }
 
   ok('GET  /yearly-results       | admin     ', (await request('GET', '/yearly-results', null, adminToken)).status, 403);

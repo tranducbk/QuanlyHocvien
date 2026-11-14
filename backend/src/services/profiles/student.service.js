@@ -26,7 +26,7 @@ const Semester = db.semester;
 const isCommander = (requester) => requester?.role === 'COMMANDER';
 
 const applyCommanderScope = (where, requester) => {
-  if (isCommander(requester)) where.commanderId = requester.id;
+  // Cho phép Chỉ huy quản lý tất cả học viên trường ngoài
 };
 
 const assertCommanderCanAccessProfile = (profile, requester) => {

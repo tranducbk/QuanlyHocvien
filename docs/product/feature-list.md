@@ -230,7 +230,7 @@ Chỉ huy nhập điểm trực tiếp; Học viên gửi đề xuất khi quy t
 
 ### Trạng thái
 
-Hỗ trợ nhập kết quả và các luồng đề xuất/duyệt theo quy định của từng hệ; điểm chính thức bất biến.
+Hỗ trợ Chỉ huy nhập kết quả mới. Với hệ ngoài hiện hành, Học viên chỉ được đề xuất bổ sung kết quả cho môn chưa có điểm; đề xuất sửa/xóa lịch sử không thể được duyệt để thay đổi điểm. Điểm chính thức không có API sửa/xóa công khai. Cần chuẩn hóa quy trình này theo đủ năm hệ trong task phân hệ tiếp theo.
 
 ## F16 - Nghiệp vụ riêng của Hệ 5
 

@@ -50,16 +50,22 @@ export const academicManagementService = {
     return apiClient.get(ENDPOINTS.SEMESTER_RESULTS.BASE, { params });
   },
 
-  getSemesterResultDetail: async (id: string): Promise<ApiResponse<SemesterResult>> => {
+  getSemesterResultDetail: async (
+    id: string
+  ): Promise<ApiResponse<SemesterResult>> => {
     return apiClient.get(ENDPOINTS.SEMESTER_RESULTS.DETAIL(id));
   },
 
-  createSemesterResult: async (data: Partial<SemesterResult>): Promise<ApiResponse<SemesterResult>> => {
+  createSemesterResult: async (
+    data: Partial<SemesterResult>
+  ): Promise<ApiResponse<SemesterResult>> => {
     return apiClient.post(ENDPOINTS.SEMESTER_RESULTS.BASE, data);
   },
 
   // Subject Results
-  createSubjectResult: async (data: Partial<SubjectResult>): Promise<ApiResponse<SubjectResult>> => {
+  createSubjectResult: async (
+    data: Partial<SubjectResult>
+  ): Promise<ApiResponse<SubjectResult>> => {
     return apiClient.post(ENDPOINTS.SUBJECT_RESULTS.BASE, data);
   },
 
@@ -67,16 +73,23 @@ export const academicManagementService = {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("semesterResultId", semesterResultId);
-    return apiClient.post(`${ENDPOINTS.SUBJECT_RESULTS.BASE}/import`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    return apiClient.post(
+      `${ENDPOINTS.SUBJECT_RESULTS.BASE}/import`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
   },
 
   downloadSubjectResultTemplate: async (): Promise<Blob> => {
-    return apiClient.get(`${ENDPOINTS.SUBJECT_RESULTS.BASE}/template/download`, {
-      responseType: 'blob',
-    });
+    return apiClient.get(
+      `${ENDPOINTS.SUBJECT_RESULTS.BASE}/template/download`,
+      {
+        responseType: "blob",
+      }
+    );
   },
 };

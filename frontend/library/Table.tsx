@@ -68,7 +68,7 @@ export interface TableProps<TData> {
   /** Ép bảng vừa chiều rộng container thay vì cuộn ngang. */
   fitToContainer?: boolean;
   /** Class CSS cho các hàng (tr) */
-  rowClassName?: string;
+  rowClassName?: string | ((row: Row<TData>) => string);
   /** Lay cac row con de expand tren client */
   getSubRows?: (row: TData) => TData[] | undefined;
   /** Render hang group full-width; return null/undefined/false de render row theo columns */
@@ -138,11 +138,16 @@ const Table = <TData,>({
       header: "STT",
       size: 70,
       enableSorting: false,
+      meta: {
+        align: "center",
+      },
       cell: (info) => {
         return (
-          <span className="text-xs font-bold text-neutral-400 dark:text-neutral-500">
-            {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
-          </span>
+          <div className="text-center">
+            <span className="text-xs font-bold text-neutral-400 dark:text-neutral-500">
+              {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
+            </span>
+          </div>
         );
       },
     };
@@ -150,6 +155,8 @@ const Table = <TData,>({
     return [indexColumn, ...userColumns];
   }, [showIndex, userColumns, pagination.pageIndex, pagination.pageSize]);
 
+  // TanStack Table intentionally returns functions that React Compiler cannot memoize.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: displayData,
     columns: finalColumns,

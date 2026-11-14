@@ -529,7 +529,7 @@ const { authMiddleware, requireRole, requireAdmin, requireTrainingSystem } = req
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
 
 const requireAdminOrHe5Commander = (req, res, next) => {
   if (req.user?.role === 'ADMIN') return next();
@@ -545,7 +545,7 @@ router.delete('/:id/students', requireAdmin, controller.removeStudents);
 router.delete('/:id/students/:userId', requireAdmin, controller.removeStudent);
 router.get('/:id/students', controller.getStudents);
 router.get('/:id', controller.getDetail);
-router.put('/:id', requireAdmin, controller.update);
-router.delete('/:id', requireAdmin, controller.delete);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
 
 module.exports = router;

@@ -14,7 +14,7 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *       "requestBody": {
  *         "required": true,
  *         "content": {
- *           "application/json": {
+ *           "multipart/form-data": {
  *             "schema": {
  *               "$ref": "#/components/schemas/AchievementProfile"
  *             }
@@ -22,11 +22,24 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *         }
  *       },
  *       "responses": {
- *         "201": {
- *           "description": "Created"
+ *         "200": {
+ *           "description": "Kết quả import"
  *         }
  *       }
  *     },
+ *     "get": {
+ *       "tags": [
+ *         "Achievements"
+ *       ],
+ *       "summary": "Danh s?ch h? s? th?nh t?ch",
+ *       "responses": {
+ *         "200": {
+ *           "description": "OK"
+ *         }
+ *       }
+ *     }
+ *   },
+ *   "/subject-results/template/download": {
  *     "get": {
  *       "tags": [
  *         "Achievements"
@@ -75,58 +88,8 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  *           "in": "path",
  *           "required": true,
  *           "schema": {
- *             "type": "string"
- *           }
- *         }
- *       ],
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
- *     },
- *     "put": {
- *       "tags": [
- *         "Achievements"
- *       ],
- *       "summary": "Cập nhật hồ sơ thành tích",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "string"
- *           }
- *         }
- *       ],
- *       "requestBody": {
- *         "content": {
- *           "application/json": {
- *             "schema": {
- *               "$ref": "#/components/schemas/AchievementProfile"
- *             }
- *           }
- *         }
- *       },
- *       "responses": {
- *         "200": {
- *           "description": "OK"
- *         }
- *       }
- *     },
- *     "delete": {
- *       "tags": [
- *         "Achievements"
- *       ],
- *       "summary": "Xóa hồ sơ thành tích",
- *       "parameters": [
- *         {
- *           "name": "id",
- *           "in": "path",
- *           "required": true,
- *           "schema": {
- *             "type": "string"
+ *             "type": "string",
+ *             "format": "uuid"
  *           }
  *         }
  *       ],
@@ -141,12 +104,10 @@ const { authMiddleware, requireRole } = require('../../middlewares/auth.middlewa
  */
 
 router.use(authMiddleware);
-router.use(requireRole('ADMIN', 'COMMANDER'));
+router.use(requireRole('COMMANDER'));
 
 router.post('/', controller.create);
 router.get('/', controller.getAll);
 router.get('/:id', controller.getDetail);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
 
 module.exports = router;

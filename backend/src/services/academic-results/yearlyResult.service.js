@@ -39,6 +39,8 @@ const buildQueryParts = (query = {}, { studentIds = [] } = {}) => {
     profileWhere.unit = { [db.Sequelize.Op.iLike]: `%${query.unit}%` };
   }
 
+  profileWhere.commanderId = requester.id;
+
   if (query.isPartyMember === 'true') {
     profileWhere[db.Sequelize.Op.or] = [
       { probationaryPartyMember: { [db.Sequelize.Op.ne]: null } },
@@ -66,7 +68,7 @@ const buildQueryParts = (query = {}, { studentIds = [] } = {}) => {
   const include = [{
     model: User,
     attributes: ['id'],
-    where: { role: 'STUDENT' },
+    where: { role: 'STUDENT', systemType: requester.systemType },
     include: [profileInclude],
     required: true,
   }];
